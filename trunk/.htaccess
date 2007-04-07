@@ -1,0 +1,11 @@
+Options +FollowSymLinks
+RewriteEngine on
+
+order deny,allow
+deny from all
+allow from 127.0.0.1
+
+RewriteCond $1 !^index\.php
+RewriteCond $1 !^$
+RewriteRule ^(.*)$ /?url=$1 [L]
+
