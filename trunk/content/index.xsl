@@ -6,6 +6,7 @@
 		<html>
 		<head>
 		<title><xsl:value-of select="title"/></title>
+		<link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon" />
 		<style type="text/css">
 			html {
 				background:			#fff;
