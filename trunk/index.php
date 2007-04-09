@@ -153,19 +153,31 @@ class KBContent {
 	public $type = "notfound"; // Assume the address is not found unless proven otherwise
 	public $contents = "";
 	public $contenttype = "";
-	private $dir = "content/";
+	private $dir = "content/"; // TODO: the content folder should probably be in a settings file
 	
 	function __construct($url) {
-		// Input translation
+		// Input parsing
 		
 		$xml = new KBXML($this->dir."index.xml");
 		if($xml->error) return;
 		// TODO: validation of the xml file and the following xml and xsl file
-		// TODO: find a proper rule for symbols in urls
+		// TODO: make a proper rule for symbols in urls
 		KBTB::req(ereg("^[a-zA-Z._/-]*$",$url),"Error on line ".__LINE__.": Invalid URL.");
 		if($url) {
+			if($url == "config") { // Admin interface
+				// TODO: the content of this page should be configurable
+				// TODO: submit to same url (/config) and then redirect on correct login
+				$login = "<form action='".$_SERVER['REQUEST_URI']."'><table>
+				<tr><td>Username: </td><td><input type='text'/></td></tr>
+				<tr><td>Password: </td><td><input type='text'/></td></tr>
+				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
+				</table></form>
+				";
+				$xml->set("/page/content",$login);
+			//} elseif($url == "sitemap.xml") { // Sitemap
+				// TODO: the actual sitemap
 			// Check if $url is a content file or a media file
-			if(is_file($file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$url))."']/../loc")) && is_readable($file)) {
+			} elseif(is_file($file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$url))."']/../loc")) && is_readable($file)) {
 				// Requirements
 				KBTB::req(KBTB::inpath($file),"Error on line ".__LINE__.": Invalid path.");
 				// Get the real contents and put it in the right place
@@ -209,8 +221,6 @@ The requested URL ".getenv("REQUEST_URI")." does not exist.
 }
 
 function website() {
-	// TODO: make an admin page possible somewhere
-	// TODO: make a google compatible sitemap
 	$content = new KBContent($_GET["url"]);
 	switch($content->type) {
 	case "page":
