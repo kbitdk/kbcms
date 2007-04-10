@@ -196,15 +196,17 @@ class KBContent {
 		if($this->cfg->error == "File not found") $this->cfg = $this->getStdCfg();
 		$this->dir = $this->cfg->get("/config/contentpath")."/";
 		$xml = new KBXML($this->dir."index.xml");
-		
 		if($xml->error) return;
+		
+		// TODO: define a precedence for the url's
 		// TODO: validation of the xml file and the following xml and xsl file
 		// TODO: make a proper rule for symbols in urls
+		
 		KBTB::req(ereg("^[a-zA-Z._/-]*$",$url),"Error on line ".__LINE__.": Invalid URL.");
 		if($url) {
 			if($url == "config") { // Admin interface
-				// TODO: the content of this page should be configurable
-				// TODO: submit to same url (/config) and then redirect on correct login
+				// TODO: the content of this page should be configurable (in index.xml?)
+				// TODO: consider to use something else than request_uri (the url should be configurable, in config.xml?)
 				$login = "<form action='".$_SERVER['REQUEST_URI']."'><table>
 				<tr><td>Username: </td><td><input type='text'/></td></tr>
 				<tr><td>Password: </td><td><input type='text'/></td></tr>
@@ -219,7 +221,7 @@ class KBContent {
 				$sitemap .= "</urlset>";
 				
 				$this->contents = $sitemap;
-				$this->contenttype = "text/plain"; // TODO: should be set back to html when it's done
+				$this->contenttype = "text/html";
 				$this->type = "page";
 				return;
 			// Check if $url is a content file or a media file
