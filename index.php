@@ -61,8 +61,11 @@ class KBXML {
 	}
 	
 	// Load an xml file
-	function __construct($file) {
-		if(is_file($file) && is_readable($file)) {
+	function __construct($file,$xml=null) {
+		if(!is_null($xml)) {
+			// TODO: check validity, perhaps against a DTD
+			$this->xml = DomDocument::loadXML($xml);
+		} elseif(is_file($file) && is_readable($file)) {
 			// TODO: check validity, perhaps against a DTD
 			$this->xml = DomDocument::load($file);
 		}else{
@@ -165,6 +168,11 @@ class KBContent {
 	private $dir;
 	//private $xml;
 	
+	function getStdCfg() {
+		return new KBXML(null,"<?xml version='1.0' encoding='UTF-8'?> 
+		<config><contentpath>content</contentpath></config>");
+	}
+	
 	function getSitemap($xml,$url=null,$xpath="/page/page") {
 		$xpath .= is_null($url) ? "" : "/page/title[.='".substr($url,strrpos($url,"/")+1)."']/..";
 		$lastmod = $xml->get($xpath."/lastmod");
@@ -185,6 +193,7 @@ class KBContent {
 	function __construct($url) {
 		// Input parsing
 		$this->cfg = new KBXML("config.xml");
+		if($this->cfg->error == "File not found") $this->cfg = $this->getStdCfg();
 		$this->dir = $this->cfg->get("/config/contentpath")."/";
 		$xml = new KBXML($this->dir."index.xml");
 		
