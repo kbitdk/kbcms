@@ -77,6 +77,14 @@ class KBXML {
 		if(!$node = $xp->query($xpath)->item(0)) return false;
 		return $this->nodeasXML($node); // TODO: check if it might be better to transform it to regular xml like in this comment: http://dk2.php.net/manual/en/function.dom-domxpath-query.php#58729
 	}
+	function getArr($xpath) {
+		// returns xml data as an array of strings from xpath
+		// returns false for invalid query
+		$xp = new DOMXPath($this->xml);
+		if(!$nodes = $xp->query($xpath)) return false;
+		foreach($nodes as $node) $output[] = $this->nodeasXML($node);
+		return $output; // TODO: check if it might be better to transform it to regular xml like in this comment: http://dk2.php.net/manual/en/function.dom-domxpath-query.php#58729
+	}
 	
 	function replace($xpath,$value) {
 		$xp = new DOMXPath($this->xml);
@@ -153,12 +161,33 @@ class KBContent {
 	public $type = "notfound"; // Assume the address is not found unless proven otherwise
 	public $contents = "";
 	public $contenttype = "";
-	private $dir = "content/"; // TODO: the content folder should probably be in a settings file
+	private $cfg;
+	private $dir;
+	//private $xml;
+	
+	function getSitemap($xml,$url=null,$xpath="/page/page") {
+		$xpath .= is_null($url) ? "" : "/page/title[.='".substr($url,strrpos($url,"/")+1)."']/..";
+		$lastmod = $xml->get($xpath."/lastmod");
+		
+		// Output the record for the page
+		// TODO: Should interpret characters (such as spaces, symbols, etc.)
+		$output .= "\n\n<url><loc>"."http://". $_SERVER['SERVER_NAME'].$url."</loc>";
+		if($lastmod) $output .= "\n<lastmod>".$lastmod."</lastmod>";
+		$output .= "</url>";
+		
+		// Recursive
+		if($xml->get($xpath."/page")) foreach($xml->getArr($xpath."/page/title") as $page)
+			$output .= $this->getSitemap($xml,$url."/".$page,$xpath);
+		
+		return $output;
+	}
 	
 	function __construct($url) {
 		// Input parsing
-		
+		$this->cfg = new KBXML("config.xml");
+		$this->dir = $this->cfg->get("/config/contentpath")."/";
 		$xml = new KBXML($this->dir."index.xml");
+		
 		if($xml->error) return;
 		// TODO: validation of the xml file and the following xml and xsl file
 		// TODO: make a proper rule for symbols in urls
@@ -174,8 +203,16 @@ class KBContent {
 				</table></form>
 				";
 				$xml->set("/page/content",$login);
-			//} elseif($url == "sitemap.xml") { // Sitemap
-				// TODO: the actual sitemap
+			} elseif($url == "sitemap.xml") { // Sitemap
+				$sitemap = "<?xml version='1.0' encoding='UTF-8'?>";
+				$sitemap .= "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";
+				$sitemap .= $this->getSitemap($xml);
+				$sitemap .= "</urlset>";
+				
+				$this->contents = $sitemap;
+				$this->contenttype = "text/plain"; // TODO: should be set back to html when it's done
+				$this->type = "page";
+				return;
 			// Check if $url is a content file or a media file
 			} elseif(is_file($file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$url))."']/../loc")) && is_readable($file)) {
 				// Requirements
