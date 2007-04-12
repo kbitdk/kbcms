@@ -190,6 +190,19 @@ class KBContent {
 		return $output;
 	}
 	
+	function getKBAJAX() { // TODO: this should be put into the head of the login-page and the logged-in pages
+		ob_start();
+		?>
+		<script type="text/javascript">
+		function submit() {
+			alert("hey");
+			return false;
+		}
+		</script>
+		<?
+		return ob_get_clean();
+	}
+	
 	function __construct($url) {
 		// Input parsing
 		$this->cfg = new KBXML("config.xml");
@@ -207,7 +220,8 @@ class KBContent {
 			if($url == "config") { // Admin interface
 				// TODO: the content of this page should be configurable (in index.xml?)
 				// TODO: consider to use something else than request_uri (the url should be configurable, in config.xml?)
-				$login = "<form action='".$_SERVER['REQUEST_URI']."'><table>
+				$login = "<h1>Administration</h1>
+				<form onsubmit=\"alert('asd')\"><table>
 				<tr><td>Username: </td><td><input type='text'/></td></tr>
 				<tr><td>Password: </td><td><input type='text'/></td></tr>
 				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
