@@ -1,4 +1,5 @@
 #summary URLs can be fully customized, which has a variety of benefits
+#labels Feature
 
 = Introduction =
 
@@ -8,13 +9,23 @@ In KB CMS you can name the pages as you like and make them available with any na
 = Benefits =
 
 This feature can have several benefits:
-  * Makes migrating from another CMS or a custom website easier
-   * You can name the new pages exactly as they were before, regardless of how the naming scheme was
-  * Makes SEO (Search Engine Optimization) fully in your control
-   * Search engines will gather important keywords and contextual info from the URLs of the pages
-   * Search results for your website will look clearer, as the URLs show the tiers of the results
-  * Gets rid of the traditional way of showing all pages as .html or .php files and all images as .jpg or .png files
+ * Makes migrating from another CMS or a custom website easier
+  * You can name the new pages exactly as they were before, regardless of how the naming scheme was
+ * Makes SEO (Search Engine Optimization) fully in your control
+  * Search engines will gather important keywords and contextual info from the URLs of the pages
+  * Search results for your website will look clearer, as the URLs show the tiers of the results
+ * Gets rid of the traditional way of showing all pages as .html or .php files and all images as .jpg or .png files
 
 = Precedence =
 
-TODO: This section should explain about the precedence of the "special" URL's, such as the admin-section of the CMS.
+The precedence of the URLs ensure that certain pages, like the admin page and the sitemap can always be shown, even if a page has been manually named the same as those pages. The precedence is as follows, with the highest priority first:
+
+ * */favicon.ico* - hardcoded in the .htaccess file
+ * */sitemap.xml* - hardcoded in the index.php file
+ * */admin* - the actual URL is configurable in config.xml
+ * *pages* - any page in the index.xml file
+ * *media* - any media in the index.xml file
+
+
+
+
