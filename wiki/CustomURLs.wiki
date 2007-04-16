@@ -1,0 +1,20 @@
+#summary URLs can be fully customized, which has a variety of benefits
+
+= Introduction =
+
+In KB CMS you can name the pages as you like and make them available with any name you want.
+
+
+= Benefits =
+
+This feature can have several benefits:
+  * Makes migrating from another CMS or a custom website easier
+   * You can name the new pages exactly as they were before, regardless of how the naming scheme was
+  * Makes SEO (Search Engine Optimization) fully in your control
+   * Search engines will gather important keywords and contextual info from the URLs of the pages
+   * Search results for your website will look clearer, as the URLs show the tiers of the results
+  * Gets rid of the traditional way of showing all pages as .html or .php files and all images as .jpg or .png files
+
+= Precedence =
+
+TODO: This section should explain about the precedence of the "special" URL's, such as the admin-section of the CMS.
