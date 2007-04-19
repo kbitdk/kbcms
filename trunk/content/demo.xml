@@ -23,5 +23,22 @@
 				<extension>482</extension>
 			</employee>
 		</KBEmployeeList>
+		Code:<br/><br/>
+		<verbatim>
+		<![CDATA[
+			<KBEmployeeList>
+				<employee>
+					<name>John Doe</name>
+					<department>Security</department>
+					<extension>112</extension>
+				</employee>
+				<employee>
+					<name>Jane Doe</name>
+					<department>Accounting</department>
+					<extension>482</extension>
+				</employee>
+			</KBEmployeeList>
+		]]>
+		</verbatim>
 	</content>
 </page>

@@ -170,7 +170,10 @@ class KBContent {
 	
 	function getStdCfg() {
 		return new KBXML(null,"<?xml version='1.0' encoding='UTF-8'?> 
-		<config><contentpath>content</contentpath></config>");
+		<config>
+			<contentpath>content</contentpath>
+			<adminpath>admin</adminpath>
+		</config>");
 	}
 	
 	function getSitemap($xml,$url=null,$xpath="/page/page") {
@@ -190,45 +193,21 @@ class KBContent {
 		return $output;
 	}
 	
-	function getKBAJAX() { // TODO: this should be put into the head of the login-page and the logged-in pages
-		ob_start();
-		?>
-		<script type="text/javascript">
-		function submit() {
-			alert("hey");
-			return false;
-		}
-		</script>
-		<?
-		return ob_get_clean();
-	}
-	
 	function __construct($url) {
 		// Input parsing
 		$this->cfg = new KBXML("config.xml");
 		if($this->cfg->error == "File not found") $this->cfg = $this->getStdCfg();
 		$this->dir = $this->cfg->get("/config/contentpath")."/";
+		// TODO: validate the config file
 		$xml = new KBXML($this->dir."index.xml");
 		if($xml->error) return;
 		
-		// TODO: define a precedence for the url's
 		// TODO: validation of the xml file and the following xml and xsl file
 		// TODO: make a proper rule for symbols in urls
 		
 		KBTB::req(ereg("^[a-zA-Z._/-]*$",$url),"Error on line ".__LINE__.": Invalid URL.");
 		if($url) {
-			if($url == "config") { // Admin interface
-				// TODO: the content of this page should be configurable (in index.xml?)
-				// TODO: consider to use something else than request_uri (the url should be configurable, in config.xml?)
-				$login = "<h1>Administration</h1>
-				<form onsubmit=\"alert('asd')\"><table>
-				<tr><td>Username: </td><td><input type='text'/></td></tr>
-				<tr><td>Password: </td><td><input type='text'/></td></tr>
-				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
-				</table></form>
-				";
-				$xml->set("/page/content",$login);
-			} elseif($url == "sitemap.xml") { // Sitemap
+			if($url == "sitemap.xml") { // Sitemap
 				$sitemap = "<?xml version='1.0' encoding='UTF-8'?>";
 				$sitemap .= "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";
 				$sitemap .= $this->getSitemap($xml);
@@ -238,6 +217,23 @@ class KBContent {
 				$this->contenttype = "text/html";
 				$this->type = "page";
 				return;
+			} elseif($url == $this->cfg->get("/config/adminpath")) { // Admin interface
+				// Check for valid login
+				if(!is_null($_POST['user'])) {
+					if($_POST['user'] != "root") $logonErr = "Error: Wrong username and/or password";
+				}
+				
+				// TODO: the content of this page should be configurable (in index.xml, index.xsl or config.xml?)
+				// TODO: make sure the pages can't be (re)named the same as a "special URL"
+				$login = "<h1>Administration</h1>
+				".$logonErr."
+				<form action='/".$url."' method='post'><table>
+				<tr><td>Username: </td><td><input type='text' name='user'/></td></tr>
+				<tr><td>Password: </td><td><input type='text' name='pass'/></td></tr>
+				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
+				</table></form>
+				";
+				$xml->set("/page/content",$login);
 			// Check if $url is a content file or a media file
 			} elseif(is_file($file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$url))."']/../loc")) && is_readable($file)) {
 				// Requirements
