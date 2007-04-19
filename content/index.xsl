@@ -113,11 +113,17 @@
 		</xsl:copy>
 	</xsl:template>
 	
-	<xsl:template match="KBEmployeeList">
+	<xsl:template match="verbatim">
+		<pre>
+			<xsl:copy-of select="@* | node()"/>
+		</pre>
+	</xsl:template>
+	
+	<xsl:template match="content/KBEmployeeList">
 		<xsl:apply-templates/>
 	</xsl:template>
-	<xsl:template match="KBEmployeeList/employee">
-		<xsl:value-of select="name"/>
+	<xsl:template match="content/KBEmployeeList/employee">
+		<div style="background:#bbb; width:200px; padding:3px; border: 1px solid #000;"><xsl:value-of select="name"/></div>
 		<table>
 			<tr><td>Department:</td><td><xsl:value-of select="department"/></td></tr>
 			<tr><td>Extension:</td><td><xsl:value-of select="extension"/></td></tr>
