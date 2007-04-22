@@ -1,0 +1,21 @@
+#summary Guide for installing KB CMS
+#labels Featured
+
+= Introduction =
+
+This is a guide to install KB CMS on Ubuntu 7.04. Many of the steps may apply to other Ubuntu versions, other distributions or even other operating systems. This guide is specifically made for one certain setup for simplicity, but others may follow later.
+
+
+= Details =
+
+The initial setup can be done with the following commands:
+
+{{{
+sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
+sudo chown -R `whoami` /var/www
+rm -rf /var/www/apache2-default
+svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
+}}}
+
+
+
