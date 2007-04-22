@@ -17,5 +17,4 @@ rm -rf /var/www/apache2-default
 svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
 }}}
 
-
-
+The website should now be available at http://localhost.
