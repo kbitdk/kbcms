@@ -8,13 +8,16 @@ This is a guide to install KB CMS on Ubuntu 7.04. Many of the steps may apply to
 
 = Details =
 
-The initial setup can be done with the following commands:
+The initial setup can be done with a few commands in a terminal window. When it opens the text editor (nano), you need to change "AllowOverride None" in the "<Directory /var/www/>" section to "AllowOverride None".
 
 {{{
 sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
 sudo chown -R `whoami` /var/www
 rm -rf /var/www/apache2-default
 svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
+nano -w /etc/apache2/sites-enabled/000-default
+sudo ln -s ../mods-available/rewrite.load /etc/apache2/mods-enabled/
+sudo /etc/init.d/apache2 restart
 }}}
 
 The website should now be available at http://localhost.
