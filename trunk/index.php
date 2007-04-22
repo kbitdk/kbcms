@@ -166,9 +166,8 @@ class KBContent {
 	public $contenttype = "";
 	private $cfg;
 	private $dir;
-	//private $xml;
 	
-	function getStdCfg() {
+	function getStdCfg() { // Standard configuration
 		return new KBXML(null,"<?xml version='1.0' encoding='UTF-8'?> 
 		<config>
 			<contentpath>content</contentpath>
@@ -222,7 +221,8 @@ class KBContent {
 				if(!is_null($_POST['user'])) {
 					if($_POST['user'] != "root") $logonErr = "Error: Wrong username and/or password";
 				}
-				
+				// TODO: encrypt the password, perhaps like this:
+				//KBTB::debug(crypt("test","$2"));
 				// TODO: the content of this page should be configurable (in index.xml, index.xsl or config.xml?)
 				// TODO: make sure the pages can't be (re)named the same as a "special URL"
 				$login = "<h1>Administration</h1>
