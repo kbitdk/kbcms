@@ -11,8 +11,9 @@ This is a guide to install KB CMS on Ubuntu 7.04. Many of the steps may apply to
 The initial setup can be done with a few commands in a terminal window. When it opens the text editor (nano), you need to change "AllowOverride None" in the "<Directory /var/www/>" section to "AllowOverride None".
 
 {{{
-# Add universe and multiverse repositories if not avilable already
+# Add universe and multiverse repositories if not avilable and then update
 sudo sed 's/^deb \([^ ]*\) \([^ ]*\) main restricted$/deb \1 \2 main restricted universe multiverse/' /etc/apt/sources.list
+sudo apt-get update
 # Install requires packages
 sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
 # Download KB CMS and set it up
