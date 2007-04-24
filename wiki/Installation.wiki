@@ -12,7 +12,7 @@ The initial setup can be done with a few commands in a terminal window. When it 
 
 {{{
 # Add universe and multiverse repositories if not avilable and then update
-sudo sed 's/^deb \([^ ]*\) \([^ ]*\) main restricted$/deb \1 \2 main restricted universe multiverse/' /etc/apt/sources.list
+sudo sed -i 's/^deb \([^ ]*\) \([^ ]*\) main restricted$/deb \1 \2 main restricted universe multiverse/' /etc/apt/sources.list
 sudo apt-get update
 # Install requires packages
 sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
