@@ -8,7 +8,7 @@ This is a guide to install KB CMS on Ubuntu 7.04. Many of the steps may apply to
 
 = Details =
 
-The initial setup can be done with a few commands in a terminal window. When it opens the text editor (nano), you need to change "AllowOverride None" in the "<Directory /var/www/>" section to "AllowOverride None".
+The initial setup can be done with the following commands in a terminal window:
 
 {{{
 # Add universe and multiverse repositories if not avilable and then update
