@@ -20,7 +20,7 @@ sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
 sudo chown -R `whoami` /var/www
 rm -rf /var/www/apache2-default
 svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
-nano -w /etc/apache2/sites-enabled/000-default
+sudo sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/sites-enabled/000-default
 sudo ln -s ../mods-available/rewrite.load /etc/apache2/mods-enabled/
 sudo /etc/init.d/apache2 restart
 }}}
