@@ -25,7 +25,7 @@
 				position:			absolute;
 				top:					120px;
 				left:					20px;
-				width:				140px;
+				min-width:			140px;
 			}
 			b.r1, b.r2, b.r3, b.r4 {
 				display:				block;
@@ -88,19 +88,19 @@
 				<img src="Logo" alt="{title}"/>
 				<span id="motto"><xsl:value-of select="motto"/></span>
 				</div>
-			<div id="content">
-				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
-				<div id="innercontent">
-					<xsl:apply-templates select="content"/>
-				</div>
-				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
-			</div>
 			<div id="menu">
 				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
 				<a href="/{page/loc}"><xsl:value-of select="page/title"/></a>
 				<xsl:for-each select="page/page">
 					<a href="/{title}"><xsl:value-of select="title"/></a>
 				</xsl:for-each>
+				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
+			</div>
+			<div id="content">
+				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
+				<div id="innercontent">
+					<xsl:apply-templates select="content"/>
+				</div>
 				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
 			</div>
 		</body>

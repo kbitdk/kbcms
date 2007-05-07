@@ -172,6 +172,7 @@ class KBContent {
 		<config>
 			<contentpath>content</contentpath>
 			<adminpath>admin</adminpath>
+			<rootpass>$2gIC1TJNL89.</rootpass>
 		</config>");
 	}
 	
@@ -219,10 +220,16 @@ class KBContent {
 			} elseif($url == $this->cfg->get("/config/adminpath")) { // Admin interface
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
-					if($_POST['user'] != "root") $logonErr = "Error: Wrong username and/or password";
+					if($_POST['user'] == "root" && crypt($_POST['pass'],"$2") == $this->cfg->get("/config/rootpass")) {
+						//TODO: log login
+						header("Location: http".(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=="on"?"s":"")."://".$_SERVER['SERVER_NAME']);
+						//header('Location: ');
+					} else {
+						$logonErr = "Error: Wrong username and/or password";
+					}
 				}
-				// TODO: encrypt the password, perhaps like this:
-				//KBTB::debug(crypt("test","$2"));
+				
+				// Login page
 				// TODO: the content of this page should be configurable (in index.xml, index.xsl or config.xml?)
 				// TODO: make sure the pages can't be (re)named the same as a "special URL"
 				$login = "<h1>Administration</h1>
