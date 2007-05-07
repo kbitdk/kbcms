@@ -11,6 +11,11 @@
 			html {
 				background:			#fff;
 			}
+			#adminpanel {
+				position:			absolute;
+				top:					30px;
+				left:					450px;
+			}
 			#logo {
 				position:			absolute;
 				top:					30px;

@@ -72,7 +72,7 @@ class KBXML {
 			$this->error = "File not found";
 		}
 	}
-		
+	
 	function get($xpath) {
 		// returns xml data as a string from xpath (doesn't include the root of the xpath result)
 		// returns false for invalid query
@@ -134,11 +134,17 @@ class KBXML {
 	function asDOM() {
 		return $this->xml;
 	}
+	
+	function setDOM($dom) {
+		$this->xml = $dom;
+	}
+	
+	// Parse the XML with the XSL argument and put it back in the XML
 	function xslParse($xsl) {
 		$xslt = new xsltProcessor;
 		$xslt->importStyleSheet(DOMDocument::load($xsl));
-		// TODO: put the resulting xml in the object for further usage
-		return $xslt->transformToXML($this->asDOM());
+		$this->setDOM($xslt->transformToDoc($this->asDOM()));
+		return $this->asXML();
 	}
 }
 
@@ -220,10 +226,11 @@ class KBContent {
 			} elseif($url == $this->cfg->get("/config/adminpath")) { // Admin interface
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
+					//TODO: create support for users other than root
 					if($_POST['user'] == "root" && crypt($_POST['pass'],"$2") == $this->cfg->get("/config/rootpass")) {
-						//TODO: log login
+						$_SESSION['user'] = $_POST['user'];
+						//TODO: redirect to a different page?
 						header("Location: http".(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=="on"?"s":"")."://".$_SERVER['SERVER_NAME']);
-						//header('Location: ');
 					} else {
 						$logonErr = "Error: Wrong username and/or password";
 					}
@@ -232,11 +239,12 @@ class KBContent {
 				// Login page
 				// TODO: the content of this page should be configurable (in index.xml, index.xsl or config.xml?)
 				// TODO: make sure the pages can't be (re)named the same as a "special URL"
+				// TODO: make the username field gain focus on load of the page
 				$login = "<h1>Administration</h1>
 				".$logonErr."
 				<form action='/".$url."' method='post'><table>
 				<tr><td>Username: </td><td><input type='text' name='user'/></td></tr>
-				<tr><td>Password: </td><td><input type='text' name='pass'/></td></tr>
+				<tr><td>Password: </td><td><input type='password' name='pass'/></td></tr>
 				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
 				</table></form>
 				";
@@ -266,7 +274,17 @@ class KBContent {
 		
 		// Parse the xml file with the xsl stylesheet
 		// TODO: check for existance of index.xsl
-		$this->contents = $xml->xslParse($this->dir.'index.xsl');
+		$xml->xslParse($this->dir.'index.xsl');
+		if(isset($_SESSION['user'])) {
+			// TODO: make the logoff button work
+			$adminpanel = "<div id='adminpanel'>
+			<h1>Admin panel</h1>
+			<a href='javascript:logout();'>Log out</a>
+			</div>";
+			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
+			//KBTB::debug($xml->asXML());
+		}
+		$this->contents = $xml->asXML();
 		$this->contenttype = "text/html";
 		$this->type = "page";
 	}
