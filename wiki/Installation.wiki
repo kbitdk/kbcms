@@ -25,4 +25,4 @@ sudo ln -s ../mods-available/rewrite.load /etc/apache2/mods-enabled/
 sudo /etc/init.d/apache2 restart
 }}}
 
-The website should now be available at http://localhost.
+The website should now be available at http://localhost. The default website contains a demonstration of how the CMS works.
