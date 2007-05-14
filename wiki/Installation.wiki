@@ -15,7 +15,7 @@ The initial setup can be done with the following commands in a terminal window:
 sudo sed -i 's/^deb \([^ ]*\) \([^ ]*\) main restricted$/deb \1 \2 main restricted universe multiverse/' /etc/apt/sources.list
 sudo apt-get update
 # Install required packages
-sudo apt-get install php5 nautilus-script-collection-svn php5-xsl
+sudo apt-get -y install php5 nautilus-script-collection-svn php5-xsl
 # Download KB CMS and set it up
 sudo chown -R `whoami` /var/www
 rm -rf /var/www/apache2-default
