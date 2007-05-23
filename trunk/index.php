@@ -278,6 +278,7 @@ class KBContent {
 		if(isset($_SESSION['user'])) {
 			// TODO: implement the logoff and the rename functions
 			// TODO: make a seperate place for javascript functions
+			// TODO: make a single-click or perhaps double-click on the content turn it into a WYSIWYG editor
 			$adminpanel = "<div id='adminpanel'>
 			<h1>Admin panel</h1>
 			<a href=\"javascript:alert('Function not supported yet!\\n\\nRenaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
