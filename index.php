@@ -178,7 +178,7 @@ class KBContent {
 		<config>
 			<contentpath>content</contentpath>
 			<adminpath>admin</adminpath>
-			<rootpass>$2gIC1TJNL89.</rootpass>
+			<rootpass>$2.uPaZNiRMTQ</rootpass>
 		</config>");
 	}
 	
@@ -227,6 +227,7 @@ class KBContent {
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
 					//TODO: create support for users other than root
+					//KBTB::debug(crypt($_POST['pass'],"$2"));
 					if($_POST['user'] == "root" && crypt($_POST['pass'],"$2") == $this->cfg->get("/config/rootpass")) {
 						$_SESSION['user'] = $_POST['user'];
 						//TODO: redirect to a different page?
@@ -277,7 +278,7 @@ class KBContent {
 		$xml->xslParse($this->dir.'index.xsl');
 		if(isset($_SESSION['user'])) {
 			// TODO: make the logoff button work
-			$adminpanel = "<div id='adminpanel'>
+			$adminpanel = "<div id='adminpanel' style='background:#c0c0c0; padding:10px;'>
 			<h1>Admin panel</h1>
 			<a href='javascript:logout();'>Log out</a>
 			</div>";
