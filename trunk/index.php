@@ -227,7 +227,6 @@ class KBContent {
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
 					//TODO: create support for users other than root
-					//KBTB::debug(crypt($_POST['pass'],"$2"));
 					if($_POST['user'] == "root" && crypt($_POST['pass'],"$2") == $this->cfg->get("/config/rootpass")) {
 						$_SESSION['user'] = $_POST['user'];
 						//TODO: redirect to a different page?
@@ -278,9 +277,10 @@ class KBContent {
 		$xml->xslParse($this->dir.'index.xsl');
 		if(isset($_SESSION['user'])) {
 			// TODO: make the logoff button work
-			$adminpanel = "<div id='adminpanel' style='background:#c0c0c0; padding:10px;'>
+			$adminpanel = "<div id='adminpanel'>
 			<h1>Admin panel</h1>
-			<a href='javascript:logout();'>Log out</a>
+			<a href=\"javascript:alert('Function not supported yet!\\n\\nRenaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
+			<a href=\"javascript:alert('Function not supported yet!\\n\\nLogging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
 			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
 			//KBTB::debug($xml->asXML());
