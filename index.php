@@ -276,14 +276,14 @@ class KBContent {
 		// TODO: check for existance of index.xsl
 		$xml->xslParse($this->dir.'index.xsl');
 		if(isset($_SESSION['user'])) {
-			// TODO: make the logoff button work
+			// TODO: implement the logoff and the rename functions
+			// TODO: make a seperate place for javascript functions
 			$adminpanel = "<div id='adminpanel'>
 			<h1>Admin panel</h1>
 			<a href=\"javascript:alert('Function not supported yet!\\n\\nRenaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
 			<a href=\"javascript:alert('Function not supported yet!\\n\\nLogging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
 			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
-			//KBTB::debug($xml->asXML());
 		}
 		$this->contents = $xml->asXML();
 		$this->contenttype = "text/html";
