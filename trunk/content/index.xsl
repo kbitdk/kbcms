@@ -13,7 +13,7 @@
 			}
 			#adminpanel {
 				position:			absolute;
-				top:					30px;
+				top:					10px;
 				left:					450px;
 			}
 			#logo {
