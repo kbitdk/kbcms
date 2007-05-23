@@ -14,7 +14,10 @@
 			#adminpanel {
 				position:			absolute;
 				top:					10px;
-				left:					450px;
+				left:					600px;
+				z-index:          10;
+				background:       #c0c0c0;
+				padding:          10px;
 			}
 			#logo {
 				position:			absolute;
