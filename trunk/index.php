@@ -287,7 +287,7 @@ class KBContent {
 			</script>
 			<div id='adminpanel'>
 			<h1>Admin panel</h1>
-			<a href=\"javascript:unsupported('Renaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
+			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
 			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
