@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-	<xsl:output method="xml" version="1.0" encoding="ISO-8859-1" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="no"/>
+	<xsl:output method="xml" version="1.0" encoding="UTF-8" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="no"/>
 	
 	<xsl:template match="/page">
 		<html>
@@ -104,7 +104,7 @@
 				</xsl:for-each>
 				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
 			</div>
-			<div id="content">
+			<div id="content" onclick='unsupported("The content can be edited through the (by default) content/*.xml files.");'>
 				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
 				<div id="innercontent">
 					<xsl:apply-templates select="content"/>
@@ -115,6 +115,44 @@
 		</html>
 	</xsl:template>
 	
+	<!--
+		Show XML verbatim
+		- Originally from the GPL'd Text Encoding Initiative Consortium project at http://tei.sf.net/
+	-->
+	<xsl:param name="indentchar" select="'&#160;&#160;&#160;'"/>
+	<xsl:template match="text()" mode="verbatim">
+		<xsl:param name="indent" select="''"/>
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:template>
+	<xsl:template match="*" mode="verbatim">
+		<xsl:param name="indent" select="''"/>
+		<xsl:value-of select="$indent"/>
+		<xsl:text>&lt;</xsl:text>
+		<xsl:if test="namespace-uri(.)='http://www.w3.org/1999/XSL/Transform'">xsl:</xsl:if>
+		<xsl:value-of select="local-name()"/>
+		<xsl:for-each select="@*">
+			<xsl:text>&#10; </xsl:text>
+			<xsl:value-of select="normalize-space(name(.))"/>
+			<xsl:text>="</xsl:text>
+			<xsl:value-of select="."/>
+			<xsl:text>"</xsl:text>
+		</xsl:for-each>
+		<xsl:if test="not(*|text())">/</xsl:if>
+		<xsl:text>&gt;</xsl:text>
+		<xsl:if test="*"><xsl:text>&#10;</xsl:text></xsl:if>
+		
+		<xsl:if test="*|text()">
+			<xsl:apply-templates select="*|text()" mode="verbatim">
+				<xsl:with-param name="indent" select="concat($indentchar, $indent)"/>
+			</xsl:apply-templates>
+			<xsl:if test="*"><xsl:value-of select="$indent"/></xsl:if>
+			<xsl:text>&lt;/</xsl:text>
+			<xsl:if test="namespace-uri(.)='http://www.w3.org/1999/XSL/Transform'">xsl:</xsl:if>
+			<xsl:value-of select="local-name(.)"/>
+			<xsl:text>&gt;&#10;</xsl:text>
+		</xsl:if>
+	</xsl:template>
+	
 	<xsl:template match="content | @* | node()">
 		<xsl:copy>
 			<xsl:apply-templates select="@* | node()"/>
@@ -123,7 +161,7 @@
 	
 	<xsl:template match="verbatim">
 		<pre>
-			<xsl:copy-of select="@* | node()"/>
+			<xsl:apply-templates select="@* | node()" mode="verbatim"/>
 		</pre>
 	</xsl:template>
 	

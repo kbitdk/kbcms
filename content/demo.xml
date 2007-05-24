@@ -23,9 +23,8 @@
 				<extension>482</extension>
 			</employee>
 		</KBEmployeeList>
-		Code:<br/><br/>
+		Code:<br/>
 		<verbatim>
-		<![CDATA[
 			<KBEmployeeList>
 				<employee>
 					<name>John Doe</name>
@@ -38,7 +37,6 @@
 					<extension>482</extension>
 				</employee>
 			</KBEmployeeList>
-		]]>
 		</verbatim>
 	</content>
 </page>
