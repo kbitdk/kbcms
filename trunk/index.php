@@ -279,10 +279,16 @@ class KBContent {
 			// TODO: implement the logoff and the rename functions
 			// TODO: make a seperate place for javascript functions
 			// TODO: make a single-click or perhaps double-click on the content turn it into a WYSIWYG editor
-			$adminpanel = "<div id='adminpanel'>
+			$adminpanel = "
+			<script type='text/javascript'>
+			function unsupported(msg) {
+				alert('Function not supported yet!\\n\\n'+msg);
+			}
+			</script>
+			<div id='adminpanel'>
 			<h1>Admin panel</h1>
-			<a href=\"javascript:alert('Function not supported yet!\\n\\nRenaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
-			<a href=\"javascript:alert('Function not supported yet!\\n\\nLogging out can be done by closing the browser to clear the session.');\">Log out</a>
+			<a href=\"javascript:unsupported('Renaming the page can be done from the \\'content/index.xml\\' file.');\">Rename page</a><br/>
+			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
 			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
 		}
