@@ -281,12 +281,42 @@ class KBContent {
 			// TODO: make a single-click or perhaps double-click on the content turn it into a WYSIWYG editor
 			$adminpanel = "
 			<script type='text/javascript'>
+			var editable;
 			function unsupported(msg) {
 				alert('Function not supported yet!\\n\\n'+msg);
 			}
+			function wysiwyg() {
+				if(!editable) {
+					document.getElementById('innercontent').innerHTML = '<textarea id='editor' name='content' cols='100' rows='30'>'+document.getElementById('innercontent').innerHTML+'</textarea>';
+					tinyMCE.execCommand('mceAddControl', false, 'editor');
+					editable = true;
+				}
+			}
+			window.onload = function() {
+				document.getElementById('innercontent').onclick = function() {
+					wysiwyg();
+				};
+			};
 			</script>
 			<div id='adminpanel'>
 			<h1>Admin panel</h1>
+			<script type='text/javascript' src='tiny_mce/tiny_mce_gzip.js'></script>
+			<script type='text/javascript'>
+			tinyMCE_GZ.init({
+				plugins : 'style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras',
+				themes : 'simple,advanced',
+				languages : 'en',
+				disk_cache : true,
+				debug : false
+			});
+			</script>
+			<!-- Needs to be seperate script tags! -->
+			<script language='javascript' type='text/javascript'>
+			tinyMCE.init({
+				mode : 'textareas'
+			});
+			</script>
+					
 			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";

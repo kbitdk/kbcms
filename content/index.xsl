@@ -104,7 +104,7 @@
 				</xsl:for-each>
 				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
 			</div>
-			<div id="content" onclick='unsupported("The content can be edited through the (by default) content/*.xml files.");'>
+			<div id="content">
 				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
 				<div id="innercontent">
 					<xsl:apply-templates select="content"/>
