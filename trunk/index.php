@@ -178,7 +178,7 @@ class KBContent {
 		<config>
 			<contentpath>content</contentpath>
 			<adminpath>admin</adminpath>
-			<rootpass>$2.uPaZNiRMTQ</rootpass>
+			<rootpass>".crypt("changeme","$2")."</rootpass>
 		</config>");
 	}
 	
