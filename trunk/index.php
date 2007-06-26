@@ -223,6 +223,13 @@ class KBContent {
 				$this->contenttype = "text/html";
 				$this->type = "page";
 				return;
+			} elseif($url == "favicon.ico") {
+				// TODO: check if favicon.ico exists
+				KBTB::req(KBTB::inpath($this->dir."favicon.ico"),"Error on line ".__LINE__.": Invalid path.");
+				$this->contents = file_get_contents($this->dir."favicon.ico");
+				$this->contenttype = "image/x-icon";
+				$this->type = "media";
+				return;
 			} elseif($url == $this->cfg->get("/config/adminpath")) { // Admin interface
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
