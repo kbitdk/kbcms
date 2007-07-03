@@ -107,7 +107,7 @@
 			<div id="content">
 				<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
 				<div id="innercontent">
-					<xsl:apply-templates select="content"/>
+					<xsl:apply-templates select="content/*|content/text()"/>
 				</div>
 				<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
 			</div>
