@@ -1,4 +1,5 @@
 <?
+// TODO: make a session id that needs to be sent out and back on user made changes
 
 // Main
 website();
@@ -166,6 +167,26 @@ class KBTB { // Toolbox
 	}
 }
 
+class KBSite {
+	private $url;
+	private $file;
+	
+	function __construct($url) {
+		$this->url = $url;
+	}
+	
+	function validPage($xml) {
+		$this->file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+		return is_file($this->file) && is_readable($this->file);
+	}
+	
+	function setContent(&$xml) {
+		$xmlpage = new KBXML($file);
+		KBTB::req(!$xmlpage->error,"Error on line ".__LINE__.": Invalid XML input.");
+		$xml->set("/page/content",$xmlpage->get("/page/content"));
+	}
+}
+
 class KBContent {
 	public $type = "notfound"; // Assume the address is not found unless proven otherwise
 	public $contents = "";
@@ -207,10 +228,25 @@ class KBContent {
 		// TODO: validate the config file
 		$xml = new KBXML($this->dir."index.xml");
 		if($xml->error) return;
+		$site = new KBSite($url);
+		
+		// TODO: user permissions
+		if($_POST['ajax'] && isset($_SESSION['user'])) { // AJAX call
+			switch($_POST['ajax']) {
+				case "submitpage":
+					// TODO: check if file exists
+					$page = new KBXML(getFilenameFromURL($url));
+					$page->set("/page/content",$_POST['content']);
+					$this->contents = saveFile(getFilenameFromURL($url),$page->asXML());
+					$this->contenttype = "text/html";
+					$this->type = "page";
+					break;
+			}
+			return;
+		}
 		
 		// TODO: validation of the xml file and the following xml and xsl file
 		// TODO: make a proper rule for symbols in urls
-		
 		KBTB::req(ereg("^[a-zA-Z._/-]*$",$url),"Error on line ".__LINE__.": Invalid URL.");
 		if($url) {
 			if($url == "sitemap.xml") { // Sitemap
@@ -223,7 +259,7 @@ class KBContent {
 				$this->contenttype = "text/html";
 				$this->type = "page";
 				return;
-			} elseif($url == "favicon.ico") {
+			} elseif($url == "favicon.ico") { // Favicon
 				// TODO: check if favicon.ico exists
 				KBTB::req(KBTB::inpath($this->dir."favicon.ico"),"Error on line ".__LINE__.": Invalid path.");
 				$this->contents = file_get_contents($this->dir."favicon.ico");
@@ -256,14 +292,11 @@ class KBContent {
 				</table></form>
 				";
 				$xml->set("/page/content",$login);
-			// Check if $url is a content file or a media file
-			} elseif(is_file($file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$url))."']/../loc")) && is_readable($file)) {
-				// Requirements
-				KBTB::req(KBTB::inpath($file),"Error on line ".__LINE__.": Invalid path.");
+			// Check if $url is a content file
+			} elseif($site->validPage($xml)) {
 				// Get the real contents and put it in the right place
-				$xmlpage = new KBXML($file);
-				KBTB::req(!$xmlpage->error,"Error on line ".__LINE__.": Invalid XML input.");
-				$xml->set("/page/content",$xmlpage->get("/page/content"));
+				$site->setContent($xml);
+			// Media
 			} elseif(is_file($file = $this->dir.$xml->get("/page/medias/media/title[.='".$url."']/../loc")) && is_readable($file)) {
 				// Requirements
 				KBTB::req(KBTB::inpath($file),"Error on line ".__LINE__.": Invalid path.");
@@ -282,21 +315,55 @@ class KBContent {
 		// Parse the xml file with the xsl stylesheet
 		// TODO: check for existance of index.xsl
 		$xml->xslParse($this->dir.'index.xsl');
-		if(isset($_SESSION['user'])) {
+		
+		if(isset($_SESSION['user'])) { // Insert admin panel
 			// TODO: implement the logoff and the rename functions
 			// TODO: make a seperate place for javascript functions
 			// TODO: make a single-click or perhaps double-click on the content turn it into a WYSIWYG editor
+			// TODO: make 'cancel' reinsert the original HTML instead of just reloading the page
 			$adminpanel = "
 			<script type='text/javascript'>
 			var editable;
+			
+			var httpRequest;
+			if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+				httpRequest = new XMLHttpRequest();
+				if (httpRequest.overrideMimeType) { httpRequest.overrideMimeType('text/xml'); }
+			} else if (window.ActiveXObject) { // IE
+				httpRequest = new ActiveXObject('Microsoft.XMLHTTP');
+			}
+			httpRequest.onreadystatechange = function(){
+				// do the thing
+			};
+			
 			function unsupported(msg) {
 				alert('Function not supported yet!\\n\\n'+msg);
 			}
+			function set(vars) {
+				httpRequest.open('POST', location.protocol+'//'+location.host+location.pathname, false);
+				httpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				httpRequest.send(vars);
+				if(httpRequest.status == 200) {
+					return httpRequest.responseText;
+				} else {
+					return false;
+				}
+			}
+			function submit() {
+				unsupported('Content can be edited in the content/*.xml files');
+				alert(set('ajax=submitpage',document.location.href,document.getElementById('innercontent').innerHTML));
+				return false;
+			}
 			function wysiwyg() {
 				if(!editable) {
-					document.getElementById('innercontent').innerHTML = '<textarea id='editor' name='content' cols='100' rows='30'>'+document.getElementById('innercontent').innerHTML+'</textarea>';
-					tinyMCE.execCommand('mceAddControl', false, 'editor');
+					document.getElementById('innercontent').innerHTML = '<form id='contentform'>'+
+					'<textarea id='editor' name='content' cols='100' rows='20'>'+document.getElementById('innercontent').innerHTML+'</textarea>'+
+					'<br/><br/><input type='submit' value='Submit'/> <input type='button' value='Cancel' onclick='document.location.reload()'/></form>';
+					//tinyMCE.execCommand('mceAddControl', false, 'editor');
 					editable = true;
+					document.getElementById('contentform').onsubmit = function() {
+						return submit();
+					};
 				}
 			}
 			window.onload = function() {
