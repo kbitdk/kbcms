@@ -140,6 +140,11 @@ class KBXML {
 		$this->xml = $dom;
 	}
 	
+	function save($filename) {
+		//TODO: check for file permissions
+		return $this->xml->save($filename);
+	}
+	
 	// Parse the XML with the XSL argument and put it back in the XML
 	function xslParse($xsl) {
 		$xslt = new xsltProcessor;
@@ -170,9 +175,25 @@ class KBTB { // Toolbox
 class KBSite {
 	private $url;
 	private $file;
+	private $dir;
+	private $xml;
 	
-	function __construct($url) {
+	private function UrlToFile($url) {
+		// TODO: special case for $url = "" (main page)
+		$file = $this->dir.$this->xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+		return (is_file($file) && is_readable($file)) ? $file : false;
+	}
+	
+	function saveContent($url,$content) {
+		$page = new KBXML($this->UrlToFile($url));
+		$page->set("/page/content",$content);
+		return ($page->save($this->UrlToFile($url))>0);
+	}
+	
+	function __construct($dir,$url,&$xml) {
 		$this->url = $url;
+		$this->dir = $dir;
+		$this->xml = $xml;
 	}
 	
 	function validPage($xml) {
@@ -180,10 +201,10 @@ class KBSite {
 		return is_file($this->file) && is_readable($this->file);
 	}
 	
-	function setContent(&$xml) {
-		$xmlpage = new KBXML($file);
+	function setContent() {
+		$xmlpage = new KBXML($this->file);
 		KBTB::req(!$xmlpage->error,"Error on line ".__LINE__.": Invalid XML input.");
-		$xml->set("/page/content",$xmlpage->get("/page/content"));
+		$this->xml->set("/page/content",$xmlpage->get("/page/content"));
 	}
 }
 
@@ -227,17 +248,15 @@ class KBContent {
 		$this->dir = $this->cfg->get("/config/contentpath")."/";
 		// TODO: validate the config file
 		$xml = new KBXML($this->dir."index.xml");
+		$site = new KBSite($this->cfg->get("/config/contentpath")."/",$url,$xml);
 		if($xml->error) return;
-		$site = new KBSite($url);
 		
 		// TODO: user permissions
 		if($_POST['ajax'] && isset($_SESSION['user'])) { // AJAX call
 			switch($_POST['ajax']) {
 				case "submitpage":
 					// TODO: check if file exists
-					$page = new KBXML(getFilenameFromURL($url));
-					$page->set("/page/content",$_POST['content']);
-					$this->contents = saveFile(getFilenameFromURL($url),$page->asXML());
+					$this->contents = $site->saveContent($_POST['url'],$_POST['content']);
 					$this->contenttype = "text/html";
 					$this->type = "page";
 					break;
@@ -350,8 +369,13 @@ class KBContent {
 				}
 			}
 			function submit() {
-				unsupported('Content can be edited in the content/*.xml files');
-				alert(set('ajax=submitpage',document.location.href,document.getElementById('innercontent').innerHTML));
+				//unsupported('Content can be edited in the content/*.xml files');
+				if(set('ajax=submitpage'+String.fromCharCode(38)+'url='+document.location.pathname.slice(1)+String.fromCharCode(38)+'content='+document.getElementById('editor').value)) {
+					document.getElementById('innercontent').innerHTML = document.getElementById('editor').value;
+					editable = false;
+				} else {
+					alert('An unknown error occurred');
+				}
 				return false;
 			}
 			function wysiwyg() {
@@ -391,6 +415,7 @@ class KBContent {
 			});
 			</script>
 					
+			<a href=\"javascript:unsupported('The password can be changed manually through the config.xml file.');\">Change password</a><br/>
 			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
