@@ -179,8 +179,11 @@ class KBSite {
 	private $xml;
 	
 	private function UrlToFile($url) {
-		// TODO: special case for $url = "" (main page)
-		$file = $this->dir.$this->xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+		if($url=="") { // Main page
+			$file = $this->dir."index.xml";
+		} else {
+			$file = $this->dir.$this->xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+		}
 		return (is_file($file) && is_readable($file)) ? $file : false;
 	}
 	
@@ -252,11 +255,13 @@ class KBContent {
 		if($xml->error) return;
 		
 		// TODO: user permissions
-		if($_POST['ajax'] && isset($_SESSION['user'])) { // AJAX call
+		if($_POST['ajax']) { // AJAX call
+			KBTB::req(isset($_SESSION['user']),"Error on line ".__LINE__.": User not logged in.");
 			switch($_POST['ajax']) {
 				case "submitpage":
 					// TODO: check if file exists
-					$this->contents = $site->saveContent($_POST['url'],$_POST['content']);
+					$saved = $site->saveContent($_POST['url'],stripslashes($_POST['content']));
+					$this->contents = ($saved === true ? "ok" : $saved);
 					$this->contenttype = "text/html";
 					$this->type = "page";
 					break;
@@ -331,6 +336,8 @@ class KBContent {
 			}
 		}
 		
+		$pageContent = $xml->get("/page/content");
+		
 		// Parse the xml file with the xsl stylesheet
 		// TODO: check for existance of index.xsl
 		$xml->xslParse($this->dir.'index.xsl');
@@ -343,6 +350,7 @@ class KBContent {
 			$adminpanel = "
 			<script type='text/javascript'>
 			var editable;
+			var pageContent = \"".str_replace("\n","\\n",addslashes($pageContent))."\";
 			
 			var httpRequest;
 			if (window.XMLHttpRequest) { // Mozilla, Safari, ...
@@ -369,21 +377,24 @@ class KBContent {
 				}
 			}
 			function submit() {
-				//unsupported('Content can be edited in the content/*.xml files');
-				if(set('ajax=submitpage'+String.fromCharCode(38)+'url='+document.location.pathname.slice(1)+String.fromCharCode(38)+'content='+document.getElementById('editor').value)) {
-					document.getElementById('innercontent').innerHTML = document.getElementById('editor').value;
+				var result = set('ajax=submitpage'+String.fromCharCode(38)+'url='+document.location.pathname.slice(1)+String.fromCharCode(38)+'content='+document.getElementById('editor').value);
+				if(result == 'ok') {
+					pageContent = document.getElementById('innercontent').innerHTML = document.getElementById('editor').value;
+					
 					editable = false;
 				} else {
-					alert('An unknown error occurred');
+					alert('An error occurred:\\n\\n'+result);
 				}
 				return false;
 			}
 			function wysiwyg() {
 				if(!editable) {
-					document.getElementById('innercontent').innerHTML = '<form id='contentform'>'+
-					'<textarea id='editor' name='content' cols='100' rows='20'>'+document.getElementById('innercontent').innerHTML+'</textarea>'+
-					'<br/><br/><input type='submit' value='Submit'/> <input type='button' value='Cancel' onclick='document.location.reload()'/></form>';
+					var contents = pageContent; //subdomToXML(document.getElementById('innercontent'));
+					document.getElementById('innercontent').innerHTML = '<form id='contentform' action='http://localhost/'><p>'+
+					'<textarea id='editor' name='content' cols='100' rows='20'></textarea>'+
+					'<br/><br/><input type='submit' value='Submit'/> <input type='button' value='Cancel' onclick='document.location.reload()'/></p></form>';
 					//tinyMCE.execCommand('mceAddControl', false, 'editor');
+					document.getElementById('editor').value = contents;
 					editable = true;
 					document.getElementById('contentform').onsubmit = function() {
 						return submit();
@@ -400,21 +411,21 @@ class KBContent {
 			<h1>Admin panel</h1>
 			<script type='text/javascript' src='tiny_mce/tiny_mce_gzip.js'></script>
 			<script type='text/javascript'>
-			tinyMCE_GZ.init({
+			/*tinyMCE_GZ.init({
 				plugins : 'style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras',
 				themes : 'simple,advanced',
 				languages : 'en',
 				disk_cache : true,
 				debug : false
-			});
+			});*/
 			</script>
 			<!-- Needs to be seperate script tags! -->
 			<script language='javascript' type='text/javascript'>
-			tinyMCE.init({
+			/*tinyMCE.init({
 				mode : 'textareas'
-			});
+			});*/
 			</script>
-					
+			
 			<a href=\"javascript:unsupported('The password can be changed manually through the config.xml file.');\">Change password</a><br/>
 			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
