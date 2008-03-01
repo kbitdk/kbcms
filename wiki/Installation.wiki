@@ -21,7 +21,7 @@ sudo chown -R `whoami` /var/www
 rm -rf /var/www/apache2-default
 svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
 sudo sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/sites-enabled/000-default
-sudo ln -s ../mods-available/rewrite.load /etc/apache2/mods-enabled/
+sudo ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/
 sudo /etc/init.d/apache2 restart
 }}}
 
