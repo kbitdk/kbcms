@@ -170,6 +170,11 @@ class KBTB { // Toolbox
 			die($errMsg ? $errMsg : "Unknown error");
 		}else return $value;
 	}
+	function fatal($string) {
+		echo "Fatal error";
+		if($GLOBALS['debug']) echo ": ".$string;
+		die();
+	}
 }
 
 class KBSite {
@@ -251,8 +256,9 @@ class KBContent {
 		$this->dir = $this->cfg->get("/config/contentpath")."/";
 		// TODO: validate the config file
 		$xml = new KBXML($this->dir."index.xml");
+		if($xml->error == "File not found") KBTB::fatal("Site settings not found or not accessible");
+		if($xml->error) KBTB::fatal("XML error: ".$xml->error);
 		$site = new KBSite($this->cfg->get("/config/contentpath")."/",$url,$xml);
-		if($xml->error) return;
 		
 		// TODO: user permissions
 		if($_POST['ajax']) { // AJAX call
@@ -452,6 +458,9 @@ The requested URL ".getenv("REQUEST_URI")." does not exist.
 }
 
 function website() {
+	global $debug;
+	$debug = false;
+	
 	$content = new KBContent($_GET["url"]);
 	switch($content->type) {
 	case "page":
