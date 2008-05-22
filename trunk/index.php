@@ -205,7 +205,7 @@ class KBSite {
 	}
 	
 	function validPage($xml) {
-		$this->file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+		$this->file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",str_replace("_"," ",$this->url)))."']/../loc");
 		return is_file($this->file) && is_readable($this->file);
 	}
 	
