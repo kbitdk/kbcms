@@ -1,4 +1,4 @@
-<?
+<?php
 // TODO: make a session id that needs to be sent out and back on user made changes
 
 // Main
@@ -161,7 +161,7 @@ class KBTB { // Toolbox
 		die();
 	}
 	function inpath($path) {
-		return ereg("^".realpath(".")."/",realpath($path));
+		return ereg("^".addslashes(realpath(".").DIRECTORY_SEPARATOR),realpath($path));
 	}
 	function req($value,$errMsg = false) {
 		if(!$value) {
