@@ -1,4 +1,6 @@
+Options -Indexes
 Options +FollowSymLinks
+Redirect 403 /php.ini
 RewriteEngine on
 
 php_value session.auto_start 1
