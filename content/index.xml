@@ -5,16 +5,13 @@
 	<page>
 		<title>Main page</title>
 		<loc></loc>
-		<lastmod>2007-04-06</lastmod>
 		<page>
 			<title>Demonstration</title>
 			<loc>demo.xml</loc>
-			<lastmod>2007-04-06</lastmod>
 		</page>
 		<page>
 			<title>Documentation</title>
 			<loc>docs.xml</loc>
-			<lastmod>2007-04-06</lastmod>
 		</page>
 	</page>
 	<medias>

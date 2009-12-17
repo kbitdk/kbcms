@@ -183,19 +183,20 @@ class KBSite {
 	private $dir;
 	private $xml;
 	
-	private function UrlToFile($url) {
+	function UrlToFile($url,$xml) {
 		if($url=="") { // Main page
-			$file = $this->dir."index.xml";
+			$file = $this->dir.'index.xml';
 		} else {
-			$file = $this->dir.$this->xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",$this->url))."']/../loc");
+			if(preg_match('/^\//',$url)) $url = substr($url,1);
+			$file = $this->dir.$xml->get('/page/page/page/title[.=\''.implode('\']/../page/title[.=\'',explode('/',str_replace('_',' ',$url))).'\']/../loc');
 		}
 		return (is_file($file) && is_readable($file)) ? $file : false;
 	}
 	
-	function saveContent($url,$content) {
-		$page = new KBXML($this->UrlToFile($url));
+	function saveContent($url,$content,$xml) {
+		$page = new KBXML($this->UrlToFile($url,$xml));
 		$page->set("/page/content",$content);
-		return ($page->save($this->UrlToFile($url))>0);
+		return ($page->save($this->UrlToFile($url,$xml))>0);
 	}
 	
 	function __construct($dir,$url,&$xml) {
@@ -205,7 +206,7 @@ class KBSite {
 	}
 	
 	function validPage($xml) {
-		$this->file = $this->dir.$xml->get("/page/page/page/title[.='".implode("']/../page/title[.='",explode("/",str_replace("_"," ",$this->url)))."']/../loc");
+		$this->file = $this->UrlToFile($this->url,$xml);
 		return is_file($this->file) && is_readable($this->file);
 	}
 	
@@ -232,19 +233,19 @@ class KBContent {
 		</config>");
 	}
 	
-	function getSitemap($xml,$url=null,$xpath="/page/page") {
+	function getSitemap($xml,$site,$url=null,$xpath="/page/page") {
 		$xpath .= is_null($url) ? "" : "/page/title[.='".substr($url,strrpos($url,"/")+1)."']/..";
 		$lastmod = $xml->get($xpath."/lastmod");
 		
 		// Output the record for the page
 		// TODO: Should interpret characters (such as spaces, symbols, etc.)
 		$output .= "\n\n<url><loc>"."http://". $_SERVER['SERVER_NAME'].$url."</loc>";
-		if($lastmod) $output .= "\n<lastmod>".$lastmod."</lastmod>";
+		$output .= "\n<lastmod>".($lastmod?$lastmod:date('c',filemtime($site->UrlToFile($url,$xml))))."</lastmod>";
 		$output .= "</url>";
 		
 		// Recursive
 		if($xml->get($xpath."/page")) foreach($xml->getArr($xpath."/page/title") as $page)
-			$output .= $this->getSitemap($xml,$url."/".$page,$xpath);
+			$output .= $this->getSitemap($xml,$site,$url."/".$page,$xpath);
 		
 		return $output;
 	}
@@ -282,7 +283,7 @@ class KBContent {
 			if($url == "sitemap.xml") { // Sitemap
 				$sitemap = "<?xml version='1.0' encoding='UTF-8'?>";
 				$sitemap .= "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";
-				$sitemap .= $this->getSitemap($xml);
+				$sitemap .= $this->getSitemap($xml,$site);
 				$sitemap .= "</urlset>";
 				
 				$this->contents = $sitemap;
