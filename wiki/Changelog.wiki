@@ -3,7 +3,7 @@
 
 = Repository (coming in next release) =
  * Fixed compatibility with XAMPP for windows
- * Now dynamically updates lastmod times on sitemap
+ * Now dynamically updates lastmod times on sitemap (if it isn't set in index.xml)
 
 = 0.1 =
  * First release
