@@ -1,5 +1,5 @@
 #summary URLs can be fully customized, which has a variety of benefits
-#labels Feature
+#labels Featured
 
 = Introduction =
 
@@ -25,7 +25,5 @@ The precedence of the URLs ensure that certain pages, like the admin page and th
  * */admin* - the actual URL is configurable in config.xml
  * *pages* - any page in the index.xml file
  * *media* - any media in the index.xml file
-
-
 
 
