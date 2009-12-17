@@ -1,0 +1,16 @@
+#summary Changes in each version.
+#labels Featured
+
+= Repository (coming in next release) =
+ * Fixed compatibility with XAMPP for windows
+
+= 0.1 =
+ * First release
+ * Licensed under the GPL version 2 or later
+  * Use it for as many sites as you like and customize it all you want
+  * Note: The logo and the name are not to be used with derivative works)
+ * Content and design separation with XML and XSL files
+ * [CustomURLs *Fully* customizable URL's]
+  * SEO (Search Engine Optimization) URL's are now trivial
+  * Paths can be named exactly as they were on the website you're replacing
+ * Automatically generates a google-compatible sitemap
