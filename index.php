@@ -14,13 +14,13 @@ class KBXML {
 		foreach($node->childNodes as $child){
 			switch($child->nodeType) {
 			case 1: // elementnode
-				$attrs = "";
+				$attrs = '';
 				foreach($child->attributes as $attr) {
-					$attrs .= " ".$attr->name."='".$attr->value."'";
+					$attrs .= ' '.$attr->name.'=\''.$attr->value.'\'';
 				}
-				$result .= "<".$child->nodeName."$attrs";
+				$result .= '<'.$child->nodeName.$attrs;
 				$value = $child->hasChildNodes()?$this->nodeasXML($child):$child->NodeValue;
-				$result .= $value=="" ? "/>" : ">".$value."</".$child->nodeName.">";
+				$result .= $value=='' ? '/>' : '>'.$value.'</'.$child->nodeName.'>';
 				break;
 			case 3: // textnode
 				$result .= $child->nodeValue;
@@ -36,13 +36,13 @@ class KBXML {
 	protected function replacenode($old, $new) {
 		// replaces a node with a new one
 		
-		$old->nodeValue = "";
+		$old->nodeValue = '';
 		
 		foreach($new->childNodes as $child) {
 			
 			switch($child->nodeType) {
 			case 1: // elementnode
-				$altered = $old->appendchild(new DOMElement($child->nodeName,""));
+				$altered = $old->appendchild(new DOMElement($child->nodeName,''));
 				foreach($child->attributes as $attr) {
 					$altered->appendchild($this->xml->createattribute($attr->name));
 					$altered->setattribute($attr->name,$attr->value);
@@ -70,7 +70,7 @@ class KBXML {
 			// TODO: check validity, perhaps against a DTD
 			$this->xml = DomDocument::load($file);
 		}else{
-			$this->error = "File not found";
+			$this->error = 'File not found';
 		}
 	}
 	
@@ -96,8 +96,8 @@ class KBXML {
 		$node = $nodes->item(0)->parentNode;
 		$node->removeChild;
 		
-		$xp = new DOMXPath(DOMDocument::loadXML("<x>".$value."</x>"));
-		$pn = $xp->query("/x");
+		$xp = new DOMXPath(DOMDocument::loadXML('<x>'.$value.'</x>'));
+		$pn = $xp->query('/x');
 		
 		foreach($pn->item(0)->childNodes as $child) {
 			switch($child->nodeType) {
@@ -122,8 +122,8 @@ class KBXML {
 		$xp = new DOMXPath($this->xml);
 		$nodes = $xp->query($xpath)->item(0);
 		
-		$xp = new DOMXPath(DOMDocument::loadXML("<x>".$value."</x>"));
-		$pn = $xp->query("/x")->item(0);
+		$xp = new DOMXPath(DOMDocument::loadXML('<x>'.$value.'</x>'));
+		$pn = $xp->query('/x')->item(0);
 		
 		$this->replacenode($nodes,$pn);
 	}
@@ -155,25 +155,68 @@ class KBXML {
 }
 
 class KBTB { // Toolbox
-	function debug($string) {
-		header("Content-type: text/plain");
-		var_dump($string);
-		die();
-	}
-	function inpath($path) {
-		return ereg("^".addslashes(realpath(".").DIRECTORY_SEPARATOR),realpath($path));
+	function valid($types,$var,$var2=null,$var3=null) {
+		$valid = true;
+		foreach(explode(',',$types) as $type) {
+			switch($type) {
+				case 'int':
+					$valid = $valid && $var!==true && (string)$var==(string)(int)$var;
+					break;
+				case '>':
+					$valid = $valid && $var>$var2;
+					break;
+				case '<':
+					$valid = $valid && $var<$var2;
+					break;
+				case '><':
+					$valid = $valid && $var>$var2 && $var<$var3;
+					break;
+				case 'usbi': //mysql unsigned bigint
+					$valid = $valid && KBTB::valid('int',$var) && $var>=0 && $var<10000000000000000000;
+					break;
+				case 'strlen':
+					$valid = $valid && strlen($var)>$var2 && strlen($var)<$var3;
+					break;
+				case 'email': // valid e-mail, and less than var2 in length if set
+					$valid = $valid && (is_null($var2) || strlen($var)<$var2) && (strlen($var) > 5 && preg_match('/^([.0-9a-z_-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,4})$/i', $var) !== false);
+					break;
+				case 'IP':
+					$valid = $valid && preg_match('/^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$/', $var);
+					break;
+				case 'url':
+					$regex = '/^((https?|ftp)\:\/\/)?'; // SCHEME 
+					$regex .= '([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?'; // User and Pass 
+					$regex .= '([a-z0-9-.]*)\.([a-z]{2,3})'; // Host or IP 
+					$regex .= '(\:[0-9]{2,5})?'; // Port 
+					$regex .= '(\/([a-z0-9+\$_-]\.?)+)*\/?'; // Path 
+					$regex .= '(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?'; // GET Query 
+					$regex .= '(#[a-z_.-][a-z0-9+\$_.-]*)?$/i'; // Anchor 
+					$valid = $valid && preg_match($regex, $var);
+					break;
+			}
+		}
+		return $valid;
 	}
 	function req($value,$errMsg = false) {
 		if(!$value) {
-			// TODO: find a correct http error code
-			//header("HTTP/1.0 404 Not Found");
-			die($errMsg ? $errMsg : "Unknown error");
+			while(ob_end_clean()) {}
+			throw new Exception($errMsg ? $errMsg : 'Unknown error');
 		}else return $value;
 	}
-	function fatal($string) {
-		echo "Fatal error";
-		if($GLOBALS['debug']) echo ": ".$string;
-		die();
+	function debug($value, $continue = false) {
+		header('Content-type: text/plain');
+		while(ob_end_clean()) {}
+		var_dump($value);
+		if(!$continue) die();
+	}
+	function html_encode($var) {
+		return htmlentities($var, ENT_QUOTES, 'UTF-8');
+	}
+	function attr_encode($var) {
+		return htmlspecialchars($var, ENT_QUOTES, 'UTF-8');
+	}
+	function inpath($path) {
+		return ereg('^'.addslashes(realpath('.').DIRECTORY_SEPARATOR),realpath($path));
 	}
 }
 
@@ -184,7 +227,7 @@ class KBSite {
 	private $xml;
 	
 	function UrlToFile($url,$xml) {
-		if($url=="") { // Main page
+		if($url=='') { // Main page
 			$file = $this->dir.'index.xml';
 		} else {
 			if(preg_match('/^\//',$url)) $url = substr($url,1);
@@ -195,7 +238,7 @@ class KBSite {
 	
 	function saveContent($url,$content,$xml) {
 		$page = new KBXML($this->UrlToFile($url,$xml));
-		$page->set("/page/content",$content);
+		$page->set('/page/content',$content);
 		return ($page->save($this->UrlToFile($url,$xml))>0);
 	}
 	
@@ -212,65 +255,65 @@ class KBSite {
 	
 	function setContent() {
 		$xmlpage = new KBXML($this->file);
-		KBTB::req(!$xmlpage->error,"Error on line ".__LINE__.": Invalid XML input.");
-		$this->xml->set("/page/content",$xmlpage->get("/page/content"));
+		KBTB::req(!$xmlpage->error,'Error on line '.__LINE__.': Invalid XML input.');
+		$this->xml->set('/page/content',$xmlpage->get('/page/content'));
 	}
 }
 
 class KBContent {
-	public $type = "notfound"; // Assume the address is not found unless proven otherwise
-	public $contents = "";
-	public $contenttype = "";
+	public $type = 'notfound'; // Assume the address is not found unless proven otherwise
+	public $contents = '';
+	public $contenttype = '';
 	private $cfg;
 	private $dir;
 	
 	function getStdCfg() { // Standard configuration
-		return new KBXML(null,"<?xml version='1.0' encoding='UTF-8'?> 
+		return new KBXML(null,'<?xml version="1.0" encoding="UTF-8"?>
 		<config>
 			<contentpath>content</contentpath>
 			<adminpath>admin</adminpath>
-			<rootpass>".crypt("changeme","$2")."</rootpass>
-		</config>");
+			<rootpass>'.crypt('changeme','$2').'</rootpass>
+		</config>');
 	}
 	
-	function getSitemap($xml,$site,$url=null,$xpath="/page/page") {
-		$xpath .= is_null($url) ? "" : "/page/title[.='".substr($url,strrpos($url,"/")+1)."']/..";
-		$lastmod = $xml->get($xpath."/lastmod");
+	function getSitemap($xml,$site,$url=null,$xpath='/page/page') {
+		$xpath .= is_null($url) ? '' : '/page/title[.=\''.substr($url,strrpos($url,'/')+1).'\']/..';
+		$lastmod = $xml->get($xpath.'/lastmod');
 		
 		// Output the record for the page
 		// TODO: Should interpret characters (such as spaces, symbols, etc.)
-		$output .= "\n\n<url><loc>"."http://". $_SERVER['SERVER_NAME'].$url."</loc>";
-		$output .= "\n<lastmod>".($lastmod?$lastmod:date('c',filemtime($site->UrlToFile($url,$xml))))."</lastmod>";
-		$output .= "</url>";
+		$output .= "\n\n".'<url><loc>http://'. $_SERVER['SERVER_NAME'].$url.'</loc>';
+		$output .= "\n".'<lastmod>'.($lastmod?$lastmod:date('c',filemtime($site->UrlToFile($url,$xml)))).'</lastmod>';
+		$output .= '</url>';
 		
 		// Recursive
-		if($xml->get($xpath."/page")) foreach($xml->getArr($xpath."/page/title") as $page)
-			$output .= $this->getSitemap($xml,$site,$url."/".$page,$xpath);
+		if($xml->get($xpath.'/page')) foreach($xml->getArr($xpath.'/page/title') as $page)
+			$output .= $this->getSitemap($xml,$site,$url.'/'.$page,$xpath);
 		
 		return $output;
 	}
 	
 	function __construct($url) {
 		// Input parsing
-		$this->cfg = new KBXML("config.xml");
-		if($this->cfg->error == "File not found") $this->cfg = $this->getStdCfg();
-		$this->dir = $this->cfg->get("/config/contentpath")."/";
+		$this->cfg = new KBXML('config.xml');
+		if($this->cfg->error == 'File not found') $this->cfg = $this->getStdCfg();
+		$this->dir = $this->cfg->get('/config/contentpath').'/';
 		// TODO: validate the config file
-		$xml = new KBXML($this->dir."index.xml");
-		if($xml->error == "File not found") KBTB::fatal("Site settings not found or not accessible");
-		if($xml->error) KBTB::fatal("XML error: ".$xml->error);
-		$site = new KBSite($this->cfg->get("/config/contentpath")."/",$url,$xml);
+		$xml = new KBXML($this->dir.'index.xml');
+		if($xml->error == 'File not found') KBTB::req(false,'Site settings not found or not accessible');
+		if($xml->error) KBTB::req(false,'XML error: '.$xml->error);
+		$site = new KBSite($this->cfg->get('/config/contentpath').'/',$url,$xml);
 		
 		// TODO: user permissions
 		if($_POST['ajax']) { // AJAX call
-			KBTB::req(isset($_SESSION['user']),"Error on line ".__LINE__.": User not logged in.");
+			KBTB::req(isset($_SESSION['user']),'Error on line '.__LINE__.': User not logged in.');
 			switch($_POST['ajax']) {
-				case "submitpage":
+				case 'submitpage':
 					// TODO: check if file exists
 					$saved = $site->saveContent($_POST['url'],stripslashes($_POST['content']));
-					$this->contents = ($saved === true ? "ok" : $saved);
-					$this->contenttype = "text/html";
-					$this->type = "page";
+					$this->contents = ($saved === true ? 'ok' : $saved);
+					$this->contenttype = 'text/html';
+					$this->type = 'page';
 					break;
 			}
 			return;
@@ -278,35 +321,35 @@ class KBContent {
 		
 		// TODO: validation of the xml file and the following xml and xsl file
 		// TODO: make a proper rule for symbols in urls
-		KBTB::req(ereg("^[a-zA-Z._/-]*$",$url),"Error on line ".__LINE__.": Invalid URL.");
+		KBTB::req(ereg('^[a-zA-Z._/-]*$',$url),'Error on line '.__LINE__.': Invalid URL.');
 		if($url) {
-			if($url == "sitemap.xml") { // Sitemap
-				$sitemap = "<?xml version='1.0' encoding='UTF-8'?>";
-				$sitemap .= "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>";
+			if($url == 'sitemap.xml') { // Sitemap
+				$sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
+				$sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 				$sitemap .= $this->getSitemap($xml,$site);
-				$sitemap .= "</urlset>";
+				$sitemap .= '</urlset>';
 				
 				$this->contents = $sitemap;
-				$this->contenttype = "text/html";
-				$this->type = "page";
+				$this->contenttype = 'text/html';
+				$this->type = 'page';
 				return;
-			} elseif($url == "favicon.ico") { // Favicon
+			} elseif($url == 'favicon.ico') { // Favicon
 				// TODO: check if favicon.ico exists
-				KBTB::req(KBTB::inpath($this->dir."favicon.ico"),"Error on line ".__LINE__.": Invalid path.");
-				$this->contents = file_get_contents($this->dir."favicon.ico");
-				$this->contenttype = "image/x-icon";
-				$this->type = "media";
+				KBTB::req(KBTB::inpath($this->dir.'favicon.ico'),'Error on line '.__LINE__.': Invalid path.');
+				$this->contents = file_get_contents($this->dir.'favicon.ico');
+				$this->contenttype = 'image/x-icon';
+				$this->type = 'media';
 				return;
-			} elseif($url == $this->cfg->get("/config/adminpath")) { // Admin interface
+			} elseif($url == $this->cfg->get('/config/adminpath')) { // Admin interface
 				// Check for valid login
 				if(!is_null($_POST['user'])) {
 					//TODO: create support for users other than root
-					if($_POST['user'] == "root" && crypt($_POST['pass'],"$2") == $this->cfg->get("/config/rootpass")) {
+					if($_POST['user'] == 'root' && crypt($_POST['pass'],'$2') == $this->cfg->get('/config/rootpass')) {
 						$_SESSION['user'] = $_POST['user'];
 						//TODO: redirect to a different page?
-						header("Location: http".(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=="on"?"s":"")."://".$_SERVER['SERVER_NAME']);
+						header('Location: http'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on'?'s':'').'://'.$_SERVER['SERVER_NAME']);
 					} else {
-						$logonErr = "Error: Wrong username and/or password";
+						$logonErr = 'Error: Wrong username and/or password';
 					}
 				}
 				
@@ -314,36 +357,36 @@ class KBContent {
 				// TODO: the content of this page should be configurable (in index.xml, index.xsl or config.xml?)
 				// TODO: make sure the pages can't be (re)named the same as a "special URL"
 				// TODO: make the username field gain focus on load of the page
-				$login = "<h1>Administration</h1>
-				".$logonErr."
-				<form action='/".$url."' method='post'><table>
-				<tr><td>Username: </td><td><input type='text' name='user'/></td></tr>
-				<tr><td>Password: </td><td><input type='password' name='pass'/></td></tr>
-				<tr><td><input type='submit' value='Login'/></td><td></td></tr>
+				$login = '<h1>Administration</h1>
+				'.$logonErr.'
+				<form action="/'.$url.'" method="post"><table>
+				<tr><td>Username: </td><td><input type="text" name="user"/></td></tr>
+				<tr><td>Password: </td><td><input type="password" name="pass"/></td></tr>
+				<tr><td><input type="submit" value="Login"/></td><td></td></tr>
 				</table></form>
-				";
-				$xml->set("/page/content",$login);
+				';
+				$xml->set('/page/content',$login);
 			// Check if $url is a content file
 			} elseif($site->validPage($xml)) {
 				// Get the real contents and put it in the right place
 				$site->setContent($xml);
 			// Media
-			} elseif(is_file($file = $this->dir.$xml->get("/page/medias/media/title[.='".$url."']/../loc")) && is_readable($file)) {
+			} elseif(is_file($file = $this->dir.$xml->get('/page/medias/media/title[.=\''.$url.'\']/../loc')) && is_readable($file)) {
 				// Requirements
-				KBTB::req(KBTB::inpath($file),"Error on line ".__LINE__.": Invalid path.");
+				KBTB::req(KBTB::inpath($file),'Error on line '.__LINE__.': Invalid path.');
 				// Spit out the media
 				// TODO: check for image type (png, jpg, gif, etc.), or maybe the system should require png, is that too locked in, if it converts the format in the admin back-end?
 				// TODO: check for image validity
 				$this->contents = file_get_contents($file);
-				$this->contenttype = "image/png";
-				$this->type = "media";
+				$this->contenttype = 'image/png';
+				$this->type = 'media';
 				return;
 			} else { // 404
 				return;
 			}
 		}
 		
-		$pageContent = $xml->get("/page/content");
+		$pageContent = $xml->get('/page/content');
 		
 		// Parse the xml file with the xsl stylesheet
 		// TODO: check for existance of index.xsl
@@ -357,7 +400,7 @@ class KBContent {
 			$adminpanel = "
 			<script type='text/javascript'>
 			var editable;
-			var pageContent = \"".str_replace("\n","\\n",addslashes($pageContent))."\";
+			var pageContent = \"\";
 			
 			var httpRequest;
 			if (window.XMLHttpRequest) { // Mozilla, Safari, ...
@@ -437,39 +480,39 @@ class KBContent {
 			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
-			$xml->set("/html/body",$adminpanel.$xml->get("/html/body"));
+			$xml->set('/html/body',$adminpanel.$xml->get('/html/body'));
 		}
 		$this->contents = $xml->asXML();
-		$this->contenttype = "text/html";
-		$this->type = "page";
+		$this->contenttype = 'text/html';
+		$this->type = 'page';
 	}
 }
 
 // Functions
 function err404() {
 	// Shows a 404 page and dies
-	header("HTTP/1.0 404 Not Found");
-	die("<html><head><title>404 Not Found</title></head>
+	header('HTTP/1.0 404 Not Found');
+	die('<html><head><title>404 Not Found</title></head>
 <body bgcolor=white>
 <h1>404 Not Found</h1>
 
-The requested URL ".getenv("REQUEST_URI")." does not exist.
+The requested URL '.getenv('REQUEST_URI').' does not exist.
 
-</body></html>"); //TODO: redirect to the real 404 page
+</body></html>'); //TODO: redirect to the real 404 page
 }
 
 function website() {
 	global $debug;
 	$debug = false;
 	
-	$content = new KBContent($_GET["url"]);
+	$content = new KBContent($_GET['url']);
 	switch($content->type) {
-	case "page":
-	case "media":
-		header("Content-type: ".$content->contenttype);
+	case 'page':
+	case 'media':
+		header('Content-type: '.$content->contenttype);
 		echo $content->contents;
 		break;
-	case "notfound":
+	case 'notfound':
 		err404();
 		break;
 	}
