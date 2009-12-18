@@ -480,7 +480,6 @@ class KBContent {
 			<a href=\"javascript:unsupported('The page can be renamed from the content/index.xml file.');\">Rename page</a><br/>
 			<a href=\"javascript:unsupported('Logging out can be done by closing the browser to clear the session.');\">Log out</a>
 			</div>";
-			die("xv");
 			$xml->set('/html/body',$adminpanel.$xml->get('/html/body'));
 		}
 		$this->contents = $xml->asXML();
