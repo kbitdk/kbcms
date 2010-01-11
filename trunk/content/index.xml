@@ -20,6 +20,14 @@
 			<loc>logo.png</loc>
 		</media>
 		<media>
+			<title>index.js</title>
+			<loc>index.js</loc>
+		</media>
+		<media>
+			<title>index.css</title>
+			<loc>index.css</loc>
+		</media>
+		<media>
 			<title>Test</title>
 			<loc>test.png</loc>
 		</media>

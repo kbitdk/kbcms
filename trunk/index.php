@@ -337,7 +337,7 @@ class KBContent {
 				// TODO: check if favicon.ico exists
 				KBTB::req(KBTB::inpath($this->dir.'favicon.ico'),'Error on line '.__LINE__.': Invalid path.');
 				$this->contents = file_get_contents($this->dir.'favicon.ico');
-				$this->contenttype = 'image/x-icon';
+				$this->contenttype = 'image/vnd.microsoft.icon';
 				$this->type = 'media';
 				return;
 			} elseif($url == $this->cfg->get('/config/adminpath')) { // Admin interface
@@ -375,10 +375,17 @@ class KBContent {
 				// Requirements
 				KBTB::req(KBTB::inpath($file),'Error on line '.__LINE__.': Invalid path.');
 				// Spit out the media
-				// TODO: check for image type (png, jpg, gif, etc.), or maybe the system should require png, is that too locked in, if it converts the format in the admin back-end?
 				// TODO: check for image validity
+				// TODO: check for more mime types (maybe use finfo_file()?)
+				preg_match('/\.([a-zA-Z]+)$/', $file,$matches);
+				switch(strtolower($matches[1])) {
+					case 'ico': $this->contenttype = 'image/vnd.microsoft.icon'; break;
+					case 'png': $this->contenttype = 'image/png'; break;
+					case 'js': $this->contenttype = 'text/javascript'; break;
+					case 'css': $this->contenttype = 'text/css'; break;
+					default: KBTB::req(false,'Unknown mime-type'); break;
+				}
 				$this->contents = file_get_contents($file);
-				$this->contenttype = 'image/png';
 				$this->type = 'media';
 				return;
 			} else { // 404
