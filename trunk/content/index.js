@@ -1,10 +1,6 @@
 
 
 
-// Init
-
-
-
 // Functions
 function ajax(vars, arg) {
 	$.ajax({
@@ -12,7 +8,7 @@ function ajax(vars, arg) {
 		success: function(msg) {
 			ajaxCallback(msg, arg);
 		},
-		error: function (xhr, desc, exceptionobj) { alert(xhr.responseText || 'Unknown error'); }
+		error: function (xhr, desc, exceptionobj) { alert(xhr.responseText ? 'Parser error: '+xhr.responseText : 'Unknown error'); }
 	});
 	return false;
 }
@@ -31,6 +27,7 @@ function ajaxCallback(msg, arg) {
 		case 'msg':
 		case 'err':
 			KBAlert(msg[1]);
+			//alert(msg[1]);
 			break;
 		case 'callback':
 			if(typeof(arg)=='undefined') alert('Error: Invalid internal call');
