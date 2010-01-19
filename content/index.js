@@ -81,7 +81,7 @@ function KBPopupDialog(opts) {
 	var dialog = $(document.body).append(popup);
 	$('.popupDialog .content',dialog).css({
 		top:			$(window).height()/2-$('.popupDialog .content',dialog).height()/2,
-		left:			$(window).width()/2-$('.popupDialog .content',dialog).width()/2,
+		left:			$(window).width()/2-$('.popupDialog .content',dialog).width()/2
 	});
 	$('.popupDialog',dialog).hide().css('visibility','visible');
 	for(var button in opts['buttons']) $('.popupDialog .content .'+button,dialog).click(opts['buttons'][button]);
