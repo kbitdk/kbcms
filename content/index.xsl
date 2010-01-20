@@ -8,9 +8,8 @@
 		<title><xsl:value-of select="title"/></title>
 		<link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon" />
 		<link rel="stylesheet" type="text/css" href="/index.css"/>
-		<script src="http://www.google.com/jsapi"></script><script type="text/javascript"> 
-			google.load('jquery', '1.3');
-		</script><script type="text/javascript" src="/index.js"></script> 
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+		<script type="text/javascript" src="/index.js"></script> 
 		</head>
 		<body>
 			<div id="logo">
