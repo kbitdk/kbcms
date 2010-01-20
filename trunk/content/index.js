@@ -1,4 +1,9 @@
 
+// Init
+$(function() {
+	$.expr[':'].focus = function(a){ return (a == document.activeElement); } // Make the :focus selector work in IE7
+});
+
 
 
 // Functions
@@ -27,7 +32,6 @@ function ajaxCallback(msg, arg) {
 		case 'msg':
 		case 'err':
 			KBAlert(msg[1]);
-			//alert(msg[1]);
 			break;
 		case 'callback':
 			if(typeof(arg)=='undefined') alert('Error: Invalid internal call');
@@ -89,7 +93,7 @@ function KBPopupDialog(opts) {
 	$(document).keydown(function (e) {
 		if(e.which == 27) {
 			$('.popupDialog').fadeOut();
-			oldFocus.focus();
+			if(typeof(oldFocus)!='undefined') oldFocus.focus();
 			return false;
 		}
 	});
@@ -104,7 +108,7 @@ function KBAlert(msg) {
 	popup += "<a href='#' class='close' style='display:inline-block; margin: 0 36px 20px 0;'>Close</a>";
 	popup += "</div>";
 	var oldFocus = $(':focus');
-	return KBPopupDialog({ "msg": popup, "buttons": { "close": function() { $('.popupDialog').fadeOut(); oldFocus.focus(); return false; } } });
+	return KBPopupDialog({ "msg": popup, "buttons": { "close": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } } });
 }
 function KBConfirm(msg,ok,cancel) {
 	var popup = '<div style="padding:10px; font-weight:bold;">Message</div>';
@@ -115,8 +119,8 @@ function KBConfirm(msg,ok,cancel) {
 	popup += "</div>";
 	var oldFocus = $(':focus');
 	return KBPopupDialog({ "msg": popup, "buttons": {
-		"ok": function() { $('.popupDialog').fadeOut(); oldFocus.focus(); if(ok) ok(); return false; },
-		"cancel": function() { $('.popupDialog').fadeOut(); oldFocus.focus(); if(cancel) cancel(); return false; }
+		"ok": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(ok) ok(); return false; },
+		"cancel": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(cancel) cancel(); return false; }
 	} });
 }
 
