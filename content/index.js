@@ -102,8 +102,7 @@ function KBPopupDialog(opts) {
 	return false;
 }
 function KBAlert(msg) {
-	var popup = '<div style="padding:10px; font-weight:bold;">Message</div>';
-	popup += "<div style='background:#fff; color:#888; font-size:14px; padding:23px;'>"+msg+"</div>";
+	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+msg+"</div>";
 	popup += "<div style='text-align:right;'>";
 	popup += "<a href='#' class='close' style='display:inline-block; margin: 0 36px 20px 0;'>Close</a>";
 	popup += "</div>";
