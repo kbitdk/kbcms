@@ -48,6 +48,7 @@ function ajaxCallback(msg, arg) {
 			else {
 				if(typeof(Recaptcha)!='undefined') Recaptcha.reload();
 				$('input,select',arg).css('background','');
+				$('input[type=radio]',arg).parent().css('background','');
 				$('input + span.validationResponse, select + span.validationResponse',arg).hide();
 				var clearCaptchaFun = function() {
 					$(this).css('background','');
@@ -62,6 +63,7 @@ function ajaxCallback(msg, arg) {
 						$('#recaptcha_response_field',arg).focus(clearCaptchaFun);
 					}else{
 						$('[name="'+key+'"]',arg).css('background','#f99');
+						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f99');
 						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
 						$('[name="'+key+'"] + span.validationResponse',arg).show();
 						$('[name="'+key+'"]',arg).focus(clearFun);
