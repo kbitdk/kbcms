@@ -9,7 +9,7 @@ $(function() {
 // Functions
 function ajax(vars, arg) {
 	$.ajax({
-		type: 'POST', url: (ajaxServer?ajaxServer:'/'), dataType: 'json', data: vars,
+		type: 'POST', url: (typeof(ajaxServer)!='undefined'?ajaxServer:'/'), dataType: 'json', data: vars,
 		success: function(msg) {
 			ajaxCallback(msg, arg);
 		},
@@ -59,9 +59,13 @@ function ajaxCallback(msg, arg) {
 				};
 				for(var key in msg[1]) {
 					if(key == 'captcha') {
-						$('#recaptcha_response_field',arg).css('background','#f99');
-						$('#recaptcha_response_field',arg).focus(clearCaptchaFun);
+						var field = $('#recaptcha_response_field',arg);
+						if(field.length) {
+							field.css('background','#f99');
+							field.focus(clearCaptchaFun);
+						} else alert('Error finding captcha field.');
 					}else{
+						if(!$('[name="'+key+'"]',arg).length) alert('Error finding field with key: '+key);
 						$('[name="'+key+'"]',arg).css('background','#f99');
 						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f99');
 						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
@@ -100,16 +104,18 @@ function KBPopupDialog(opts) {
 		}
 	});
 	$('.popupDialog',dialog).fadeIn();
-	$('.popupDialog .content a:last',dialog).focus();
+	if(typeof(opts['focus'])!='undefined') $(opts['focus']).focus();
+	else $('.popupDialog .content a:last',dialog).focus();
 	return false;
 }
-function KBAlert(msg) {
-	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+msg+"</div>";
+function KBAlert(opts) {
+	if(typeof(opts)=='string') opts = {'msg': opts};
+	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
 	popup += "<div style='text-align:right;'>";
 	popup += "<a href='#' class='close' style='display:inline-block; margin: 0 36px 20px 0;'>Close</a>";
 	popup += "</div>";
 	var oldFocus = $(':focus');
-	return KBPopupDialog({ "msg": popup, "buttons": { "close": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } } });
+	return KBPopupDialog({ 'msg': popup, 'buttons': { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } }, 'focus': opts['focus'] });
 }
 function KBConfirm(msg,ok,cancel) {
 	var popup = '<div style="padding:10px; font-weight:bold;">Message</div>';
@@ -126,17 +132,6 @@ function KBConfirm(msg,ok,cancel) {
 }
 
 function formHandler(form) {
-	var vars = {};
-	for(var i=0; i<form.elements.length; i++) {
-		if(form.elements[i].multiple) {
-			$('option:selected',form.elements[i]).each(function() {
-				if(typeof(vars[form.elements[i].name])=='undefined') vars[form.elements[i].name] = [$(this).val()];
-				else vars[form.elements[i].name].push($(this).val());
-			});
-		}else{
-			if(form.elements[i].type!='radio' || (form.elements[i].type=='radio' && form.elements[i].checked)) vars[form.elements[i].name] = form.elements[i].value;
-		}
-	}
 	if($(form).attr('enctype')=='multipart/form-data') { // Use iframe style submit
 		var id = 'KBFormIO' + (new Date().getTime());
 		var iframe = '<iframe id="' + id + '" name="' + id + '" style="position:absolute;top:-1000px;left:-1000px;" src="about:blank" type="text/plain"/>';
@@ -151,14 +146,39 @@ function formHandler(form) {
 		});
 		
 		$(form).attr({
-			action:	(ajaxServer?ajaxServer:'/'),
+			action:	(typeof(ajaxServer)!='undefined'?ajaxServer:'/'),
 			method:	'post',
 			target:	id
 		});
 		form.submit();
 		
 		return false;
-	}else return ajax(vars, form);
+	}else{
+		var vars = {};
+		for(var i=0; i<form.elements.length; i++) {
+			if(form.elements[i].multiple) {
+				$('option:selected',form.elements[i]).each(function() {
+					if(typeof(vars[form.elements[i].name])=='undefined') vars[form.elements[i].name] = [$(this).val()];
+					else vars[form.elements[i].name].push($(this).val());
+				});
+			}else{
+				if(form.elements[i].type!='radio' || (form.elements[i].type=='radio' && form.elements[i].checked)) {
+					switch(typeof(vars[form.elements[i].name])) {
+					case 'undefined':
+						vars[form.elements[i].name] = form.elements[i].value;
+						break;
+					case 'object':
+						vars[form.elements[i].name].push(form.elements[i].value);
+						break;
+					default:
+						vars[form.elements[i].name] = [vars[form.elements[i].name],form.elements[i].value];
+						break;
+					}
+				}
+			}
+		}
+		return ajax(vars, form);
+	}
 }
  
 function logout() {
