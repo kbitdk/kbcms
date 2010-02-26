@@ -34,8 +34,12 @@ function ajaxCallback(msg, arg) {
 			KBAlert(msg[1]);
 			break;
 		case 'callback':
-			if(typeof(arg)=='undefined') alert('Error: Invalid internal call');
+			if(typeof(arg)!='function') alert('Error: Invalid internal call.');
 			else arg(msg[1]);
+			break;
+		case 'callbackCustom':
+			if(new RegExp('^[a-zA-Z]+$').test(msg[1])) eval(msg[1]+'(msg);');
+			else alert('Error: Invalid internal call.');
 			break;
 		case 'content':
 			$(typeof(arg['contentBox'])=='undefined'?'#content':arg['contentBox']).html(msg[1]);
@@ -57,22 +61,27 @@ function ajaxCallback(msg, arg) {
 					$(this).css('background','');
 					$('+ span.validationResponse',this).hide();
 				};
+				var errorTop = $(document).height();
 				for(var key in msg[1]) {
 					if(key == 'captcha') {
 						var field = $('#recaptcha_response_field',arg);
 						if(field.length) {
-							field.css('background','#f99');
+							field.css('background','#f88');
 							field.focus(clearCaptchaFun);
 						} else alert('Error finding captcha field.');
 					}else{
 						if(!$('[name="'+key+'"]',arg).length) alert('Error finding field with key: '+key);
-						$('[name="'+key+'"]',arg).css('background','#f99');
-						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f99');
-						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
-						$('[name="'+key+'"] + span.validationResponse',arg).show();
+						currTop = $('[name="'+key+'"]',arg).offset().top;
+						if(currTop < errorTop) errorTop = currTop;
+						$('[name="'+key+'"]',arg).css('background','#f88');
+						$('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg).contents().find('body').css('background','#f88');
+						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f88');
+						$(':has([name="'+key+'"]) span.validationResponse',arg).html(msg[1][key]);
+						$(':has([name="'+key+'"]) span.validationResponse',arg).show();
 						$('[name="'+key+'"]',arg).focus(clearFun);
 					}
 				}
+				$('html,body').animate({scrollTop: errorTop-100}, 'slow');
 			}
 			break;
 		default:
@@ -132,6 +141,7 @@ function KBConfirm(msg,ok,cancel) {
 }
 
 function formHandler(form) {
+	if(typeof(form)=='undefined') return KBAlert('Internal error (formHandler): Invalid input.');
 	if($(form).attr('enctype')=='multipart/form-data') { // Use iframe style submit
 		var id = 'KBFormIO' + (new Date().getTime());
 		var iframe = '<iframe id="' + id + '" name="' + id + '" style="position:absolute;top:-1000px;left:-1000px;" src="about:blank" type="text/plain"/>';
@@ -186,7 +196,7 @@ function logout() {
 }
  
 function unsupported() {
-	alert('Error: This feature isn\'t supported, yet.');
+	KBAlert('Error: This feature isn\'t supported, yet.');
 	return false;
 }
 function msgConfirm(question) {
