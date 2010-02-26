@@ -76,8 +76,8 @@ function ajaxCallback(msg, arg) {
 						$('[name="'+key+'"]',arg).css('background','#f88');
 						$('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg).contents().find('body').css('background','#f88');
 						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f88');
-						$(':has([name="'+key+'"]) span.validationResponse',arg).html(msg[1][key]);
-						$(':has([name="'+key+'"]) span.validationResponse',arg).show();
+						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
+						$('[name="'+key+'"] + span.validationResponse',arg).show();
 						$('[name="'+key+'"]',arg).focus(clearFun);
 					}
 				}
