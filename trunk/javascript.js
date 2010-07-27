@@ -208,7 +208,8 @@ function formHandler(form) {
 }
 
 function html_encode(input) {
-	return input===null ? '' : input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); //'
+	if(input===null) return '';
+	return input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); //''{
 }
 
 function loadingStart() {
@@ -267,6 +268,7 @@ function in_array(needle,haystack) {
 	for(var i in haystack) if(haystack[i]==needle) return true;
 	return false;
 }
+
 
 
 
