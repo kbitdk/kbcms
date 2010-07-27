@@ -3,17 +3,19 @@
 // Functions
 function main() {
 	$cfg = getCfg();
-	KBTB::debug($_POST);
+	KBTB::debug(array($cfg,$_POST));
 	
 	die('test');
 }
 
 function getCfg() {
-	$file = 'config.php';
-	if(is_file($file) && is_readable($file)) {
-		require_once($file);
-		return cfg();
-	}else KBTB::req(false,'Cannot retrieve configuration.');
+	if(!function_exists('cfg')) {
+		$file = 'config.php';
+		if(is_file($file) && is_readable($file)) {
+			require_once($file);
+		}else KBTB::req(false,'Cannot retrieve configuration.');
+	}
+	return cfg();
 }
 
 
