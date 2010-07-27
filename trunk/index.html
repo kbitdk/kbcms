@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>KB CMS - Suit yourself</title>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+	<script type="text/javascript"> 
+		ajaxServer = 'ajax.php';
+	</script>
+	<script type="text/javascript" src="javascript.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+	<div id="logo"><a href="."><img src="content/logo.png" alt="KB CMS"/></a><span id="motto"> - Suit yourself</span></div>
+	<div id="menu">
+		<a href=".">Main page</a>
+		<a href="about.html">About KB CMS</a>
+	</div>
+	<div id="content">
+		<h1>Welcome</h1>
+		<div>
+			KB CMS administration interface<br/>
+			<br/>
+			<form onsubmit="return formHandler(this);">
+				<input type="hidden" name="a" value="login"/>
+				<div>
+					<label>Username:</label>
+					<input type="text" name="user"/>
+				</div>
+				<div>
+					<label>Password:</label>
+					<input type="password" name="pass"/>
+				</div>
+				<br/>
+				<input type="submit" value="Submit"/>
+			</form>
+			<br/>
+		</div>
+	</div>
+</body>
+</html>
