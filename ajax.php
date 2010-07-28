@@ -3,9 +3,16 @@
 // Functions
 function main() {
 	$cfg = getCfg();
-	KBTB::debug(array($cfg,$_POST));
 	
-	die('test');
+	switch($_POST['a']) {
+		case 'login':
+			echo(json_encode(array('unsupported')));
+			break;
+		default:
+			KBTB::req(false,'Invalid input (a).');
+			break;
+	}
+	die();
 }
 
 function getCfg() {
@@ -13,7 +20,14 @@ function getCfg() {
 		$file = 'config.php';
 		if(is_file($file) && is_readable($file)) {
 			require_once($file);
-		}else KBTB::req(false,'Cannot retrieve configuration.');
+		}else return array(
+			'users' =>	array(
+				array(
+					'user' =>	'admin',
+					'pass' =>	crypt('changeme','$2')
+				)
+			)
+		);
 	}
 	return cfg();
 }
