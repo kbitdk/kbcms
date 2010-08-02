@@ -6,7 +6,19 @@ function main() {
 	
 	switch($_POST['a']) {
 		case 'login':
+			$fieldErrs = array();
+			
+			//errCheck()
+			
+			$login = false;
+			foreach($cfg['users'] as $user) if(!login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=true;
+			
+			//$_SESSION['user'];
+			
 			echo(json_encode(array('unsupported')));
+			
+			
+			
 			break;
 		default:
 			KBTB::req(false,'Invalid input (a).');
@@ -24,7 +36,7 @@ function getCfg() {
 			'users' =>	array(
 				array(
 					'user' =>	'admin',
-					'pass' =>	crypt('changeme','$2')
+					'pass' =>	crypt('changeme')
 				)
 			)
 		);
