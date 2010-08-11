@@ -11,11 +11,13 @@ function main() {
 			//errCheck()
 			
 			$login = false;
-			foreach($cfg['users'] as $user) if(!login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=true;
+			foreach($cfg['users'] as $user) if(!login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
 			
-			//$_SESSION['user'];
-			
-			echo(json_encode(array('unsupported')));
+			if($login!==false) {
+				$_SESSION['user'] = $user['user'];
+				
+				echo(json_encode(array('unsupported')));
+			}else echo(json_encode(array('fieldErrs',array('user','pass'))));
 			
 			
 			
