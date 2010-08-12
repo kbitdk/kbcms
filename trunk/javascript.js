@@ -88,19 +88,19 @@ function ajaxCallback(msg, arg) {
 				if(key == 'captcha') {
 					var field = $('#recaptcha_response_field',arg);
 					if(field.length) {
-						field.css('background','#f88');
+						field.css('background','#f66');
 						field.focus(clearCaptchaFun);
 					} else alert('Error finding captcha field.');
 				}else{
 					var el = $('[name="'+key+'"]:not([type=hidden])',arg);
 					if(!el.length) alert('Error finding field with key: '+key);
-					el.css('background','#f88');
+					el.css('background','#f66');
 					var ckedit = $('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg);
 					if(ckedit.length) {
-						ckedit.contents().find('body').css('background','#f88');
+						ckedit.contents().find('body').css('background','#f66');
 						el = ckedit;
 					}
-					$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f88');
+					$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f66');
 					$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
 					$('[name="'+key+'"] + span.validationResponse',arg).show();
 					el.focus(clearFun).change(clearFun);
@@ -208,7 +208,7 @@ function formHandler(form) {
 }
 
 function html_encode(input) {
-	return input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); //'
+	return input===null ? '' : input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); //'
 }
 
 function loadingStart() {
