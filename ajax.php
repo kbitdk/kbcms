@@ -13,13 +13,12 @@ function main() {
 			$login = false;
 			foreach($cfg['users'] as $user) if(!login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
 			
-			if($login!==false) {
+			if($login===false) echo(json_encode(array('fieldErrs',array('user','pass'))));
+			else {
 				$_SESSION['user'] = $user['user'];
 				
-				echo(json_encode(array('unsupported')));
-			}else echo(json_encode(array('fieldErrs',array('user','pass'))));
-			
-			
+				echo(json_encode(array('selector','#content','<h1>Main page</h1>')));
+			}
 			
 			break;
 		default:
