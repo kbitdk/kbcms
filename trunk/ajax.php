@@ -1,6 +1,14 @@
 <?
 
 // Functions
+function page($url) {
+	switch($url) {
+		case '#main':
+			return json_encode(array('selector','#content','<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/>'));
+			break;
+	}
+}
+
 function main() {
 	$cfg = getCfg();
 	
@@ -11,13 +19,13 @@ function main() {
 			//errCheck()
 			
 			$login = false;
-			foreach($cfg['users'] as $user) if(!login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
+			foreach($cfg['users'] as $user) if(!$login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
 			
 			if($login===false) echo(json_encode(array('fieldErrs',array('user','pass'))));
 			else {
 				$_SESSION['user'] = $user['user'];
 				
-				echo(json_encode(array('selector','#content','<h1>Main page</h1>')));
+				echo(page('#main'));
 			}
 			
 			break;
