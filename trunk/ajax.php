@@ -3,10 +3,17 @@
 // Functions
 function page($url) {
 	switch($url) {
-		case '#main':
-			return json_encode(array('selector','#content','<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/>'));
+		case 'main':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/>';
+			$menu = '<a href=".#main">Main page</a><a href="about.html">About KB CMS</a>';
+			break;
+		default:
+			KBTB::req(false);
 			break;
 	}
+	return json_encode(array('page',$url,$content,$menu));
 }
 
 function main() {
@@ -24,10 +31,11 @@ function main() {
 			if($login===false) echo(json_encode(array('fieldErrs',array('user','pass'))));
 			else {
 				$_SESSION['user'] = $user['user'];
-				
-				echo(page('#main'));
+				echo(page('main'));
 			}
-			
+			break;
+		case 'page':
+			echo(page($_POST['p']));
 			break;
 		default:
 			KBTB::req(false,'Invalid input (a).');
