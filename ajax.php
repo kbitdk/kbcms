@@ -2,33 +2,60 @@
 
 // Functions
 function page($url) {
+	$menuArr = array(
+		'default' =>	'<a href=".">Main page</a><a href="about.html">About KB CMS</a>',
+		'loggedin' =>	'<a href=".#main">Main page</a>'.
+			'<a href=".#pages">Pages</a>'.
+			'<a href=".#settings">Settings</a>'.
+			'<a href="about.html">About KB CMS</a>'
+	);
 	switch($url) {
 		case 'main':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
-			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/>';
-			$menu = '<a href=".#main">Main page</a><a href="about.html">About KB CMS</a>';
+			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/><a href="#" onclick="ajax({a:\'logout\'})">Log out</a>';
+			$menu = $menuArr['loggedin'];
+			break;
+		case 'pages':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			$content = '<h1>Pages</h1>Feature not supported, yet.';
+			$menu = $menuArr['loggedin'];
+			break;
+		case 'settings':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			$content = '<h1>Settings</h1><h2>Change password</h2>'.
+				'<form><label>New password:</label><input type="text" name="pass"/><br/><label>Repeat new password:</label><input type="text" name="pass2"/><br/><br/><input type="submit" value="Submit"/></form>';
+			$menu = $menuArr['loggedin'];
 			break;
 		default:
-			KBTB::req(false);
+			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
 			break;
 	}
 	return json_encode(array('page',$url,$content,$menu));
 }
 
 function main() {
+	session_start();
 	$cfg = getCfg();
 	
 	switch($_POST['a']) {
+		case 'logout':
+			unset($_SESSION['user']);
+			echo(json_encode(array('redirect','.')));
+			break;
+		case 'checklogin':
+			if(isset($_SESSION['user'])) echo(page('main'));
+			else echo(json_encode(array('callbackCustom','loginFocus')));
+			break;
 		case 'login':
 			$fieldErrs = array();
-			
-			//errCheck()
 			
 			$login = false;
 			foreach($cfg['users'] as $user) if(!$login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
 			
-			if($login===false) echo(json_encode(array('fieldErrs',array('user','pass'))));
+			if($login===false) echo(json_encode(array('fieldErrs',array('user'=>'Incorrect username and/or password.','pass'=>'Incorrect username and/or password.'))));
 			else {
 				$_SESSION['user'] = $user['user'];
 				echo(page('main'));
@@ -108,7 +135,7 @@ class KBTB { // Toolbox
 	}
 	function req($value,$errMsg = false) {
 		if(!$value) {
-			while(ob_end_clean()) {}
+			while(ob_get_clean());
 			throw new Exception($errMsg ? $errMsg : 'Unknown error');
 		}else return $value;
 	}

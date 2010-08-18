@@ -3,12 +3,12 @@
 $(function() {
 	if($.browser.msie && $.browser.version.split('.')[0]<=7) $.expr[':'].focus = function(a){ return (a == document.activeElement); } // Make the :focus selector work in IE7
 	
-	var hash = window.location.hash;
-	console.log(hash);
-	if(hash!='') {
-		if(hash.indexOf('#')!=0) KBAlert('Error: Invalid value received from the browser.');
-		ajax({a:'page',p:hash.substr(1)});
-	}
+	$(window).bind('hashchange',function(){
+		var hash = location.hash;
+		if(hash.indexOf('#')==0) hash = hash.substr(1);
+		ajax({a:'page',p:hash});
+	});
+	if(location.hash!='') $.event.trigger('hashchange');;
 });
 
 
@@ -28,6 +28,8 @@ function ajaxCallback(msg, arg) {
 	loadingStop();
 	if(!$.isArray(msg)) KBAlert(html_encode(msg).replace(/\n/g, '<br/>') || 'Unknown error');
 	else switch(msg[0]) {
+		case 'nothing':
+			break;
 		case 'page':
 			$('#content').html(msg[2]);
 			$('#menu').html(msg[3]);
@@ -122,7 +124,7 @@ function ajaxCallback(msg, arg) {
 			if(errorTop!==false) $('html,body').animate({scrollTop: errorTop-100}, 'slow');
 			break;
 		default:
-			alert('Error: Unknown response');
+			KBAlert('Error: Unknown response');
 			break;
 	}
 }
