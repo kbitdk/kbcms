@@ -7,6 +7,10 @@
 		ajaxServer = 'ajax.php';
 	</script>
 	<script type="text/javascript" src="javascript.js"></script>
+	<script type="text/javascript">
+		function loginFocus() { $('input[name=user]').focus(); }
+		$(function() { if(location.hash=='') ajax({a:'checklogin'}); });
+	</script>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
 </head>
 <body>
@@ -20,7 +24,7 @@
 		<div>
 			KB CMS administration interface<br/>
 			<br/>
-			<form onsubmit="return formHandler(this);">
+			<form onsubmit="var pass=$('input[name=pass]'); if(pass.val()=='') {pass.focus(); return false;}; return formHandler(this);">
 				<input type="hidden" name="a" value="login"/>
 				<div>
 					<label>Username:</label>
@@ -33,7 +37,6 @@
 				<br/>
 				<input type="submit" value="Submit"/>
 			</form>
-			<br/>
 		</div>
 	</div>
 </body>
