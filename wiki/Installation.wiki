@@ -7,6 +7,8 @@ This is a guide to install KB CMS on Ubuntu. Many of the steps may apply to othe
 
 = Ubuntu 9.10 (draft instructions) =
 
+This will set up KB CMS on http://localhost/admin, so you can create your site on http://localhost
+
 {{{
 # Add universe and multiverse repositories if not avilable and then update
 sudo sed -i 's/^deb \([^ ]*\) \([^ ]*\) main restricted$/deb \1 \2 main restricted universe multiverse/' /etc/apt/sources.list
@@ -16,7 +18,8 @@ sudo apt-get -y install php5 nautilus-script-collection-svn php5-xsl
 # Download KB CMS and set it up
 sudo chown -R `whoami` /var/www
 rm /var/www/index.html
-svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www
+svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www/admin
+sudo /etc/init.d/apache2 restart
 }}}
 
 
