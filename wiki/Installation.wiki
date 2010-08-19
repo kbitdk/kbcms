@@ -7,7 +7,7 @@ This is a guide to install KB CMS on Ubuntu. Many of the steps may apply to othe
 
 = Ubuntu 9.10 (draft instructions) =
 
-This will set up KB CMS on http://localhost/admin, so you can create your site on http://localhost
+This will set up KB CMS on http://localhost/admin, so you can create your site on http://localhost.
 
 {{{
 # Add universe and multiverse repositories if not avilable and then update
