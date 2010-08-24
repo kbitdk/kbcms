@@ -26,7 +26,10 @@ function page($url) {
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
 			$content = '<h1>Settings</h1><h2>Change password</h2>'.
-				'<form><label>New password:</label><input type="text" name="pass"/><br/><label>Repeat new password:</label><input type="text" name="pass2"/><br/><br/><input type="submit" value="Submit"/></form>';
+				'<form class="labelsWide" onsubmit="return formHandler(this);"><input type="hidden" name="a" value="passChange"/>'.
+				'<label>Old password:</label><input type="password" name="passOld"/><br/>'.
+				'<label>New password:</label><input type="password" name="pass"/><br/>'.
+				'<label>Repeat new password:</label><input type="password" name="pass2"/><br/><br/><input type="submit" value="Submit"/></form>';
 			$menu = $menuArr['loggedin'];
 			break;
 		default:
@@ -41,6 +44,30 @@ function main() {
 	$cfg = getCfg();
 	
 	switch($_POST['a']) {
+		case 'passChange':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			$fieldErrs = array();
+			
+			if(!KBTB::valid('strlen',$_POST['pass'],4,50)) $fieldErrs['pass'] = 'Invalid input.';
+			if($_POST['pass']!=$_POST['pass2']) $fieldErrs['pass2'] = 'Password fields not matching.';
+			
+			$login = false;
+			//KBTB::debug(array($cfg,$cfg['users'][0]['pass']));
+			$oldpass = $cfg['users'][0]['pass'];
+			foreach($cfg['users'] as $key=>$user) if($login===false && $user['user']==$_SESSION['user'] && crypt($_POST['passOld'],$user['pass'])==$user['pass']) $login = $key;
+			if($login===false) $fieldErrs['passOld'] = 'Invalid input.';
+			
+			// Send validation err's back
+			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
+			
+			die(json_encode(array('unsupported')));
+			
+			$cfg['users'][$login]['pass'] = crypt($_POST['pass']);
+			//KBTB::debug(array($cfg,$login));
+			KBTB::debug(array($cfg,$oldpass));
+			
+			KBTB::debug($cfg);
+			break;
 		case 'logout':
 			unset($_SESSION['user']);
 			echo(json_encode(array('redirect','.')));
@@ -50,8 +77,6 @@ function main() {
 			else echo(json_encode(array('callbackCustom','loginFocus')));
 			break;
 		case 'login':
-			$fieldErrs = array();
-			
 			$login = false;
 			foreach($cfg['users'] as $user) if(!$login && $user['user']==$_POST['user'] && crypt($_POST['pass'],$user['pass'])==$user['pass']) $login=$user['user'];
 			
