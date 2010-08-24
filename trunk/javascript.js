@@ -3,7 +3,7 @@
 $(function() {
 	if($.browser.msie && $.browser.version.split('.')[0]<=7) $.expr[':'].focus = function(a){ return (a == document.activeElement); } // Make the :focus selector work in IE7
 	
-	if(ajaxFetcher) {
+	if(typeof(ajaxFetcher)!='undefined' && ajaxFetcher) {
 		$(window).bind('hashchange',function(){
 			var hash = location.hash;
 			if(hash.indexOf('#')==0) hash = hash.substr(1);
@@ -283,7 +283,6 @@ function in_array(needle,haystack) {
 	for(var i in haystack) if(haystack[i]==needle) return true;
 	return false;
 }
-
 
 
 
