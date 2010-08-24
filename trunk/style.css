@@ -50,6 +50,9 @@ form label {
 	width:						100px;
 }
 
+form.labelsWide label {
+	width:	160px;
+}
 
 
 

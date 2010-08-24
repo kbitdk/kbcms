@@ -3,12 +3,14 @@
 $(function() {
 	if($.browser.msie && $.browser.version.split('.')[0]<=7) $.expr[':'].focus = function(a){ return (a == document.activeElement); } // Make the :focus selector work in IE7
 	
-	$(window).bind('hashchange',function(){
-		var hash = location.hash;
-		if(hash.indexOf('#')==0) hash = hash.substr(1);
-		ajax({a:'page',p:hash});
-	});
-	if(location.hash!='') $.event.trigger('hashchange');;
+	if(ajaxFetcher) {
+		$(window).bind('hashchange',function(){
+			var hash = location.hash;
+			if(hash.indexOf('#')==0) hash = hash.substr(1);
+			ajax({a:'page',p:hash});
+		});
+		if(location.hash!='') $.event.trigger('hashchange');
+	}
 });
 
 
