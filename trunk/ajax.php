@@ -41,7 +41,7 @@ function page($url) {
 
 function main() {
 	session_start();
-	$cfg = getCfg();
+	$cfg = cfgGet();
 	
 	switch($_POST['a']) {
 		case 'passChange':
@@ -60,13 +60,10 @@ function main() {
 			// Send validation err's back
 			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
-			die(json_encode(array('unsupported')));
-			
 			$cfg['users'][$login]['pass'] = crypt($_POST['pass']);
-			//KBTB::debug(array($cfg,$login));
-			KBTB::debug(array($cfg,$oldpass));
 			
-			KBTB::debug($cfg);
+			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			else echo(json_encode(array('callbackCustom','passChanged')));
 			break;
 		case 'logout':
 			unset($_SESSION['user']);
@@ -96,11 +93,20 @@ function main() {
 	die();
 }
 
-function getCfg() {
+function cfgSet($cfg) {
+	if(!is_dir('../settings')) if(!@mkdir('../settings')) return false;
+	
+	KBTB::req(file_put_contents('../settings/.htaccess',"Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]")>0);
+	KBTB::req(file_put_contents('../settings/cfg.json',json_encode($cfg))>0);
+	
+	return true;
+}
+
+function cfgGet() {
 	if(!function_exists('cfg')) {
-		$file = 'config.php';
+		$file = '../settings/cfg.json';
 		if(is_file($file) && is_readable($file)) {
-			require_once($file);
+			return json_decode(file_get_contents($file),true);
 		}else return array(
 			'users' =>	array(
 				array(
