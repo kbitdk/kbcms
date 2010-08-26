@@ -10,6 +10,7 @@
 	<script type="text/javascript" src="javascript.js"></script>
 	<script type="text/javascript">
 		function loginFocus() { $('input[name=user]').focus(); }
+		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		$(function() { if(location.hash=='') ajax({a:'checklogin'}); });
 	</script>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
