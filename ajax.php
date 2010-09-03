@@ -1,7 +1,7 @@
 <?
 
 // Functions
-function page($url) {
+function page($url,$cfg) {
 	$menuArr = array(
 		'default' =>	'<a href=".">Main page</a><a href="about.html">About KB CMS</a>',
 		'loggedin' =>	'<a href=".#main">Main page</a>'.
@@ -13,13 +13,21 @@ function page($url) {
 		case 'main':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
-			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/><a href="#" onclick="ajax({a:\'logout\'})">Log out</a>';
+			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/><a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
 			$menu = $menuArr['loggedin'];
 			break;
 		case 'pages':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
-			$content = '<h1>Pages</h1>Feature not supported, yet.';
+			$pages = $cfg['pages'];
+			
+			$content = '<h1>Pages</h1>'.
+				'<a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
+			
+			foreach($pages as $page) {
+				$content .= '<a href="#" onclick=\'return ajax({a:"pageEdit",page:"index"});\'>'+KBTB::html_encode($page['title'])+'</a><br/>';
+			}
+			
 			$menu = $menuArr['loggedin'];
 			break;
 		case 'settings':
@@ -44,6 +52,26 @@ function main() {
 	$cfg = cfgGet();
 	
 	switch($_POST['a']) {
+		case 'pageAdd':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			$fieldErrs = array();
+			
+			if(!KBTB::valid('strlen',$_POST['title'],0,100)) $fieldErrs['title'] = 'Invalid input.';
+			
+			//TODO: translate page name
+			foreach($cfg['pages'] as $page) {
+				//TODO: check if translated pagename exists
+			}
+			
+			// Send validation err's back
+			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
+			
+			die(json_encode(array('unsupported')));
+			
+			//TODO: save page with lorem ipsum text
+			//Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+			
+			break;
 		case 'passChange':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
@@ -52,7 +80,6 @@ function main() {
 			if($_POST['pass']!=$_POST['pass2']) $fieldErrs['pass2'] = 'Password fields not matching.';
 			
 			$login = false;
-			//KBTB::debug(array($cfg,$cfg['users'][0]['pass']));
 			$oldpass = $cfg['users'][0]['pass'];
 			foreach($cfg['users'] as $key=>$user) if($login===false && $user['user']==$_SESSION['user'] && crypt($_POST['passOld'],$user['pass'])==$user['pass']) $login = $key;
 			if($login===false) $fieldErrs['passOld'] = 'Invalid input.';
@@ -70,7 +97,7 @@ function main() {
 			echo(json_encode(array('redirect','.')));
 			break;
 		case 'checklogin':
-			if(isset($_SESSION['user'])) echo(page('main'));
+			if(isset($_SESSION['user'])) echo(page('main',$cfg));
 			else echo(json_encode(array('callbackCustom','loginFocus')));
 			break;
 		case 'login':
@@ -80,11 +107,11 @@ function main() {
 			if($login===false) echo(json_encode(array('fieldErrs',array('user'=>'Incorrect username and/or password.','pass'=>'Incorrect username and/or password.'))));
 			else {
 				$_SESSION['user'] = $user['user'];
-				echo(page('main'));
+				echo(page('main',$cfg));
 			}
 			break;
 		case 'page':
-			echo(page($_POST['p']));
+			echo(page($_POST['p'],$cfg));
 			break;
 		default:
 			KBTB::req(false,'Invalid input (a).');
@@ -103,20 +130,24 @@ function cfgSet($cfg) {
 }
 
 function cfgGet() {
-	if(!function_exists('cfg')) {
-		$file = '../settings/cfg.json';
-		if(is_file($file) && is_readable($file)) {
-			return json_decode(file_get_contents($file),true);
-		}else return array(
-			'users' =>	array(
-				array(
-					'user' =>	'admin',
-					'pass' =>	crypt('changeme')
-				)
+	$file = '../settings/cfg.json';
+	if(is_file($file) && is_readable($file)) {
+		return json_decode(file_get_contents($file),true);
+	}else return array( // Default config
+		'users' =>	array(
+			array(
+				'user' =>	'admin',
+				'pass' =>	crypt('changeme')
 			)
-		);
-	}
-	return cfg();
+		),
+		'pages' =>	array(
+			array(
+				'page' =>	'index',
+				'title' =>	'Main page',
+				'content' =>	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+			)
+		)
+	);
 }
 
 
