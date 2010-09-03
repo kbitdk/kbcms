@@ -11,6 +11,8 @@
 	<script type="text/javascript">
 		function loginFocus() { $('input[name=user]').focus(); }
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
+		function pageAdd() { return KBAlert({msg:'<div style="color:#000;"><h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
+			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form></div>',focus:'.popupDialog input[name=title]'}); }
 		$(function() { if(location.hash=='') ajax({a:'checklogin'}); });
 	</script>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
