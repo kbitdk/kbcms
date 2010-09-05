@@ -15,6 +15,8 @@ sudo apt-get -y install php5 nautilus-script-collection-svn php5-xsl
 # Download KB CMS and set it up
 sudo chown -R `whoami` /var/www
 svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www/admin
+sudo chown -R `whoami`:www-data /var/www
+sudo chmod -R g+w /var/www
 sudo /etc/init.d/apache2 restart
 }}}
 
