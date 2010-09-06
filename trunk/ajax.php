@@ -20,12 +20,11 @@ function page($url,$cfg) {
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
 			$pages = $cfg['pages'];
-			
-			$content = '<h1>Pages</h1>'.
-				'<a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
+			$content = '<h1>Pages</h1><a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
 			
 			foreach($pages as $page) {
-				$content .= '<a href="#" onclick=\'return ajax({a:"pageEdit",page:"index"});\'>'+KBTB::html_encode($page['title'])+'</a><br/>';
+				$content .= '<a href="#" onclick=\'return ajax({a:"pageEdit",page:"'.KBTB::attr_encode($page['page']).'"});\'>'.KBTB::html_encode($page['title']).'</a>'.
+					($page['page']!='index'?' <a href="#" onclick=\'return ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"});\'>Delete</a>':'').'<br/>';
 			}
 			
 			$menu = $menuArr['loggedin'];
@@ -52,25 +51,37 @@ function main() {
 	$cfg = cfgGet();
 	
 	switch($_POST['a']) {
+		case 'pageDelete':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			$fieldErrs = array();
+			
+			KBTB::req($_POST['page']!='index');
+			foreach($cfg['pages'] as $i=>$page) if($_POST['page']==$page['page']) unset($cfg['pages'][$i]);
+			
+			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			else echo(json_encode(array('reload')));
+			break;
 		case 'pageAdd':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
 			
 			if(!KBTB::valid('strlen',$_POST['title'],0,100)) $fieldErrs['title'] = 'Invalid input.';
-			
-			//TODO: translate page name
-			foreach($cfg['pages'] as $page) {
-				//TODO: check if translated pagename exists
+			else {
+				$pageurl = preg_replace('/[^a-zA-Z0-9]/i','_',$_POST['title']);
+				foreach($cfg['pages'] as $page) if($pageurl==$page['page']) $fieldErrs['title'] = 'Invalid input.';
 			}
 			
 			// Send validation err's back
 			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
-			die(json_encode(array('unsupported')));
+			$cfg['pages'][] = array(
+				'page' =>	$pageurl,
+				'title' =>	$_POST['title'],
+				'content' =>	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+			);
 			
-			//TODO: save page with lorem ipsum text
-			//Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-			
+			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			else echo(json_encode(array('reload')));
 			break;
 		case 'passChange':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
