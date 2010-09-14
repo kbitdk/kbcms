@@ -22,7 +22,11 @@ function ajax(vars, arg) {
 		success: function(msg) {
 			ajaxCallback(msg, arg);
 		},
-		error: function (xhr, desc, exceptionobj) { loadingStop(); KBAlert(xhr.responseText ? 'Parser error: <pre>'+html_encode(xhr.responseText)+'</pre>' : 'Unknown error'); }
+		error: function (xhr, desc, exceptionobj) {
+			loadingStop();
+			KBAlert(xhr.responseText ? 'Parser error: <pre>'+html_encode(xhr.responseText)+'</pre>' : 'Unknown error');
+			$('input[type=submit][class~=KBLoading][disabled]').removeClass('KBLoading').removeAttr('disabled');
+		}
 	});
 	return false;
 }
@@ -129,6 +133,7 @@ function ajaxCallback(msg, arg) {
 			KBAlert('Error: Unknown response');
 			break;
 	}
+	$('input[type=submit][class~=KBLoading][disabled]').removeClass('KBLoading').removeAttr('disabled');
 }
 
 function KBPopupDialogReposition() {
@@ -188,6 +193,7 @@ function KBConfirm(msg,ok,cancel) {
 
 function formHandler(form) {
 	if(typeof(form)=='undefined') return KBAlert('Internal error (formHandler): Invalid input.');
+	$('input[type=submit]:not([disabled])',form).addClass('KBLoading').attr('disabled','disabled');
 	loadingStart();
 	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) {
 		var inst = CKEDITOR.instances[instance];
