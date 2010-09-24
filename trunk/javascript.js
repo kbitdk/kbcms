@@ -170,12 +170,24 @@ function KBPopupDialog(opts) {
 }
 function KBAlert(opts) {
 	if(typeof(opts)=='string') opts = {'msg': opts};
+	if(typeof(opts['buttons'])=='object' && opts['buttons'] instanceof Array) {
+		var buttons = '';
+		var tmpButtons = {};
+		for(var i in opts['buttons']) {
+			buttons += '<a href="#" class="'+opts['buttons'][i][1]+'" style="display:inline-block; margin: 0 36px 20px 0;">'+opts['buttons'][i][0]+'</a>';
+			tmpButtons[opts['buttons'][i][1]] = opts['buttons'][i][2];
+		}
+		opts['buttons'] = tmpButtons;
+	} else {
+		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 0;">Close</a>';
+		opts['buttons'] = { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
+	}
 	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
 	popup += "<div style='text-align:right;'>";
-	popup += "<a href='#' class='close' style='display:inline-block; margin: 0 36px 20px 0;'>Close</a>";
+	popup += buttons;
 	popup += "</div>";
 	var oldFocus = $(':focus');
-	return KBPopupDialog({ 'msg': popup, 'buttons': { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } }, 'focus': opts['focus'], events: opts['events'] });
+	return KBPopupDialog({ 'msg': popup, 'buttons': opts['buttons'], 'focus': opts['focus'], events: opts['events'] });
 }
 function KBConfirm(msg,ok,cancel) {
 	var popup = '<div style="padding:10px; font-weight:bold;">Message</div>';
