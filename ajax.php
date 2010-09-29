@@ -22,10 +22,12 @@ function page($url,$cfg) {
 			$pages = $cfg['pages'];
 			$content = '<h1>Pages</h1><a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
 			
+			$content .= '<table>';
 			foreach($pages as $page) {
-				$content .= '<a href="#" onclick=\'return ajax({a:"pageEdit",page:"'.KBTB::attr_encode($page['page']).'"});\'>'.KBTB::html_encode($page['title']).'</a>'.
-					($page['page']!='index'?' <a href="#" onclick=\'return ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"});\'>Delete</a>':'').'<br/>';
+				$content .= '<tr><td><a href="#" onclick=\'return ajax({a:"pageEdit",page:"'.KBTB::attr_encode($page['page']).'"});\'>'.KBTB::html_encode($page['title']).'</a></td><td>'.
+					($page['page']!='index'?' <a href="#" onclick=\'if(confirm("Are you sure you want to delete this page?")) ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"}); return false;\'>Delete</a>':'&nbsp;').'</td></tr>';
 			}
+			$content .= '</table>';
 			
 			$menu = $menuArr['loggedin'];
 			break;
@@ -47,7 +49,6 @@ function page($url,$cfg) {
 }
 
 function main() {
-	session_start();
 	$cfg = cfgGet();
 	
 	switch($_POST['a']) {
@@ -124,8 +125,11 @@ function main() {
 		case 'page':
 			echo(page($_POST['p'],$cfg));
 			break;
+		case 'pageEdit':
+			echo(json_encode(array('unsupported')));
+			break;
 		default:
-			KBTB::req(false,'Invalid input (a).');
+			KBTB::req(false,'Invalid input (a: "'.$_POST['a'].'").');
 			break;
 	}
 	die();
