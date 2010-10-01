@@ -37,6 +37,7 @@ function ajaxCallback(msg, arg) {
 		case 'nothing':
 			break;
 		case 'page':
+			$('.popupDialog').hide();
 			$('#content').html(msg[2]);
 			$('#menu').html(msg[3]);
 			window.location.hash=msg[1];

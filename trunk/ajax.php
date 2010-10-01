@@ -1,66 +1,150 @@
 <?
 
 // Functions
-function page($url,$cfg) {
-	$menuArr = array(
-		'default' =>	'<a href=".">Main page</a><a href="about.html">About KB CMS</a>',
-		'loggedin' =>	'<a href=".#main">Main page</a>'.
-			'<a href=".#pages">Pages</a>'.
-			'<a href=".#settings">Settings</a>'.
-			'<a href="about.html">About KB CMS</a>'
-	);
+function page($urlOrg,$cfg) {
+	if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+	if(($qPos=strpos($urlOrg,'?'))!==false) {
+		$qs = substr($urlOrg,$qPos+1);
+		$url = substr($urlOrg,0,$qPos);
+	} else $url = $urlOrg;
 	switch($url) {
-		case 'main':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+		case 'design':
+			$content = <<<EOF
+<h1>Design</h1>
+<form onsubmit="return formHandler(this);">
+	<input type="hidden" name="a" value="designChange"/>
+	<textarea name="design" style="width:700px; height:350px;"></textarea>
+	<input type="submit" value="Submit"/>
+</form>
+EOF;
+			break;
+		case 'pageEdit':
+			foreach($cfg['pages'] as $i=>$pageCurr) if($qs==$pageCurr['page']) $page = $pageCurr;
+			KBTB::req($page!==null);
 			
+			$pageUrl = KBTB::attr_encode($page['page']);
+			$pageTitle = KBTB::attr_encode($page['title']);
+			$pageContent = KBTB::html_encode($page['content']);
+			$content = <<<EOF
+<h1>Edit page</h1>
+<a href="#pages">Back to pages</a><br/><br/>
+
+<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
+<input type="hidden" name="a" value="adminPageEditChange"/>
+<input type="hidden" name="pageUrl" value="$pageUrl"/>
+Title: <input type="text" name="pageTitle" value="$pageTitle"/><br/><br/>
+<textarea name="content" id="editor">$pageContent</textarea>
+<span class="validationResponse"></span><br/>
+<input type="submit" value="Submit"/>
+</form>
+
+<script type="text/javascript"> 
+// Instantiate and configure YUI Loader:
+$.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yuiloader-min.js', function() {
+	var loader = new YAHOO.util.YUILoader({ 
+		base: "http://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
+		require: ["container","dom","editor","element","event"], 
+		loadOptional: false, 
+		combine: false, 
+		filter: "MIN", 
+		allowRollup: true, 
+		onSuccess: function() { 
+			var Dom = YAHOO.util.Dom,
+				Event = YAHOO.util.Event;
+			
+			var myConfig = {
+				width: '700px',
+				height: '350px',
+				dompath: true,
+				focusAtStart: true,
+				markup: 'xhtml'
+			};
+			
+			YAHOO.log('Create the Editor..', 'info', 'example');
+			myEditor = new YAHOO.widget.Editor('editor', myConfig);
+			myEditor._defaultToolbar.buttonType = 'basic';
+			myEditor.render();
+		} 
+	}); 
+	
+	// Load the files using the insert() method. 
+	loader.insert(); 
+});
+</script>
+
+EOF;
+			break;
+		case 'main':
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/><a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
-			$menu = $menuArr['loggedin'];
 			break;
 		case 'pages':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			$pages = $cfg['pages'];
 			$content = '<h1>Pages</h1><a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
 			
-			$content .= '<table>';
+			$content .= '<table class="pagetable">';
 			foreach($pages as $page) {
-				$content .= '<tr><td><a href="#" onclick=\'return ajax({a:"pageEdit",page:"'.KBTB::attr_encode($page['page']).'"});\'>'.KBTB::html_encode($page['title']).'</a></td><td>'.
+				$content .= '<tr><td><a href="#pageEdit?'.KBTB::attr_encode($page['page']).'">'.KBTB::html_encode($page['title']).'</a></td><td>'.
 					($page['page']!='index'?' <a href="#" onclick=\'if(confirm("Are you sure you want to delete this page?")) ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"}); return false;\'>Delete</a>':'&nbsp;').'</td></tr>';
 			}
 			$content .= '</table>';
-			
-			$menu = $menuArr['loggedin'];
 			break;
 		case 'settings':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			$content = '<h1>Settings</h1><h2>Change password</h2>'.
 				'<form class="labelsWide" onsubmit="return formHandler(this);"><input type="hidden" name="a" value="passChange"/>'.
 				'<label>Old password:</label><input type="password" name="passOld"/><br/>'.
 				'<label>New password:</label><input type="password" name="pass"/><br/>'.
 				'<label>Repeat new password:</label><input type="password" name="pass2"/><br/><br/><input type="submit" value="Submit"/></form>';
-			$menu = $menuArr['loggedin'];
 			break;
 		default:
 			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
 			break;
 	}
-	return json_encode(array('page',$url,$content,$menu));
+	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="about.html">About KB CMS</a>'));
 }
 
 function main() {
 	$cfg = cfgGet();
 	
 	switch($_POST['a']) {
+		case 'designChange':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			die(json_encode(array('unsupported')));
+			
+			
+			
+			break;
+		case 'adminPageEditChange':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			foreach($cfg['pages'] as $i=>$page) if($_POST['pageUrl']==$page['page']) $pageNo = $i;
+			KBTB::req($pageNo!==null);
+			
+			$fieldErrs = array();
+			if(!KBTB::valid('strlen',$_POST['pageTitle'],0,100)) $fieldErrs['pageTitle'] = 'Invalid input.';
+			if(!KBTB::valid('strlen',$_POST['content'],0,4000)) $fieldErrs['content'] = 'Invalid input.';
+			else {
+				$content = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><content>'.$_POST['content'].'</content>');
+				if($content===false) $fieldErrs['content'] = 'Ugyldigt input (invalid XML).';
+			}
+			
+			// Send validation err's back
+			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
+			
+			$cfg['pages'][$pageNo]['title'] = $_POST['pageTitle'];
+			$cfg['pages'][$pageNo]['content'] = $_POST['content'];
+			
+			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			else echo(page('pages',$cfg));
+			break;
 		case 'pageDelete':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			$fieldErrs = array();
 			
 			KBTB::req($_POST['page']!='index');
 			foreach($cfg['pages'] as $i=>$page) if($_POST['page']==$page['page']) unset($cfg['pages'][$i]);
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
-			else echo(json_encode(array('reload')));
+			else echo(page('pages',$cfg));
 			break;
 		case 'pageAdd':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
@@ -82,7 +166,7 @@ function main() {
 			);
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
-			else echo(json_encode(array('reload')));
+			else echo(page('pages',$cfg));
 			break;
 		case 'passChange':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
@@ -124,9 +208,6 @@ function main() {
 			break;
 		case 'page':
 			echo(page($_POST['p'],$cfg));
-			break;
-		case 'pageEdit':
-			echo(json_encode(array('unsupported')));
 			break;
 		default:
 			KBTB::req(false,'Invalid input (a: "'.$_POST['a'].'").');
