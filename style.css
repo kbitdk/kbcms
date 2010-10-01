@@ -1,4 +1,8 @@
 
+body {
+	margin:	0px;
+}
+
 #logo {
 	position:	absolute;
 	top:			30px;
@@ -31,10 +35,11 @@
 }
 #content {
 	background:					#b3c9ff;
-	position:					absolute;
+	position:					relative;
 	top:							120px;
 	left:							240px;
 	width:					750px;
+	margin-bottom:	150px;
 	padding:						10px 10px 30px 10px;
 	border-radius:				5px;
 	-moz-border-radius:		5px;
@@ -53,6 +58,17 @@ form label {
 form.labelsWide label {
 	width:	160px;
 }
+
+table.pagetable {
+	border-collapse:	collapse;
+}
+
+table.pagetable td:first-child {
+	padding-left:	0px;
+}
+
+
+
 
 
 

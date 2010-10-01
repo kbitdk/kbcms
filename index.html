@@ -9,7 +9,7 @@
 	</script>
 	<script type="text/javascript" src="javascript.js"></script>
 	<script type="text/javascript">
-		function loginFocus() { $('input[name=user]').focus(); }
+		function loginFocus() { $('#loginpage').show(); $('input[name=user]').focus(); }
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		function pageAdd() { return KBAlert({msg:'<div style="color:#000;"><h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
 			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form></div>',focus:'.popupDialog input[name=title]'}); }
@@ -24,23 +24,25 @@
 		<a href="about.html">About KB CMS</a>
 	</div>
 	<div id="content">
-		<h1>Welcome</h1>
-		<div>
-			KB CMS administration interface<br/>
-			<br/>
-			<form onsubmit="var pass=$('input[name=pass]'); if(pass.val()=='') {pass.focus(); return false;}; return formHandler(this);">
-				<input type="hidden" name="a" value="login"/>
-				<div>
-					<label>Username:</label>
-					<input type="text" name="user"/>
-				</div>
-				<div>
-					<label>Password:</label>
-					<input type="password" name="pass"/>
-				</div>
+		<div id="loginpage" style="display:none;">
+			<h1>Welcome</h1>
+			<div>
+				KB CMS administration interface<br/>
 				<br/>
-				<input type="submit" value="Submit"/>
-			</form>
+				<form onsubmit="var pass=$('input[name=pass]'); if(pass.val()=='') {pass.focus(); return false;}; return formHandler(this);">
+					<input type="hidden" name="a" value="login"/>
+					<div>
+						<label>Username:</label>
+						<input type="text" name="user"/>
+					</div>
+					<div>
+						<label>Password:</label>
+						<input type="password" name="pass"/>
+					</div>
+					<br/>
+					<input type="submit" value="Submit"/>
+				</form>
+			</div>
 		</div>
 	</div>
 </body>
