@@ -9,11 +9,12 @@ function page($urlOrg,$cfg) {
 	} else $url = $urlOrg;
 	switch($url) {
 		case 'design':
+			$design = KBTB::html_encode($cfg['design']);
 			$content = <<<EOF
 <h1>Design</h1>
 <form onsubmit="return formHandler(this);">
 	<input type="hidden" name="a" value="designChange"/>
-	<textarea name="design" style="width:700px; height:350px;"></textarea>
+	<textarea name="design" style="width:700px; height:350px;">$design</textarea>
 	<input type="submit" value="Submit"/>
 </form>
 EOF;
@@ -102,6 +103,38 @@ EOF;
 	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="about.html">About KB CMS</a>'));
 }
 
+function pageUpdate($page,$design) {
+	$pageResult = array();
+	while(count($split=explode('{%',$design,2)) == 2) {
+		array_push($pageResult,$split[0]);
+		KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
+		KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0);
+		switch($cmd[0]) {
+			case 'content':
+				KBTB::req(count($cmd)==2);
+				switch($cmd[1]) {
+					case 'main':
+						array_push($pageResult,$page['content']);
+						break;
+					case 'title':
+						array_push($pageResult,$page['title']);
+						break;
+					default:
+						KBTB::req(false);
+						break;
+				}
+				break;
+			default:
+				KBTB::req(false);
+				break;
+		}
+		$design = $split[1];
+	}
+	array_push($pageResult,$design);
+	
+	KBTB::req(file_put_contents('../'.$page['page'].'.html',$pageResult)>0);
+}
+
 function main() {
 	$cfg = cfgGet();
 	
@@ -109,10 +142,19 @@ function main() {
 		case 'designChange':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			
-			die(json_encode(array('unsupported')));
+			$fieldErrs = array();
+			if(!KBTB::valid('strlen',$_POST['design'],0,4000)) $fieldErrs['design'] = 'Invalid input.';
 			
+			// Send validation err's back
+			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
+			$cfg['design'] = $_POST['design'];
 			
+			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			else {
+				foreach($cfg['pages'] as $page) pageUpdate($page,$cfg['design']);
+				echo(json_encode(array('msg','Design was updated.')));
+			}
 			break;
 		case 'adminPageEditChange':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
@@ -125,7 +167,7 @@ function main() {
 			if(!KBTB::valid('strlen',$_POST['content'],0,4000)) $fieldErrs['content'] = 'Invalid input.';
 			else {
 				$content = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><content>'.$_POST['content'].'</content>');
-				if($content===false) $fieldErrs['content'] = 'Ugyldigt input (invalid XML).';
+				if($content===false) $fieldErrs['content'] = 'Invalid input (invalid XML).';
 			}
 			
 			// Send validation err's back
@@ -135,7 +177,10 @@ function main() {
 			$cfg['pages'][$pageNo]['content'] = $_POST['content'];
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
-			else echo(page('pages',$cfg));
+			else {
+				pageUpdate($cfg['pages'][$pageNo],$cfg['design']);
+				echo(page('pages',$cfg));
+			}
 			break;
 		case 'pageDelete':
 			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
@@ -242,7 +287,17 @@ function cfgGet() {
 				'title' =>	'Main page',
 				'content' =>	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 			)
-		)
+		),
+		'design' =>	'<!DOCTYPE html>'+
+			'<html>'+
+			'<head>'+
+			'	<title>KB CMS - Suit yourself</title>'+
+			'</head>'+
+			'<body>'+
+			'	<h1>{%"content","title"%}</h1>'+
+			'	{%"content","main"%}'+
+			'</body>'+
+			'</html>'
 	);
 }
 
@@ -318,6 +373,7 @@ class KBTB { // Toolbox
 
 // Init
 main();
+
 
 
 ?>
