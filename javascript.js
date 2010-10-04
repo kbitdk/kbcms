@@ -115,17 +115,19 @@ function ajaxCallback(msg, arg) {
 				}else{
 					var el = $('[name="'+key+'"]:not([type=hidden])',arg);
 					if(!el.length) alert('Error finding field with key: '+key);
-					el.css('background','#f66');
-					var ckedit = $('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg);
-					if(ckedit.length) {
-						ckedit.contents().find('body').css('background','#f66');
-						el = ckedit;
+					else {
+						el.css('background','#f66');
+						var ckedit = $('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg);
+						if(ckedit.length) {
+							ckedit.contents().find('body').css('background','#f66');
+							el = ckedit;
+						}
+						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f66');
+						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
+						$('[name="'+key+'"] + span.validationResponse',arg).show();
+						el.focus(clearFun).change(clearFun);
+						if(errorTop!==false && (currTop=el.offset().top) < errorTop) errorTop = currTop;
 					}
-					$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f66');
-					$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
-					$('[name="'+key+'"] + span.validationResponse',arg).show();
-					el.focus(clearFun).change(clearFun);
-					if(errorTop!==false && (currTop=el.offset().top) < errorTop) errorTop = currTop;
 				}
 			}
 			if(errorTop!==false) $('html,body').animate({scrollTop: errorTop-100}, 'slow');
