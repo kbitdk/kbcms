@@ -58,7 +58,15 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 				height: '350px',
 				dompath: true,
 				focusAtStart: true,
-				markup: 'xhtml'
+				markup: 'xhtml',
+				html:	'<html><head><title>{TITLE}</title>'+
+					'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'+
+					'<base href="..">'+
+					'<style>{CSS}</style>'+
+					'<style>{HIDDEN_CSS}</style>'+
+					'<style>{EXTRA_CSS}</style>'+
+					'</head>'+
+					'<body onload="document.body._rteLoaded=true;">{CONTENT}</body></html>'
 			};
 			
 			YAHOO.log('Create the Editor..', 'info', 'example');
