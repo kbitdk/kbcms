@@ -45,6 +45,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 	var loader = new YAHOO.util.YUILoader({ 
 		base: "http://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
 		require: ["container","dom","editor","element","event"], 
+		//require: ["animation","button","container","dom","editor","element","event","menu"], 
 		loadOptional: false, 
 		combine: false, 
 		filter: "MIN", 
@@ -69,9 +70,8 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 					'<body onload="document.body._rteLoaded=true;">{CONTENT}</body></html>'
 			};
 			
-			YAHOO.log('Create the Editor..', 'info', 'example');
 			myEditor = new YAHOO.widget.Editor('editor', myConfig);
-			myEditor._defaultToolbar.buttonType = 'basic';
+			myEditor._defaultToolbar.buttonType = 'advanced';
 			myEditor.render();
 		} 
 	}); 
@@ -111,8 +111,9 @@ EOF;
 	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="about.html">About KB CMS</a>'));
 }
 
-function pageUpdate($page,$design) {
+function pageUpdate($page,$cfg) {
 	$pageResult = array();
+	$design = $cfg['design'];
 	while(count($split=explode('{%',$design,2)) == 2) {
 		array_push($pageResult,$split[0]);
 		KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
@@ -127,8 +128,11 @@ function pageUpdate($page,$design) {
 					case 'title':
 						array_push($pageResult,$page['title']);
 						break;
+					case 'menu':
+						foreach($cfg['pages'] as $mi) array_push($pageResult,'<a href="'.$mi['page'].'.html"'.($mi['page']==$page['page']?' class="active"':'').'>'.KBTB::html_encode($mi['title']).'</a> ');
+						break;
 					default:
-						KBTB::req(false);
+						KBTB::req(false,'Invalid content type.');
 						break;
 				}
 				break;
@@ -160,7 +164,7 @@ function main() {
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
-				foreach($cfg['pages'] as $page) pageUpdate($page,$cfg['design']);
+				foreach($cfg['pages'] as $page) pageUpdate($page,$cfg);
 				echo(json_encode(array('msg','Design was updated.')));
 			}
 			break;
@@ -186,7 +190,7 @@ function main() {
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
-				pageUpdate($cfg['pages'][$pageNo],$cfg['design']);
+				pageUpdate($cfg['pages'][$pageNo],$cfg);
 				echo(page('pages',$cfg));
 			}
 			break;
