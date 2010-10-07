@@ -43,7 +43,7 @@ Title: <input type="text" name="pageTitle" value="$pageTitle"/><br/><br/>
 // Instantiate and configure YUI Loader:
 $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yuiloader-min.js', function() {
 	var loader = new YAHOO.util.YUILoader({ 
-		base: "http://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
+		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
 		require: ["container","dom","editor","element","event"], 
 		//require: ["animation","button","container","dom","editor","element","event","menu"], 
 		loadOptional: false, 
@@ -97,6 +97,11 @@ EOF;
 			}
 			$content .= '</table>';
 			break;
+		case 'about':
+			$doc = simplexml_load_file('about.html')->xpath('/html/body/div[@id="content"]/*');
+			$content = '';
+			foreach($doc as $node) $content .= $node->asXML();
+			break;
 		case 'settings':
 			$content = '<h1>Settings</h1><h2>Change password</h2>'.
 				'<form class="labelsWide" onsubmit="return formHandler(this);"><input type="hidden" name="a" value="passChange"/>'.
@@ -108,7 +113,7 @@ EOF;
 			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
 			break;
 	}
-	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="about.html">About KB CMS</a>'));
+	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="#about">About KB CMS</a>'));
 }
 
 function pageUpdate($page,$cfg) {
@@ -117,7 +122,7 @@ function pageUpdate($page,$cfg) {
 	while(count($split=explode('{%',$design,2)) == 2) {
 		array_push($pageResult,$split[0]);
 		KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
-		KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0);
+		KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0,$page['page'].', '.$split[0]);
 		switch($cmd[0]) {
 			case 'content':
 				KBTB::req(count($cmd)==2);
@@ -129,7 +134,7 @@ function pageUpdate($page,$cfg) {
 						array_push($pageResult,$page['title']);
 						break;
 					case 'menu':
-						foreach($cfg['pages'] as $mi) array_push($pageResult,'<a href="'.$mi['page'].'.html"'.($mi['page']==$page['page']?' class="active"':'').'>'.KBTB::html_encode($mi['title']).'</a> ');
+						foreach($cfg['pages'] as $mi) array_push($pageResult,'<a href="'.($mi['page']=='index'?'.':$mi['page'].'.html').'"'.($mi['page']==$page['page']?' class="active"':'').'>'.KBTB::html_encode($mi['title']).'</a> ');
 						break;
 					default:
 						KBTB::req(false,'Invalid content type.');
@@ -148,6 +153,7 @@ function pageUpdate($page,$cfg) {
 }
 
 function main() {
+	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
 	
 	switch($_POST['a']) {

@@ -2,23 +2,21 @@
 <html>
 <head>
 	<title>KB CMS - Suit yourself</title>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
-	<script type="text/javascript"> 
-		ajaxServer = 'ajax.php';
-		ajaxFetcher = true;
-	</script>
 	<script type="text/javascript" src="javascript.js"></script>
 	<script type="text/javascript">
+		ajaxServer = 'ajax.php';
+		ajaxFetcher = true;
 		function loginFocus() { $('#loginpage').show(); $('input[name=user]').focus(); }
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		function pageAdd() { return KBAlert({msg:'<div style="color:#000;"><h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
 			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form></div>',focus:'.popupDialog input[name=title]'}); }
 		$(function() { if(location.hash=='') ajax({a:'checklogin'}); });
 	</script>
-	<link rel="stylesheet" type="text/css" href="style.css"/>
 </head>
 <body>
-	<div id="logo"><a href="."><img src="content/logo.png" alt="KB CMS"/></a><span id="motto"> - Suit yourself</span></div>
+	<div id="logo"><a href="."><img src="logo.png" alt="KB CMS" width="180px" height="56px"/></a><span id="motto"> - Suit yourself</span></div>
 	<div id="menu">
 		<a href=".">Main page</a>
 		<a href="about.html">About KB CMS</a>
