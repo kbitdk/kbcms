@@ -1,8 +1,6 @@
 
 // Init
 $(function() {
-	if($.browser.msie && $.browser.version.split('.')[0]<=7) $.expr[':'].focus = function(a){ return (a == document.activeElement); } // Make the :focus selector work in IE7
-	
 	if(typeof(ajaxFetcher)!='undefined' && ajaxFetcher) {
 		$(window).bind('hashchange',function(){
 			var hash = location.hash;
@@ -10,6 +8,11 @@ $(function() {
 			ajax({a:'page',p:hash});
 		});
 		if(location.hash!='') $.event.trigger('hashchange');
+	}
+	
+	if($.browser.msie && $.browser.version.split('.')[0]<=7) { // Fix IE <=7 issues
+		$.expr[':'].focus = function(a){ return (a == document.activeElement); }
+		var hashChecker = function(){ lastHash = location.hash; return setInterval(function() { if(lastHash !== location.hash) { $.event.trigger('hashchange'); lastHash = location.hash; } }, 50); }()
 	}
 });
 
