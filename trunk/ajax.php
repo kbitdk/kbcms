@@ -117,39 +117,52 @@ EOF;
 }
 
 function pageUpdate($page,$cfg) {
-	$pageResult = array();
-	$design = $cfg['design'];
-	while(count($split=explode('{%',$design,2)) == 2) {
-		array_push($pageResult,$split[0]);
-		KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
-		KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0,$page['page'].', '.$split[0]);
-		switch($cmd[0]) {
-			case 'content':
-				KBTB::req(count($cmd)==2);
-				switch($cmd[1]) {
-					case 'main':
-						array_push($pageResult,$page['content']);
-						break;
-					case 'title':
-						array_push($pageResult,$page['title']);
-						break;
-					case 'menu':
-						foreach($cfg['pages'] as $mi) array_push($pageResult,'<a href="'.($mi['page']=='index'?'.':$mi['page'].'.html').'"'.($mi['page']==$page['page']?' class="active"':'').'>'.KBTB::html_encode($mi['title']).'</a> ');
+	$handlees = array($page['content'],$cfg['design']);
+	
+	$file = '../settings/tplHandler.php';
+	if(is_file($file) && is_readable($file)) require($file);
+	
+	for($i=0; $i<2; $i++) {
+		$pageResult = array();
+		while(count($split=explode('{%',$handlees[$i],2)) == 2) {
+			array_push($pageResult,$split[0]);
+			KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
+			KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0,$page['page'].', '.$split[0]);
+			
+			$tplResult = function_exists('tplHandler') ? tplHandler($cmd) : false ;
+			
+			if($tplResult!==false) {
+				$pageResult[] = $tplResult;
+			}else{
+				switch($cmd[0]) {
+					case 'content':
+						KBTB::req(count($cmd)==2);
+						switch($cmd[1]) {
+							case 'main':
+								$pageResult[] = $handlees[0];
+								break;
+							case 'title':
+								$pageResult[] = $page['title'];
+								break;
+							case 'menu':
+								foreach($cfg['pages'] as $mi) $pageResult[] = '<a href="'.($mi['page']=='index'?'.':$mi['page'].'.html').'"'.($mi['page']==$page['page']?' class="active"':'').'>'.KBTB::html_encode($mi['title']).'</a> ';
+								break;
+							default:
+								KBTB::req(false,'Invalid content type.');
+								break;
+						}
 						break;
 					default:
-						KBTB::req(false,'Invalid content type.');
+						KBTB::req(false,'Unsupported template command.');
 						break;
 				}
-				break;
-			default:
-				KBTB::req(false);
-				break;
+			}
+			$handlees[$i] = $split[1];
 		}
-		$design = $split[1];
+		$handlees[$i] = implode($pageResult).$handlees[$i];
 	}
-	array_push($pageResult,$design);
 	
-	KBTB::req(file_put_contents('../'.$page['page'].'.html',$pageResult)>0);
+	KBTB::req(file_put_contents('../'.$page['page'].'.html',$handlees[1])>0);
 }
 
 function main() {
@@ -282,7 +295,7 @@ function main() {
 function cfgSet($cfg) {
 	if(!is_dir('../settings')) if(!@mkdir('../settings')) return false;
 	
-	KBTB::req(file_put_contents('../settings/.htaccess',"Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]")>0);
+	KBTB::req(file_put_contents('../settings/.htaccess',"Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]")>0,'Couldn\'t save settings file. Check directory permissions.');
 	KBTB::req(file_put_contents('../settings/cfg.json',json_encode($cfg))>0);
 	
 	return true;
