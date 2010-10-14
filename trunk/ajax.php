@@ -306,31 +306,36 @@ function cfgGet() {
 	$file = '../settings/cfg.json';
 	if(is_file($file) && is_readable($file)) {
 		return json_decode(file_get_contents($file),true);
-	}else return array( // Default config
-		'users' =>	array(
-			array(
-				'user' =>	'admin',
-				'pass' =>	crypt('changeme')
-			)
-		),
-		'pages' =>	array(
-			array(
-				'page' =>	'index',
-				'title' =>	'Main page',
-				'content' =>	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-			)
-		),
-		'design' =>	'<!DOCTYPE html>'+
-			'<html>'+
-			'<head>'+
-			'	<title>KB CMS - Suit yourself</title>'+
-			'</head>'+
-			'<body>'+
-			'	<h1>{%"content","title"%}</h1>'+
-			'	{%"content","main"%}'+
-			'</body>'+
-			'</html>'
-	);
+	}else {
+		$design = <<<EOF
+<!DOCTYPE html>
+<html>
+<head>
+	<title>KB CMS - Suit yourself</title>
+</head>
+<body>
+	<h1>{%"content","title"%}</h1>
+	{%"content","main"%}
+</body>
+</html>
+EOF;
+		return array( // Default config
+			'users' =>	array(
+				array(
+					'user' =>	'admin',
+					'pass' =>	crypt('changeme')
+				)
+			),
+			'pages' =>	array(
+				array(
+					'page' =>	'index',
+					'title' =>	'Main page',
+					'content' =>	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+				)
+			),
+			'design' =>	$design
+		);
+	}
 }
 
 
