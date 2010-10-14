@@ -116,7 +116,7 @@ function pageUpdate($page,$cfg) {
 	$handlees = array($page['content'],$cfg['design']);
 	
 	$file = '../settings/tplHandler.php';
-	if(is_file($file) && is_readable($file)) require($file);
+	if(is_file($file) && is_readable($file)) require_once($file);
 	
 	for($i=0; $i<2; $i++) {
 		$pageResult = array();
