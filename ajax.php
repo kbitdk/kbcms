@@ -45,7 +45,6 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 	var loader = new YAHOO.util.YUILoader({ 
 		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
 		require: ["container","dom","editor","element","event"], 
-		//require: ["animation","button","container","dom","editor","element","event","menu"], 
 		loadOptional: false, 
 		combine: false, 
 		filter: "MIN", 
@@ -63,11 +62,8 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 				html:	'<html><head><title>{TITLE}</title>'+
 					'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'+
 					'<base href="..">'+
-					'<style>{CSS}</style>'+
-					'<style>{HIDDEN_CSS}</style>'+
-					'<style>{EXTRA_CSS}</style>'+
 					'</head>'+
-					'<body onload="document.body._rteLoaded=true;">{CONTENT}</body></html>'
+					'<body onload="document.body._rteLoaded=true;" style="background:#fff; padding:10px;">{CONTENT}</body></html>'
 			};
 			
 			myEditor = new YAHOO.widget.Editor('editor', myConfig);
@@ -127,7 +123,7 @@ function pageUpdate($page,$cfg) {
 		while(count($split=explode('{%',$handlees[$i],2)) == 2) {
 			array_push($pageResult,$split[0]);
 			KBTB::req(count($split=explode('%}',$split[1],2)) == 2);
-			KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0,$page['page'].', '.$split[0]);
+			KBTB::req(count($cmd=json_decode('['.$split[0].']',true))>0,$split[0]);
 			
 			$tplResult = function_exists('tplHandler') ? tplHandler($cmd) : false ;
 			
@@ -197,15 +193,20 @@ function main() {
 			if(!KBTB::valid('strlen',$_POST['pageTitle'],0,100)) $fieldErrs['pageTitle'] = 'Invalid input.';
 			if(!KBTB::valid('strlen',$_POST['content'],0,4000)) $fieldErrs['content'] = 'Invalid input.';
 			else {
-				$content = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><content>'.$_POST['content'].'</content>');
-				if($content===false) $fieldErrs['content'] = 'Invalid input (invalid XML).';
+				$doc = new DOMDocument();
+				$doc->loadHTML('<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><body>'.$_POST['content'].'</body></html>');
 			}
 			
 			// Send validation err's back
 			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
+			$xp = new DOMXPath($doc);
+			$contentList = $xp->query('/html/body/node()');
+			$contentCode = array();
+			foreach($contentList as $item) $contentCode[] = $doc->saveXML($item);
+			
 			$cfg['pages'][$pageNo]['title'] = $_POST['pageTitle'];
-			$cfg['pages'][$pageNo]['content'] = $_POST['content'];
+			$cfg['pages'][$pageNo]['content'] = implode($contentCode);
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
