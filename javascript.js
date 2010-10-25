@@ -185,7 +185,7 @@ function KBAlert(opts) {
 		}
 		opts['buttons'] = tmpButtons;
 	} else {
-		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 0;">Close</a>';
+		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">Close</a>';
 		opts['buttons'] = { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
 	}
 	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
