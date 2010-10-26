@@ -188,7 +188,7 @@ function KBAlert(opts) {
 		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">Close</a>';
 		opts['buttons'] = { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
 	}
-	var popup = "<div style='background:#fff; color:#888; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
+	var popup = "<div style='background:#fff; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
 	popup += "<div style='text-align:right;'>";
 	popup += buttons;
 	popup += "</div>";
