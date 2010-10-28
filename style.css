@@ -1,6 +1,8 @@
 
 body {
 	margin:	0px;
+	font-family:	'Ubuntu', arial, serif;
+	font-size:	15px;
 }
 
 a img {border: none; }
@@ -53,13 +55,20 @@ h1 {
 	margin-top:					0px;
 }
 
+a.arrow {
+	text-decoration:	none;
+}
+a.arrow.hidden {
+	visibility:	hidden;
+}
+
 form label {
 	display:						inline-block;
 	width:						100px;
 }
 
 form.labelsWide label {
-	width:	160px;
+	width:	165px;
 }
 
 table.pagetable {

@@ -7,7 +7,7 @@ $(function() {
 			if(hash.indexOf('#')==0) hash = hash.substr(1);
 			ajax({a:'page',p:hash});
 		});
-		if(location.hash!='') $.event.trigger('hashchange');
+		if(location.hash!='') $(window).trigger('hashchange');
 	}
 	
 	if($.browser.msie && $.browser.version.split('.')[0]<=7) { // Fix IE <=7 issues

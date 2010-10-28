@@ -87,9 +87,16 @@ EOF;
 			$content = '<h1>Pages</h1><a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
 			
 			$content .= '<table class="pagetable">';
-			foreach($pages as $page) {
-				$content .= '<tr><td><a href="#pageEdit?'.KBTB::attr_encode($page['page']).'">'.KBTB::html_encode($page['title']).'</a></td><td>'.
-					($page['page']!='index'?' <a href="#" onclick=\'if(confirm("Are you sure you want to delete this page?")) ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"}); return false;\'>Delete</a>':'&nbsp;').'</td></tr>';
+			//foreach($pages as $page) {
+			//KBTB::debug($pages[$i++]);
+			//$i=0; while($page = $pages[$i++]) {
+			//for($i=0, $size=count($pages); $i<$size; $page = $pages[$i++]) {
+			//$i=0; $size=count($pages); while($i<$size && $page = $pages[$i++]) {
+			for($i=0, $size=count($pages); $i<$size && $page=$pages[$i]; $i++) {
+				$content .= '<tr><td style="padding-right:5px;"><a href="#pageEdit?'.KBTB::attr_encode($page['page']).'">'.KBTB::html_encode($page['title']).'</a></td><td> '.
+					'<a href="#" onclick="return unsupported();" class="arrow'.($i>0 && $i<$size-1?'':' hidden').'">▼</a> '.
+					'<a href="#" onclick="return unsupported();" class="arrow'.($i>1?'':' hidden').'">▲</a>'.
+					($page['page']!='index'?' <a href="#" class="arrow" onclick=\'if(confirm("Are you sure you want to delete this page?")) ajax({a:"pageDelete",page:"'.KBTB::attr_encode($page['page']).'"}); return false;\'>X</a>':'&nbsp;').'</td></tr>';
 			}
 			$content .= '</table>';
 			break;
