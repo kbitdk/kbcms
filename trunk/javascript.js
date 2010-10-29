@@ -216,11 +216,6 @@ function formHandler(form) {
 	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) {
 		var inst = CKEDITOR.instances[instance];
 		inst.updateElement();
-		var val = inst.element.$.value;
-		if(val.substr(val.length-7)=='<br />\n') { // Fix ckeditor extra <br /> bug
-			inst.element.$.value = val.substr(0,val.length-7);
-			inst.setData(inst.element.$.value);
-		}
 	}
 	if($(form).attr('enctype')=='multipart/form-data') { // Use iframe style submit for file uploads
 		var id = 'KBFormIO' + (new Date().getTime());
