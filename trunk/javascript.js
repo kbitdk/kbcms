@@ -125,7 +125,7 @@ function ajaxCallback(msg, arg) {
 							ckedit.contents().find('body').css('background','#f66');
 							el = ckedit;
 						}
-						$('[name="'+key+'"][type=radio]',arg).parent().css('background','#f66');
+						$('[name="'+key+'"][type=radio],[name="'+key+'"][type=checkbox]',arg).parent().css('background','#f66').focus(clearFun).change(clearFun);
 						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
 						$('[name="'+key+'"] + span.validationResponse',arg).show();
 						el.focus(clearFun).change(clearFun);
