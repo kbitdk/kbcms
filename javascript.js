@@ -35,7 +35,7 @@ function ajax(vars, arg) {
 }
 function ajaxCallback(msg, arg) {
 	loadingStop();
-	if(!$.isArray(msg)) KBAlert(html_encode(msg).replace(/\n/g, '<br/>') || 'Unknown error');
+	if(!$.isArray(msg)) KBAlert(msg ? ('Parser error: <pre>'+html_encode(msg).replace(/\n/g, '<br/>')+'</pre>') : 'Unknown error');
 	else switch(msg[0]) {
 		case 'nothing':
 			break;
