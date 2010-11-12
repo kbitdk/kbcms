@@ -10,8 +10,10 @@ $(function() {
 		if(location.hash!='') $(window).trigger('hashchange');
 	}
 	
-	if($.browser.msie && $.browser.version.split('.')[0]<=7) { // Fix IE <=7 issues
+	try { $(':focus'); } catch(e) { // Detect :focus support and repair (IE<=7 && FF<=3.0)
 		$.expr[':'].focus = function(a){ return (a == document.activeElement); }
+	}
+	if($.browser.msie && $.browser.version.split('.')[0]<=7) { // Fix IE <=7 issues
 		var hashChecker = function(){ lastHash = location.hash; return setInterval(function() { if(lastHash !== location.hash) { $.event.trigger('hashchange'); lastHash = location.hash; } }, 50); }()
 	}
 });
