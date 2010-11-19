@@ -69,7 +69,9 @@ function ajaxCallback(msg, arg) {
 			else alert('Error: Invalid internal call.');
 			break;
 		case 'content':
+		case 'contentTop':
 			$(typeof(arg['contentBox'])=='undefined'?'#content':arg['contentBox']).html(msg[1]);
+			if(msg[0]=='contentTop') $('html,body').scrollTop(0);
 			break;
 		case 'selector':
 			$(msg[1]).html(msg[2]);
