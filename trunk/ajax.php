@@ -25,34 +25,31 @@ EOF;
 			
 			$pageUrl = KBTB::attr_encode($page['page']);
 			$pageTitle = KBTB::attr_encode($page['title']);
-			$pageContent = KBTB::html_encode($page['content']);
-			$content = <<<EOF
-<h1>Edit page</h1>
-<a href="#pages">Back to pages</a><br/><br/>
-
-<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
-<input type="hidden" name="a" value="adminPageEditChange"/>
-<input type="hidden" name="pageUrl" value="$pageUrl"/>
-Title: <input type="text" name="pageTitle" value="$pageTitle"/><br/><br/>
-<textarea name="content" id="editor">$pageContent</textarea>
-<span class="validationResponse"></span><br/>
-<input type="submit" value="Submit"/>
-</form>
-
-<script type="text/javascript"> 
+			$pageContent = $page['content'];
+			
+			if(file_exists('../lib/ckeditor/ckeditor.php')) {
+				ob_start();
+				include_once "../lib/ckeditor/ckeditor.php";
+				$CKEditor = new CKEditor();
+				$CKEditor->basePath = 'http'.(isset($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'/../../lib/ckeditor/';
+				$CKEditor->editor('editor', $pageContent);
+				$editor = ob_get_clean();
+				//TODO: Set up CK Finder (http://docs.cksource.com/CKFinder_2.x/Developers_Guide/PHP/CKEditor_Integration).
+			}else{
+				$editor = '<textarea name="editor" id="editor">'.KBTB::html_encode($pageContent).'</textarea>';
+				$editor .= <<<'EOF'
+<script type="text/javascript">
 // Instantiate and configure YUI Loader:
-$.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yuiloader-min.js', function() {
+$.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuiloader-min.js', function() {
 	var loader = new YAHOO.util.YUILoader({ 
-		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/", 
+		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/", 
 		require: ["container","dom","editor","element","event"], 
 		loadOptional: false, 
 		combine: false, 
 		filter: "MIN", 
 		allowRollup: true, 
 		onSuccess: function() { 
-			var Dom = YAHOO.util.Dom,
-				Event = YAHOO.util.Event;
-			
+			var Dom = YAHOO.util.Dom, Event = YAHOO.util.Event;
 			var myConfig = {
 				width: '700px',
 				height: '350px',
@@ -65,17 +62,30 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8.1/build/yuiloader/yui
 					'</head>'+
 					'<body onload="document.body._rteLoaded=true;" style="background:#fff; padding:10px;">{CONTENT}</body></html>'
 			};
-			
 			myEditor = new YAHOO.widget.Editor('editor', myConfig);
 			myEditor._defaultToolbar.buttonType = 'advanced';
 			myEditor.render();
 		} 
 	}); 
-	
 	// Load the files using the insert() method. 
 	loader.insert(); 
 });
 </script>
+EOF;
+			}
+			
+			$content = <<<EOF
+<h1>Edit page</h1>
+<a href="#pages">Back to pages</a><br/><br/>
+
+<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
+<input type="hidden" name="a" value="adminPageEditChange"/>
+<input type="hidden" name="pageUrl" value="$pageUrl"/>
+Title: <input type="text" name="pageTitle" value="$pageTitle"/><br/><br/>
+$editor
+<span class="validationResponse"></span><br/>
+<input type="submit" value="Submit"/>
+</form>
 
 EOF;
 			break;
@@ -198,10 +208,10 @@ function main() {
 			
 			$fieldErrs = array();
 			if(!KBTB::valid('strlen',$_POST['pageTitle'],0,100)) $fieldErrs['pageTitle'] = 'Invalid input.';
-			if(!KBTB::valid('strlen',$_POST['content'],0,4000)) $fieldErrs['content'] = 'Invalid input.';
+			if(!KBTB::valid('strlen',$_POST['editor'],0,4000)) $fieldErrs['editor'] = 'Invalid input.';
 			else {
 				$doc = new DOMDocument();
-				$doc->loadHTML('<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><body>'.$_POST['content'].'</body></html>');
+				$doc->loadHTML('<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><body>'.$_POST['editor'].'</body></html>');
 			}
 			
 			// Send validation err's back
