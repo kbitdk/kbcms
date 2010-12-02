@@ -25,18 +25,31 @@ EOF;
 			
 			$pageUrl = KBTB::attr_encode($page['page']);
 			$pageTitle = KBTB::attr_encode($page['title']);
-			$pageContent = $page['content'];
+			$pageContent = KBTB::html_encode($page['content']);
 			
-			if(file_exists('../lib/ckeditor/ckeditor.php')) {
-				ob_start();
-				include_once "../lib/ckeditor/ckeditor.php";
-				$CKEditor = new CKEditor();
-				$CKEditor->basePath = 'http'.(isset($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'/../../lib/ckeditor/';
-				$CKEditor->editor('editor', $pageContent);
-				$editor = ob_get_clean();
+			if(file_exists('../lib/ckeditor/ckeditor.js')) {
+				$basepath = json_encode('http'.(isset($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'/../../lib/ckeditor/');
+				$editor = <<<EOF
+<textarea name="editor" rows="8" cols="60">$pageContent</textarea>
+<script type="text/javascript">//<![CDATA[
+window.CKEDITOR_BASEPATH=$basepath;
+//]]></script>
+<script type="text/javascript" src="../lib/ckeditor/ckeditor.js"></script>
+<script type="text/javascript">//<![CDATA[
+CKEDITOR.replace('editor',{
+	toolbarCanCollapse:	false,
+	toolbar:	'KBCMS',
+	toolbar_KBCMS:	[
+		['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink'],
+		['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','RemoveFormat','Image','-','Source'],
+		['Styles','Format','Font','FontSize']
+	]
+});
+//]]></script>
+EOF;
 				//TODO: Set up CK Finder (http://docs.cksource.com/CKFinder_2.x/Developers_Guide/PHP/CKEditor_Integration).
 			}else{
-				$editor = '<textarea name="editor" id="editor">'.KBTB::html_encode($pageContent).'</textarea>';
+				$editor = '<textarea name="editor" id="editor">'.$pageContent.'</textarea>';
 				$editor .= <<<'EOF'
 <script type="text/javascript">
 // Instantiate and configure YUI Loader:
