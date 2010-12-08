@@ -29,25 +29,43 @@ EOF;
 			
 			if(file_exists('../lib/ckeditor/ckeditor.js')) {
 				$basepath = json_encode('http'.(isset($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'/../../lib/ckeditor/');
-				$editor = <<<EOF
-<textarea name="editor" rows="8" cols="60">$pageContent</textarea>
-<script type="text/javascript">//<![CDATA[
-window.CKEDITOR_BASEPATH=$basepath;
-//]]></script>
+				
+				$editor = '<textarea name="editor" rows="8" cols="60">'.$pageContent.'</textarea>';
+				
+				if(file_exists('../lib/kcfinder/config.php')) {
+					$_SESSION['KCFINDER'] = array(
+						'disabled'	=> false,
+						'uploadURL'	=> '../../upload'
+					);
+					$editor .= <<<'EOF'
+<script type="text/javascript">
+CKEditorConfig = {
+	filebrowserBrowseUrl:	'../lib/kcfinder/browse.php?type=files',
+	filebrowserImageBrowseUrl:	'../lib/kcfinder/browse.php?type=images',
+	filebrowserFlashBrowseUrl:	'../lib/kcfinder/browse.php?type=flash',
+	filebrowserUploadUrl:	'../lib/kcfinder/upload.php?type=files',
+	filebrowserImageUploadUrl:	'../lib/kcfinder/upload.php?type=images',
+	filebrowserFlashUploadUrl:	'../lib/kcfinder/upload.php?type=flash'
+};
+</script>
+EOF;
+				}
+				
+				$editor .= '<script type="text/javascript">window.CKEDITOR_BASEPATH='.$basepath.';</script>'.<<<'EOF'
 <script type="text/javascript" src="../lib/ckeditor/ckeditor.js"></script>
 <script type="text/javascript">//<![CDATA[
-CKEDITOR.replace('editor',{
+var CKEditorConfig = CKEditorConfig||{};
+CKEDITOR.replace('editor',$.extend(CKEditorConfig,{
 	toolbarCanCollapse:	false,
 	toolbar:	'KBCMS',
 	toolbar_KBCMS:	[
-		['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink'],
-		['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','RemoveFormat','Image','-','Source'],
-		['Styles','Format','Font','FontSize']
+			['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink'],
+			['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','RemoveFormat','Image','-','Source'],
+			['Styles','Format','Font','FontSize']
 	]
-});
+}));
 //]]></script>
 EOF;
-				//TODO: Set up CK Finder (http://docs.cksource.com/CKFinder_2.x/Developers_Guide/PHP/CKEditor_Integration).
 			}else{
 				$editor = '<textarea name="editor" id="editor">'.$pageContent.'</textarea>';
 				$editor .= <<<'EOF'
@@ -297,6 +315,7 @@ function main() {
 			break;
 		case 'logout':
 			unset($_SESSION['user']);
+			unset($_SESSION['KCFINDER']);
 			echo(json_encode(array('redirect','.')));
 			break;
 		case 'checklogin':
