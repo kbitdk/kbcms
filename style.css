@@ -40,7 +40,7 @@ a img {border: none; }
 }
 #content {
 	background:					#b3c9ff;
-	position:					relative;
+	position:					absolute;
 	top:							120px;
 	left:							240px;
 	width:					750px;
