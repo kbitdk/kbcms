@@ -101,9 +101,6 @@ function ajaxCallback(msg, arg) {
 		case 'fieldErrs':
 			if(typeof(arg)=='undefined' || typeof(arg)=='function') arg=document.body;
 			if(typeof(Recaptcha)!='undefined') Recaptcha.reload();
-			$('input,select',arg).css('background','');
-			$('input[type=radio]',arg).parent().css('background','');
-			$('input + span.validationResponse, select + span.validationResponse',arg).hide();
 			var clearCaptchaFun = function() {
 				$(this).css('background','');
 			};
@@ -215,8 +212,13 @@ function KBConfirm(msg,ok,cancel) {
 
 function formHandler(form) {
 	if(typeof(form)=='undefined') return KBAlert('Internal error (formHandler): Invalid input.');
+	
 	$('input[type=submit]:not([disabled])',form).addClass('KBLoading').attr('disabled','disabled');
 	loadingStart();
+	$('input,select,textarea',form).css('background','');
+	$('input[type=radio]',form).parent().css('background','');
+	$('input + span.validationResponse, select + span.validationResponse',form).hide();
+	
 	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) {
 		var inst = CKEDITOR.instances[instance];
 		inst.updateElement();
