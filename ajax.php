@@ -37,9 +37,9 @@ EOF;
 						'disabled'	=> false,
 						'uploadURL'	=> '../../upload'
 					);
-					$editor .= <<<'EOF'
+					$editor .= <<<EOF
 <script type="text/javascript">
-CKEditorConfig = {
+window.CKEditorConfig = {
 	filebrowserBrowseUrl:	'../lib/kcfinder/browse.php?type=files',
 	filebrowserImageBrowseUrl:	'../lib/kcfinder/browse.php?type=images',
 	filebrowserFlashBrowseUrl:	'../lib/kcfinder/browse.php?type=flash',
@@ -51,24 +51,25 @@ CKEditorConfig = {
 EOF;
 				}
 				
-				$editor .= '<script type="text/javascript">window.CKEDITOR_BASEPATH='.$basepath.';</script>'.<<<'EOF'
-<script type="text/javascript" src="../lib/ckeditor/ckeditor.js"></script>
+				$editor .= '<script type="text/javascript">window.CKEDITOR_BASEPATH='.$basepath.';</script>'.<<<EOF
 <script type="text/javascript">//<![CDATA[
-var CKEditorConfig = CKEditorConfig||{};
-CKEDITOR.replace('editor',$.extend(CKEditorConfig,{
-	toolbarCanCollapse:	false,
-	toolbar:	'KBCMS',
-	toolbar_KBCMS:	[
-			['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink'],
-			['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','RemoveFormat','Image','-','Source'],
-			['Styles','Format','Font','FontSize']
-	]
-}));
+$.getScript('../lib/ckeditor/ckeditor.js', function() {
+	var CKEditorConfig = window.CKEditorConfig||{};
+	CKEDITOR.replace('editor',$.extend(CKEditorConfig,{
+		toolbarCanCollapse:	false,
+		toolbar:	'KBCMS',
+		toolbar_KBCMS:	[
+				['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink'],
+				['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','RemoveFormat','Image','-','Source'],
+				['Styles','Format','Font','FontSize']
+		]
+	}));
+});
 //]]></script>
 EOF;
 			}else{
 				$editor = '<textarea name="editor" id="editor">'.$pageContent.'</textarea>';
-				$editor .= <<<'EOF'
+				/*$editor .= <<<EOF
 <script type="text/javascript">
 // Instantiate and configure YUI Loader:
 $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuiloader-min.js', function() {
@@ -100,16 +101,16 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 	}); 
 	// Load the files using the insert() method. 
 	loader.insert(); 
-});
+}); //<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
 </script>
-EOF;
+EOF;*/
 			}
 			
 			$content = <<<EOF
 <h1>Edit page</h1>
 <a href="#pages">Back to pages</a><br/><br/>
 
-<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
+<form onsubmit="return formHandler(this);">
 <input type="hidden" name="a" value="adminPageEditChange"/>
 <input type="hidden" name="pageUrl" value="$pageUrl"/>
 Title: <input type="text" name="pageTitle" value="$pageTitle"/><br/><br/>
@@ -240,21 +241,21 @@ function main() {
 			$fieldErrs = array();
 			if(!KBTB::valid('strlen',$_POST['pageTitle'],0,100)) $fieldErrs['pageTitle'] = 'Invalid input.';
 			if(!KBTB::valid('strlen',$_POST['editor'],0,4000)) $fieldErrs['editor'] = 'Invalid input.';
-			else {
+			/*else {
 				$doc = new DOMDocument();
 				$doc->loadHTML('<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><body>'.$_POST['editor'].'</body></html>');
-			}
+			}*/
 			
 			// Send validation err's back
 			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
-			$xp = new DOMXPath($doc);
+			/*$xp = new DOMXPath($doc);
 			$contentList = $xp->query('/html/body/node()');
 			$contentCode = array();
-			foreach($contentList as $item) $contentCode[] = $doc->saveXML($item);
+			foreach($contentList as $item) $contentCode[] = $doc->saveXML($item);*/
 			
 			$cfg['pages'][$pageNo]['title'] = $_POST['pageTitle'];
-			$cfg['pages'][$pageNo]['content'] = implode($contentCode);
+			$cfg['pages'][$pageNo]['content'] = $_POST['editor'];
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
