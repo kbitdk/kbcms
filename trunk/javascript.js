@@ -58,7 +58,9 @@ function ajaxCallback(msg, arg) {
 			break;
 		case 'msg':
 		case 'err':
-			KBAlert(msg[1]);
+			var opts = {msg:msg[1]};
+			if(typeof(msg[2])=='string') opts['lang'] = msg[2];
+			KBAlert(opts);
 			break;
 		case 'callback':
 			if(typeof(arg)!='function') alert('Error: Invalid internal call.');
