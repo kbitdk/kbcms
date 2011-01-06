@@ -189,7 +189,7 @@ function KBAlert(opts) {
 		var text = {
 			da:	{
 				close:	'Luk'
-			}
+			},
 			en:	{
 				close:	'Close'
 			},
