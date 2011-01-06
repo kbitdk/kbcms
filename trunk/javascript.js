@@ -186,7 +186,20 @@ function KBAlert(opts) {
 		}
 		opts['buttons'] = tmpButtons;
 	} else {
-		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">Close</a>';
+		var text = {
+			da:	{
+				close:	'Luk'
+			}
+			en:	{
+				close:	'Close'
+			},
+			fr:	{
+				close:	'Fermer'
+			}
+		};
+		var lang = (typeof(opts['lang'])!='undefined' && typeof(text[opts['lang']])!='undefined' ? opts['lang'] : 'en');
+		text = typeof(opts['text'])!='undefined' ? opts['text'] : text[lang]; 
+		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">'+text['close']+'</a>';
 		opts['buttons'] = { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
 	}
 	var popup = "<div style='background:#fff; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
