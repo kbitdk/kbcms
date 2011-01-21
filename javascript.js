@@ -175,7 +175,11 @@ function KBPopupDialog(opts) {
 	$('.popupDialog',dialog).fadeIn();
 	if(typeof(opts['focus'])!='undefined') $(opts['focus']).focus();
 	else $('.popupDialog .content a:last',dialog).focus();
+	$('.popupDialog .content').scrollTop(0);
 	return false;
+}
+function KBPopupDialogClose() {
+	$('.popupDialog').fadeOut();
 }
 function KBAlert(opts) {
 	if(typeof(opts)=='string') opts = {'msg': opts};
