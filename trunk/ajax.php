@@ -154,11 +154,36 @@ EOF;
 				'<label>New password:</label><input type="password" name="pass"/><br/>'.
 				'<label>Repeat new password:</label><input type="password" name="pass2"/><br/><br/><input type="submit" value="Submit"/></form>';
 			break;
+		case 'modules':
+			$content = '<h1>Modules</h1>';
+			
+			$d = dir('../settings');
+			$modules = '';
+			while(false !== ($entry = $d->read())) {
+				if(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex)) {
+					require_once('../settings/'.$entry);
+					$modname = $entryRegex[1];
+					$modules .= '<a href=".#modules_settings?'.$modname.'">'.KBTB::html_encode(constant('module\\'.$modname.'\\name')).'<br/>';
+				}
+			}
+			$d->close();
+			$content .= ($modules!='' ? $modules : 'There are currently no modules installed.');
+			break;
+		case 'modules_settings':
+			KBTB::req(preg_match('/^[a-zA-Z0-9]+$/',$qs));
+			
+			require_once('../settings/module_'.$qs.'.php');
+			
+			$content = '<h1>Module settings ('.KBTB::html_encode(constant('module\\'.$qs.'\\name')).')</h1>'.
+				constant('module\\'.$qs.'\\settings');
+			break;
 		default:
 			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
 			break;
 	}
-	return json_encode(array('page',$urlOrg,$content,'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="#about">About KB CMS</a>'));
+	return json_encode(array('page', $urlOrg, $content,
+		'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#modules">Modules</a><a href=".#design">Design</a><a href=".#settings">Settings</a><a href="#about">About KB CMS</a>'
+	));
 }
 
 function pageUpdate($page,$cfg) {
@@ -337,7 +362,10 @@ function main() {
 			echo(page($_POST['p'],$cfg));
 			break;
 		default:
-			KBTB::req(false,'Invalid input (a: "'.$_POST['a'].'").');
+			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
+				require_once('../settings/module_'.$matches[1].'.php');
+				echo(call_user_func('module\\'.$matches[1].'\\ajax_'.$matches[2],$_POST));
+			} else KBTB::req(false,'Invalid input (a: "'.$_POST['a'].'").');
 			break;
 	}
 	die();
@@ -427,7 +455,13 @@ class KBTB { // Toolbox
 					$regex .= '(\/([a-z0-9+\$_-]\.?)+)*\/?'; // Path 
 					$regex .= '(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?'; // GET Query 
 					$regex .= '(#[a-z_.-][a-z0-9+\$_.-]*)?$/i'; // Anchor 
-					$valid = $valid && preg_match($regex, $var);
+					$valid = $valid && KBTB::valid('regex',$var,$regex);
+					break;
+				case 'regex':
+					$valid = $valid && preg_match($var2, $var);
+					break;
+				default:
+					KBTB::req(false,'Invalid internal input (type).');
 					break;
 			}
 		}
