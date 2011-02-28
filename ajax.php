@@ -1,4 +1,8 @@
 <?
+/*
+KB CMS
+Licensed under GPLv2 or later.
+*/
 
 // Functions
 function page($urlOrg,$cfg) {
