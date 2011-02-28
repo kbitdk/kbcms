@@ -1,3 +1,7 @@
+/*
+KB CMS
+Licensed under GPLv2 or later.
+*/
 
 // Init
 $(function() {
