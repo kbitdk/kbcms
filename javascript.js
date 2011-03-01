@@ -91,7 +91,7 @@ function ajaxCallback(msg, arg) {
 				opts.push($('<div>').append($('<option/>').val(result['key']).text(result['value'])).html());
 			});
 			$(msg[1]).html(opts.join(''));
-			if(msg[3]) $(msg[1]).val(msg[3]);
+			if(msg[3]) $(msg[1]).val(msg[3]).trigger('change');
 			$('.popupDialog').fadeOut();
 			break;
 		case 'form':
