@@ -4,7 +4,7 @@
 	<title>KB CMS - Suit yourself</title>
 	<link href='https://fonts.googleapis.com/css?family=Ubuntu:regular,bold' rel='stylesheet' type='text/css'/>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 	<script type="text/javascript" src="javascript.js"></script>
 	<script type="text/javascript">
 		ajaxServer = 'ajax.php';
@@ -13,6 +13,8 @@
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		function pageAdd() { return KBAlert({msg:'<div style="color:#000;"><h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
 			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form></div>',focus:'.popupDialog input[name=title]'}); }
+		function fileUpload() { return KBAlert('<form>File: <input type="file"/></form>'); }
+		function fileEditNew() { return unsupported(); }
 		$(function() { if(location.hash=='') ajax({a:'checklogin'}); });
 	</script>
 </head>
