@@ -5,7 +5,9 @@ body {
 	font-size:	15px;
 }
 
-a img {border: none; }
+a img {
+	border:	none;
+}
 
 
 #logo {
@@ -40,7 +42,7 @@ a img {border: none; }
 }
 #content {
 	background:					#b3c9ff;
-	position:					absolute;
+	position:					relative;
 	top:							120px;
 	left:							240px;
 	width:					750px;
