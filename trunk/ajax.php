@@ -374,6 +374,18 @@ function main() {
 		case 'page':
 			echo(page($_POST['p'],$cfg));
 			break;
+		case 'fileEditNew':
+			$fieldErrs = array();
+			
+			if(!KBTB::valid('strlen',$_POST['filename'],0,100)) $fieldErrs['filename'] = 'Invalid input.';
+			elseif(substr($_POST['filename'],-5)=='.html') $fieldErrs['filename'] = 'HTML files are not allowed through this interface. Use the pages section.';
+			elseif(!KBTB::valid('regex',$_POST['filename'],'/^[a-z0-9][a-z0-9.]*$/i')) $fieldErrs['filename'] = 'Invalid input.';;
+			
+			// Send validation err's back
+			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
+			
+			echo(json_encode(array('unsupported')));
+			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
 				require_once('../settings/module_'.$matches[1].'.php');
