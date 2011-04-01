@@ -4,16 +4,16 @@
 	<title>KB CMS - Suit yourself</title>
 	<link href='https://fonts.googleapis.com/css?family=Ubuntu:regular,bold' rel='stylesheet' type='text/css'/>
 	<link rel="stylesheet" type="text/css" href="style.css"/>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-	<script type="text/javascript" src="javascript.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+	<script src="javascript.js"></script>
 	<script type="text/javascript">
-		ajaxServer = 'ajax.php';
-		ajaxFetcher = true;
+		var ajaxServer = 'ajax.php';
+		var ajaxFetcher = true;
 		function loginFocus() { $('#loginpage').show(); $('input[name=user]').focus(); }
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		function pageAdd() { return KBAlert({msg:'<h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
 			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form>',focus:'.popupDialog input[name=title]'}); }
-		function fileUpload() { return KBAlert('<form>File: <input type="file"/></form>'); }
+		function fileUpload() { return KBAlert('<form enctype="multipart/form-data"><input type="hidden" name="a" value="fileUpload"/>File: <input type="file" name="file" onchange="var form=$(this).parents(\'form\');formHandler(form);form.submit();"/></form>'); }
 		function fileEditNew() {
 			return KBAlert({msg:'<h1>Edit new file</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="fileEditNew"/>'+
 				'Filename: <input type="text" name="filename"/><br/><br/><input type="submit" value="Create file"/></form>',focus:'.popupDialog input[name=filename]'});
