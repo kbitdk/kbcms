@@ -2,8 +2,7 @@
 #labels Featured
 
 = Repository (coming in next release) =
- * Fixed compatibility with XAMPP for windows
- * Now dynamically updates lastmod times on sitemap (if it isn't set in index.xml)
+ * Content and design is now editable directly in the admin interface, instead of using XML/XSL
 
 = 0.1 =
  * First release
