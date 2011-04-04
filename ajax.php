@@ -200,11 +200,12 @@ EOF;
 			if(preg_match('/[\x00-\x08\x0E-\x1F\x7F]/',$file)) $content .= 'Editing binary files is not supported, yet.';
 			else {
 				$file = KBTB::html_encode($file);
+				
 				$content .= <<<EOF
 <form onsubmit="return formHandler(this);">
 <input type="hidden" name="a" value="adminFileEditChange"/>
 <input type="hidden" name="filename" value="$filename"/>
-<div style="height:350px;"><div style="width:730px; height:350px; overflow:hidden; visibility:hidden;" id="editor">$file</div></div>
+<div style="height:350px;"><div id="editorLoading">Loading text editor...</div><div style="width:730px; height:350px; overflow:hidden; visibility:hidden;" id="editor">$file</div></div>
 <span class="validationResponse"></span><br/>
 <input type="submit" value="Submit"/>
 </form>
@@ -214,11 +215,26 @@ $.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function(
 	var editor = ace.edit("editor");
 	$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/theme-clouds_midnight.js', function() {
 		editor.setTheme("ace/theme/clouds_midnight");
+		editor.getSession().setTabSize(3);
+		editor.getSession().setUseSoftTabs(false);
+		$('#editorLoading').hide();
 		$('#editor').css('visibility','visible');
-		/*$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/mode-javascript.js', function() {
-			var JavaScriptMode = ace.require("ace/mode/javascript").Mode;
-			editor.getSession().setMode(new JavaScriptMode());
-		});*/
+		
+		var ext = new RegExp('\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
+		if((ext instanceof Array) && ext.length>1) ext = ext[1];
+		var mode = {
+			php:	'php',
+			css:	'css',
+			xml:	'xml',
+			js:	'javascript'
+		}[ext];
+		
+		if(mode!==undefined) {
+			$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/mode-'+mode+'.js', function() {
+				var modeNew = ace.require("ace/mode/"+mode).Mode;
+				editor.getSession().setMode(new modeNew());
+			});
+		}
 	});
 });
 </script>
