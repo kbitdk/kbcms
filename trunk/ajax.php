@@ -134,11 +134,6 @@ EOF;
 			$content = '<h1>Pages</h1><a href="#" onclick="return pageAdd();">Add page</a><br/><br/>';
 			
 			$content .= '<table class="pagetable">';
-			//foreach($pages as $page) {
-			//KBTB::debug($pages[$i++]);
-			//$i=0; while($page = $pages[$i++]) {
-			//for($i=0, $size=count($pages); $i<$size; $page = $pages[$i++]) {
-			//$i=0; $size=count($pages); while($i<$size && $page = $pages[$i++]) {
 			for($i=0, $size=count($pages); $i<$size && $page=$pages[$i]; $i++) {
 				$content .= '<tr><td style="padding-right:5px;"><a href="#pageEdit?'.KBTB::attr_encode($page['page']).'">'.KBTB::html_encode($page['title']).'</a></td><td> '.
 					'<a href="#" onclick="return unsupported();" class="arrow'.($i>0 && $i<$size-1?'':' hidden').'">▼</a> '.
@@ -162,33 +157,110 @@ EOF;
 		case 'modules':
 			$content = '<h1>Modules</h1>';
 			
-			$d = dir('../settings');
-			$modules = '';
-			while(false !== ($entry = $d->read())) {
-				if(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex)) {
-					require_once('../settings/'.$entry);
-					$modname = $entryRegex[1];
-					$modules .= '<a href=".#modules_settings?'.$modname.'">'.KBTB::html_encode(constant('module\\'.$modname.'\\name')).'<br/>';
-				}
+			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,function($val) { return is_file('../settings/'.$val) && preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $val); }))==0)
+				$content .= 'There are currently no modules installed.';
+			else while($entry = $files) {
+				KBTB::req(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex));
+				require_once('../settings/'.$entry);
+				$modname = $entryRegex[1];
+				$content .= '<a href=".#modules_settings?'.$modname.'">'.KBTB::html_encode(constant('module\\'.$modname.'\\name')).'<br/>';
 			}
-			$d->close();
-			$content .= ($modules!='' ? $modules : 'There are currently no modules installed.');
 			break;
 		case 'modules_settings':
 			KBTB::req(preg_match('/^[a-zA-Z0-9]+$/',$qs));
 			
 			require_once('../settings/module_'.$qs.'.php');
 			
-			$content = '<h1>Module settings ('.KBTB::html_encode(constant('module\\'.$qs.'\\name')).')</h1>'.
-				constant('module\\'.$qs.'\\settings');
+			$content = '<h1>Module settings ('.KBTB::html_encode(constant('module\\'.$qs.'\\name')).')</h1>'.constant('module\\'.$qs.'\\settings');
 			break;
 		case 'files':
-			$content = 
+			if(!is_dir('../settings/files') || !($files = scandir('../settings/files')) || count($files = array_filter($files,function($val) { return is_file('../settings/files/'.$val); }))==0)
+				$filelist = 'There are currently no files uploaded.';
+			else $filelist =
+				'<table class="pagetable">'.
+				implode('',array_map(function($val) { return '<tr><td><a href="#fileEdit?'.$val.'">'.$val.'</td>'.
+					'<td><a href="#" onclick=\'if(confirm("Are you sure you want to delete this file?")) ajax({a:"fileDelete",file:"'.KBTB::attr_encode($val).'"}); return false;\'>X</a></td></tr>'; },$files)).
+				'</table>';
+			
+			$content =
 				'<h1>Files</h1>'.
 				'<a href="#" onclick="return fileUpload();">Upload file</a><br/>'.
 				'<a href="#" onclick="return fileEditNew();">Edit new file</a><br/><br/>'.
-				'<a href="#" onclick="return unsupported();">File example...</a><br/>'
+				$filelist
 			;
+			break;
+		case 'fileEdit':
+			$content = '<h1>Edit file</h1><a href="#files">Back to files</a><br/><br/>';
+			
+			$filename = $qs;
+			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
+			
+			KBTB::req($file = file_get_contents('../settings/files/'.$filename));
+			
+			if(preg_match('/[\x00-\x08\x0E-\x1F\x7F]/',$file)) $content .= 'Editing binary files is not supported, yet.';
+			else {
+				$file = KBTB::html_encode($file);
+				$content .= <<<EOF
+<form onsubmit="return formHandler(this);">
+<input type="hidden" name="a" value="adminFileEditChange"/>
+<input type="hidden" name="filename" value="$filename"/>
+<div style="height:350px;"><div style="width:730px; height:350px; overflow:hidden; visibility:hidden;" id="editor">$file</div></div>
+<span class="validationResponse"></span><br/>
+<input type="submit" value="Submit"/>
+</form>
+<script>
+$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function() {
+	var ace = window.__ace_shadowed__;
+	var editor = ace.edit("editor");
+	$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/theme-clouds_midnight.js', function() {
+		editor.setTheme("ace/theme/clouds_midnight");
+		$('#editor').css('visibility','visible');
+		/*$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/mode-javascript.js', function() {
+			var JavaScriptMode = ace.require("ace/mode/javascript").Mode;
+			editor.getSession().setMode(new JavaScriptMode());
+		});*/
+	});
+});
+</script>
+<br style="clear:both;"/>
+asdasd
+EOF;
+/*<script>
+(function inject() {
+	var baseUrl="http://ajaxorg.github.com/ace/build/textarea/src/";
+	function load(path, module, callback) {
+		path = baseUrl + path;
+		if (!load.scripts[path]) {
+			load.scripts[path] = {
+				loaded: false,
+				callbacks: [ callback ]
+			};
+			var head = document.getElementsByTagName('head')[0];
+			var s = document.createElement('script');
+			function c() {
+				if (window.__ace_shadowed__ && window.__ace_shadowed__.define.modules[module]) {
+					load.scripts[path].loaded = true;
+					load.scripts[path].callbacks.forEach(function(callback) { callback(); });
+				} else {
+					setTimeout(c, 50);
+				}
+			};
+			s.src = path;
+			head.appendChild(s);
+			c();
+		} else if (load.scripts[path].loaded) { callback(); } else { load.scripts[path].callbacks.push(callback); }
+	};
+	load.scripts = {};
+	window.__ace_shadowed_load__ = load;
+	load('ace.js', 'text!ace/css/editor.css', function() {
+		var ace = window.__ace_shadowed__;
+		var Event = ace.require('pilot/event');
+		ace.transformTextarea($('#editor').get(0));
+	});
+})()
+</script>
+*/
+			}
 			break;
 		default:
 			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
@@ -387,21 +459,30 @@ function main() {
 			echo(json_encode(array('unsupported')));
 			break;
 		case 'fileUpload':
-			
 			$filename = $_FILES['file']['name'];
 			
 			if(!KBTB::valid('strlen',$filename,0,100)) echo(json_encode(array('err','Invalid filename.')));
 			elseif(substr($filename,-5)=='.html') echo(json_encode(array('err','HTML files are not allowed through this interface. Use the pages section.')));
-			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]*$/i')) echo(json_encode(array('err','Invalid filename.')));
+			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i')) echo(json_encode(array('err','Invalid filename.')));
+			elseif(file_exists('../settings/files/'.$filename) || file_exists('../'.$filename)) echo(json_encode(array('err','File already exists.')));
 			else {
 				
-				//TODO: create a folder if it doesn't exist
-				//TODO: save the file in the files folder and in the output folder
+				if(!is_dir('../settings/files')) KBTB::req(@mkdir('../settings/files', 0777, true));
 				
+				KBTB::req(move_uploaded_file($_FILES['file']['tmp_name'], $settingspath = '../settings/files/'.$filename));
+				copy($settingspath,'../'.$filename);
 				
-				echo(json_encode(array('unsupported')));
-				
+				echo(json_encode(array('reload')));
 			}
+			break;
+		case 'fileDelete':
+			$filename = $_POST['file'];
+			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
+			
+			KBTB::req(unlink('../settings/files/'.$filename));
+			KBTB::req(unlink('../'.$filename));
+			
+			echo(json_encode(array('reload')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
