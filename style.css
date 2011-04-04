@@ -79,6 +79,7 @@ table.pagetable {
 
 table.pagetable td:first-child {
 	padding-left:	0px;
+	padding-right:	10px;
 }
 
 

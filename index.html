@@ -13,7 +13,8 @@
 		function passChanged() { $('form:has(input[name=passOld])')[0].reset(); KBAlert('Your password has been changed.'); }
 		function pageAdd() { return KBAlert({msg:'<h1>Add page</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="pageAdd"/>'+
 			'Title: <input type="text" name="title"/><br/><br/><input type="submit" value="Submit"/></form>',focus:'.popupDialog input[name=title]'}); }
-		function fileUpload() { return KBAlert('<form enctype="multipart/form-data"><input type="hidden" name="a" value="fileUpload"/>File: <input type="file" name="file" onchange="var form=$(this).parents(\'form\');formHandler(form);form.submit();"/></form>'); }
+		function fileUpload() { return KBAlert('<form enctype="multipart/form-data"><input type="hidden" name="a" value="fileUpload"/>'+
+			'File: <input type="file" name="file" onchange="var form=$(this).parents(\'form\');formHandler(form);form.submit();"/></form>'); }
 		function fileEditNew() {
 			return KBAlert({msg:'<h1>Edit new file</h1><form onsubmit="return formHandler(this);"><input type="hidden" name="a" value="fileEditNew"/>'+
 				'Filename: <input type="text" name="filename"/><br/><br/><input type="submit" value="Create file"/></form>',focus:'.popupDialog input[name=filename]'});
@@ -25,7 +26,7 @@
 	<div id="logo"><a href="."><img src="logo.png" alt="KB CMS" width="180px" height="56px"/></a><span id="motto"> - Suit yourself</span></div>
 	<div id="menu">
 		<a href=".">Main page</a>
-		<a href="about.html">About KB CMS</a>
+		<a href="About.html">About KB CMS</a>
 	</div>
 	<div id="content">
 		<div id="loginpage" style="display:none;">
