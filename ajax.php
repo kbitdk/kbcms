@@ -185,7 +185,8 @@ EOF;
 			$content =
 				'<h1>Files</h1>'.
 				'<a href="#" onclick="return fileUpload();">Upload file</a><br/>'.
-				'<a href="#" onclick="return fileEditNew();">Edit new file</a><br/><br/>'.
+				'<a href="#" onclick="return fileEditNew();">Edit new file</a><br/>'.
+				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Re-publish files</a><br/><br/>'.
 				$filelist
 			;
 			break;
@@ -324,6 +325,7 @@ function pageUpdate($page,$cfg) {
 function main() {
 	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
+	KBTB::debug(user::loggedIn());
 	
 	switch($_POST['a']) {
 		case 'designChange':
@@ -496,8 +498,16 @@ function main() {
 			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
 			
 			KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false);
+			KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
 			
 			echo(json_encode(array('page','files')));
+			break;
+		case 'filesRepublish':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			
+			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, function($val) { if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val)); }));
+			
+			echo(json_encode(array('msg','The files have been re-published.')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
@@ -556,6 +566,22 @@ EOF;
 
 
 // Classes
+
+class user {
+	function loggedIn() {
+		return $_SESSION['user']!==null;
+	}
+	/*
+	reqAjax
+	reqAjaxAdmin
+	req
+	reqAdmin
+	userID
+	admin
+	developer
+	*/
+}
+
 class KBTB { // Toolbox
 	function valid($types,$var,$var2=null,$var3=null) {
 		$valid = true;
