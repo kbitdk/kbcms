@@ -6,7 +6,7 @@ Licensed under GPLv2 or later.
 
 // Functions
 function page($urlOrg,$cfg) {
-	if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+	if(!user::loggedIn()) return json_encode(array('redirect','.'));
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
 		$qs = substr($urlOrg,$qPos+1);
 		$url = substr($urlOrg,0,$qPos);
@@ -325,12 +325,10 @@ function pageUpdate($page,$cfg) {
 function main() {
 	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
-	KBTB::debug(user::loggedIn());
 	
+	if(!in_array($_POST['a'], array('logout','checklogin','login')) && !user::loggedIn()) return json_encode(array('redirect','.'));
 	switch($_POST['a']) {
 		case 'designChange':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			$fieldErrs = array();
 			if(!KBTB::valid('strlen',$_POST['design'],0,4000)) $fieldErrs['design'] = 'Invalid input.';
 			
@@ -346,8 +344,6 @@ function main() {
 			}
 			break;
 		case 'adminPageEditChange':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			foreach($cfg['pages'] as $i=>$page) if($_POST['pageUrl']==$page['page']) $pageNo = $i;
 			KBTB::req($pageNo!==null);
 			
@@ -377,8 +373,6 @@ function main() {
 			}
 			break;
 		case 'pageDelete':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			KBTB::req($_POST['page']!='index');
 			foreach($cfg['pages'] as $i=>$page) if($_POST['page']==$page['page']) unset($cfg['pages'][$i]);
 			
@@ -386,7 +380,6 @@ function main() {
 			else echo(page('pages',$cfg));
 			break;
 		case 'pageAdd':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
 			
 			if(!KBTB::valid('strlen',$_POST['title'],0,100)) $fieldErrs['title'] = 'Invalid input.';
@@ -408,7 +401,6 @@ function main() {
 			else echo(page('pages',$cfg));
 			break;
 		case 'passChange':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
 			
 			if(!KBTB::valid('strlen',$_POST['pass'],4,50)) $fieldErrs['pass'] = 'Invalid input.';
@@ -433,7 +425,7 @@ function main() {
 			echo(json_encode(array('redirect','.')));
 			break;
 		case 'checklogin':
-			if(isset($_SESSION['user'])) echo(page('main',$cfg));
+			if(user::loggedIn()) echo(page('main',$cfg));
 			else echo(json_encode(array('callbackCustom','loginFocus')));
 			break;
 		case 'login':
@@ -450,7 +442,6 @@ function main() {
 			echo(page($_POST['p'],$cfg));
 			break;
 		case 'fileEditNew':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
 			
 			if(!KBTB::valid('strlen',$_POST['filename'],0,100)) $fieldErrs['filename'] = 'Invalid input.';
@@ -463,7 +454,6 @@ function main() {
 			echo(json_encode(array('unsupported')));
 			break;
 		case 'fileUpload':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$filename = $_FILES['file']['name'];
 			
 			if(!KBTB::valid('strlen',$filename,0,100)) echo(json_encode(array('err','Invalid filename.')));
@@ -482,7 +472,6 @@ function main() {
 			}
 			break;
 		case 'fileDelete':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$filename = $_POST['file'];
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
 			
@@ -492,7 +481,6 @@ function main() {
 			echo(json_encode(array('reload')));
 			break;
 		case 'adminFileEditChange':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$filename = $_POST['filename'];
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
 			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
@@ -503,8 +491,6 @@ function main() {
 			echo(json_encode(array('page','files')));
 			break;
 		case 'filesRepublish':
-			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
-			
 			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, function($val) { if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val)); }));
 			
 			echo(json_encode(array('msg','The files have been re-published.')));
@@ -569,17 +555,8 @@ EOF;
 
 class user {
 	function loggedIn() {
-		return $_SESSION['user']!==null;
+		return isset($_SESSION['user']);
 	}
-	/*
-	reqAjax
-	reqAjaxAdmin
-	req
-	reqAdmin
-	userID
-	admin
-	developer
-	*/
 }
 
 class KBTB { // Toolbox
