@@ -208,7 +208,7 @@ EOF;
 <input type="hidden" name="a" value="adminFileEditChange"/>
 <input type="hidden" name="filename" value="$filename"/>
 <div><a href="#" onclick="return fullscreen();">Fullscreen</a></div><br/>
-<textarea name="aceEditor" style="display:none;" id="aceEditorTextarea">jkhg</textarea>
+<textarea name="aceEditor" style="display:none;" id="aceEditorTextarea"></textarea>
 <div style="height:350px;"><div id="aceEditorLoading">Loading text editor...</div><div id="aceEditor">$file</div></div>
 <span class="validationResponse"></span><br/>
 <input type="submit" value="Submit"/>
