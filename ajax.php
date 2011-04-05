@@ -143,7 +143,7 @@ EOF;
 			$content .= '</table>';
 			break;
 		case 'about':
-			$doc = simplexml_load_file('about.html')->xpath('/html/body/div[@id="content"]/*');
+			$doc = simplexml_load_file('About.html')->xpath('/html/body/div[@id="content"]/*');
 			$content = '';
 			foreach($doc as $node) $content .= $node->asXML();
 			break;
@@ -179,7 +179,7 @@ EOF;
 			else $filelist =
 				'<table class="pagetable">'.
 				implode('',array_map(function($val) { return '<tr><td><a href="#fileEdit?'.$val.'">'.$val.'</td>'.
-					'<td><a href="#" onclick=\'if(confirm("Are you sure you want to delete this file?")) ajax({a:"fileDelete",file:"'.KBTB::attr_encode($val).'"}); return false;\'>X</a></td></tr>'; },$files)).
+					'<td><a href="#" class="arrow" onclick=\'if(confirm("Are you sure you want to delete this file?")) ajax({a:"fileDelete",file:"'.KBTB::attr_encode($val).'"}); return false;\'>X</a></td></tr>'; },$files)).
 				'</table>';
 			
 			$content =
@@ -202,80 +202,65 @@ EOF;
 				$file = KBTB::html_encode($file);
 				
 				$content .= <<<EOF
-<form onsubmit="return formHandler(this);">
+<form onsubmit="$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue()); return formHandler(this);">
+<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'/>
 <input type="hidden" name="a" value="adminFileEditChange"/>
 <input type="hidden" name="filename" value="$filename"/>
-<div style="height:350px;"><div id="editorLoading">Loading text editor...</div><div style="width:730px; height:350px; overflow:hidden; visibility:hidden;" id="editor">$file</div></div>
+<div><a href="#" onclick="return fullscreen();">Fullscreen</a></div><br/>
+<textarea name="aceEditor" style="display:none;" id="aceEditorTextarea">jkhg</textarea>
+<div style="height:350px;"><div id="aceEditorLoading">Loading text editor...</div><div id="aceEditor">$file</div></div>
 <span class="validationResponse"></span><br/>
 <input type="submit" value="Submit"/>
 </form>
 <script>
+function fullscreen() {
+	$(document).keydown(function (e) {
+		if(e.which == 27) {
+			$('#aceEditor').removeClass('fullscreen');
+			aceEditor.resize();
+			return false;
+		}
+	});
+	$('#aceEditor').addClass('fullscreen');
+	aceEditor.resize();
+	aceEditor.focus();
+	return false;
+}
 $.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function() {
 	var ace = window.__ace_shadowed__;
-	var editor = ace.edit("editor");
-	$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/theme-clouds_midnight.js', function() {
-		editor.setTheme("ace/theme/clouds_midnight");
-		editor.getSession().setTabSize(3);
-		editor.getSession().setUseSoftTabs(false);
-		$('#editorLoading').hide();
-		$('#editor').css('visibility','visible');
+	var editor = ace.edit('aceEditor');
+	window.aceEditor = editor;
+	var theme = ['clouds_midnight','twilight','pastel_on_dark','idle_fingers','merbivore','merbivore_soft','vibrant_ink'][2];
+	$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/theme-'+theme+'.js', function() {
+		editor.setTheme('ace/theme/'+theme);
+		$('.ace-pastel-on-dark .ace_scroller').css('background','#1C1818');
+		var sess = editor.getSession();
+		sess.setTabSize(3);
+		sess.setUseSoftTabs(false);
+		editor.setScrollSpeed(4);
+		editor.setShowPrintMargin(false);
+		$('#aceEditorLoading').hide();
+		$('#aceEditor').css({visibility:'visible'});
 		
 		var ext = new RegExp('\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
 		if((ext instanceof Array) && ext.length>1) ext = ext[1];
 		var mode = {
-			php:	'php',
 			css:	'css',
-			xml:	'xml',
-			js:	'javascript'
+			js:	'javascript',
+			php:	'php',
+			xml:	'xml'
 		}[ext];
 		
 		if(mode!==undefined) {
 			$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/mode-'+mode+'.js', function() {
-				var modeNew = ace.require("ace/mode/"+mode).Mode;
-				editor.getSession().setMode(new modeNew());
+				var modeNew = ace.require('ace/mode/'+mode).Mode;
+				sess.setMode(new modeNew());
 			});
 		}
 	});
 });
 </script>
-<br style="clear:both;"/>
-asdasd
 EOF;
-/*<script>
-(function inject() {
-	var baseUrl="http://ajaxorg.github.com/ace/build/textarea/src/";
-	function load(path, module, callback) {
-		path = baseUrl + path;
-		if (!load.scripts[path]) {
-			load.scripts[path] = {
-				loaded: false,
-				callbacks: [ callback ]
-			};
-			var head = document.getElementsByTagName('head')[0];
-			var s = document.createElement('script');
-			function c() {
-				if (window.__ace_shadowed__ && window.__ace_shadowed__.define.modules[module]) {
-					load.scripts[path].loaded = true;
-					load.scripts[path].callbacks.forEach(function(callback) { callback(); });
-				} else {
-					setTimeout(c, 50);
-				}
-			};
-			s.src = path;
-			head.appendChild(s);
-			c();
-		} else if (load.scripts[path].loaded) { callback(); } else { load.scripts[path].callbacks.push(callback); }
-	};
-	load.scripts = {};
-	window.__ace_shadowed_load__ = load;
-	load('ace.js', 'text!ace/css/editor.css', function() {
-		var ace = window.__ace_shadowed__;
-		var Event = ace.require('pilot/event');
-		ace.transformTextarea($('#editor').get(0));
-	});
-})()
-</script>
-*/
 			}
 			break;
 		default:
@@ -463,6 +448,7 @@ function main() {
 			echo(page($_POST['p'],$cfg));
 			break;
 		case 'fileEditNew':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$fieldErrs = array();
 			
 			if(!KBTB::valid('strlen',$_POST['filename'],0,100)) $fieldErrs['filename'] = 'Invalid input.';
@@ -475,12 +461,14 @@ function main() {
 			echo(json_encode(array('unsupported')));
 			break;
 		case 'fileUpload':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$filename = $_FILES['file']['name'];
 			
 			if(!KBTB::valid('strlen',$filename,0,100)) echo(json_encode(array('err','Invalid filename.')));
 			elseif(substr($filename,-5)=='.html') echo(json_encode(array('err','HTML files are not allowed through this interface. Use the pages section.')));
 			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i')) echo(json_encode(array('err','Invalid filename.')));
 			elseif(file_exists('../settings/files/'.$filename) || file_exists('../'.$filename)) echo(json_encode(array('err','File already exists.')));
+			elseif(!is_dir('../settings') && !cfgSet($cfg)) die(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
 				
 				if(!is_dir('../settings/files')) KBTB::req(@mkdir('../settings/files', 0777, true));
@@ -492,6 +480,7 @@ function main() {
 			}
 			break;
 		case 'fileDelete':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
 			$filename = $_POST['file'];
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
 			
@@ -499,6 +488,16 @@ function main() {
 			KBTB::req(unlink('../'.$filename));
 			
 			echo(json_encode(array('reload')));
+			break;
+		case 'adminFileEditChange':
+			if(!isset($_SESSION['user'])) return json_encode(array('redirect','.'));
+			$filename = $_POST['filename'];
+			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
+			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
+			
+			KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false);
+			
+			echo(json_encode(array('page','files')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
