@@ -203,10 +203,11 @@ EOF;
 				$file = KBTB::html_encode($file);
 				
 				$content .= <<<EOF
-<form onsubmit="$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue()); return formHandler(this);" id="codeForm">
+<form onsubmit="$('#aceEditorTextarea',this).val(window.aceEditor.getSession().getValue()); $('input[name=return]',this).val('1'); return formHandler(this);" id="codeForm">
 <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'/>
 <input type="hidden" name="a" value="adminFileEditChange"/>
 <input type="hidden" name="filename" value="$filename"/>
+<input type="hidden" name="return" value="1"/>
 <div><a href="#" onclick="return fullscreen(true);">Fullscreen</a></div><br/>
 <textarea name="aceEditor" style="display:none;" id="aceEditorTextarea"></textarea>
 <div style="height:350px;"><div id="aceEditorLoading">Loading text editor...</div><div id="aceEditor">$file</div></div>
@@ -225,6 +226,7 @@ $(document).keydown(function (e) {
 	case 83: // s
 		if(e.ctrlKey) {
 			$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
+			$('input[name=return]',this).val('0');
 			return formHandler($('#codeForm'));
 		}
 		break;
@@ -501,7 +503,8 @@ function main() {
 			KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false);
 			KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
 			
-			echo(json_encode(array('page','files')));
+			if($_POST['return']=='0') echo(json_encode(array('msg','File has been saved.')));
+			else echo(json_encode(array('page','files')));
 			break;
 		case 'filesRepublish':
 			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, function($val) { if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val)); }));
