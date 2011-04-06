@@ -203,35 +203,39 @@ EOF;
 				$file = KBTB::html_encode($file);
 				
 				$content .= <<<EOF
-<form onsubmit="$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue()); return formHandler(this);">
+<form onsubmit="$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue()); return formHandler(this);" id="codeForm">
 <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'/>
 <input type="hidden" name="a" value="adminFileEditChange"/>
 <input type="hidden" name="filename" value="$filename"/>
-<div><a href="#" onclick="return fullscreen();">Fullscreen</a></div><br/>
+<div><a href="#" onclick="return fullscreen(true);">Fullscreen</a></div><br/>
 <textarea name="aceEditor" style="display:none;" id="aceEditorTextarea"></textarea>
 <div style="height:350px;"><div id="aceEditorLoading">Loading text editor...</div><div id="aceEditor">$file</div></div>
 <span class="validationResponse"></span><br/>
 <input type="submit" value="Submit"/>
 </form>
 <script>
-function fullscreen() {
-	$(document).keydown(function (e) {
-		switch(e.which) {
-		case 27: // escape
-			$('#aceEditor').removeClass('fullscreen');
-			aceEditor.resize();
-			return false;
-			break;
-		/*case 114: // F3
-			//return false;
-			break;
-		case 83: // s
-			if(e.ctrlKey) console.log('Save!');
-			return false;
-			break;*/
+$(document).keydown(function (e) {
+	switch(e.which) {
+	case 13: // enter
+		if(e.altKey) return fullscreen();
+		break;
+	case 27: // escape
+		return fullscreen(false);
+		break;
+	case 83: // s
+		if(e.ctrlKey) {
+			$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
+			return formHandler($('#codeForm'));
 		}
-	});
-	$('#aceEditor').addClass('fullscreen');
+		break;
+	/*case 114: // F3
+		//return false;
+		break;*/
+	}
+});
+function fullscreen(enable) {
+	if(typeof(enable)=='undefined') enable = !$('#aceEditor').hasClass('fullscreen');
+	$('#aceEditor').toggleClass('fullscreen',enable);
 	aceEditor.resize();
 	aceEditor.focus();
 	return false;
@@ -247,7 +251,7 @@ $.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function(
 		var sess = editor.getSession();
 		sess.setTabSize(3);
 		sess.setUseSoftTabs(false);
-		editor.setScrollSpeed(4);
+		editor.setScrollSpeed(3);
 		editor.setShowPrintMargin(false);
 		$('#aceEditorLoading').hide();
 		$('#aceEditor').css({visibility:'visible'});
