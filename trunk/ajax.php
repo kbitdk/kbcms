@@ -216,10 +216,19 @@ EOF;
 <script>
 function fullscreen() {
 	$(document).keydown(function (e) {
-		if(e.which == 27) {
+		switch(e.which) {
+		case 27: // escape
 			$('#aceEditor').removeClass('fullscreen');
 			aceEditor.resize();
 			return false;
+			break;
+		/*case 114: // F3
+			//return false;
+			break;
+		case 83: // s
+			if(e.ctrlKey) console.log('Save!');
+			return false;
+			break;*/
 		}
 	});
 	$('#aceEditor').addClass('fullscreen');
