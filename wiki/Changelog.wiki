@@ -2,8 +2,10 @@
 #labels Featured
 
 = 0.2 =
+ * Rewrite to overcome some limitations in version 0.1.
  * Content and design is now editable directly in the admin interface, instead of using XML/XSL
  * Files can be edited with a code editor, which is based on [http://ace.ajax.org/ ACE], but with things like syntax highlighting and keyboard shortcuts set by default.
+ * The fully customizable URL's and automatically generated sitemaps are removed for this version, but they might return in a later version.
 
 = 0.1 =
  * First release
