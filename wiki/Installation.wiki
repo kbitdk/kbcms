@@ -14,7 +14,7 @@ The initial setup can be done with the following commands in a terminal window:
 sudo apt-get -y install php5
 # Download KB CMS and set it up
 sudo chown -R `whoami` /var/www
-svn checkout http://kbcms.googlecode.com/svn/trunk/ /var/www/admin
+wget "https://kbcms.googlecode.com/files/kbcms-0.2.tar.gz" -O - | tar -xzf - -C /var/www/admin
 sudo chown -R `whoami`:www-data /var/www
 sudo chmod -R g+w /var/www
 sudo /etc/init.d/apache2 restart
