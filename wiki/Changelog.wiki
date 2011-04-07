@@ -1,8 +1,9 @@
 #summary Changes in each version.
 #labels Featured
 
-= Repository (coming in next release) =
+= 0.2 =
  * Content and design is now editable directly in the admin interface, instead of using XML/XSL
+ * Files can be edited with a code editor, which is based on [http://ace.ajax.org/ ACE], but with things like syntax highlighting and keyboard shortcuts set by default.
 
 = 0.1 =
  * First release
