@@ -73,42 +73,42 @@ $.getScript('../lib/ckeditor/ckeditor.js', function() {
 EOF;
 			}else{
 				$editor = '<textarea name="editor" id="editor" style="width:730px; height:300px;">'.$pageContent.'</textarea>';
-				/*$editor .= <<<EOF
+				$editor .= <<<EOF
 <script type="text/javascript">
 // Instantiate and configure YUI Loader:
-$('#editor').parents('form').addClass('yui-skin-sam');
+var form = $('#editor').parents('form');
 $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuiloader-min.js', function() {
-	    var loader = new YAHOO.util.YUILoader({ 
-        base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/", 
-        require: ["button","containercore","dom","element","event","menu","simpleeditor"], 
-        loadOptional: false, 
-        combine: false, 
-        filter: "MIN", 
-        allowRollup: true, 
-        onSuccess: function() { 
-            //Setup some private variables
-    var Dom = YAHOO.util.Dom,
-        Event = YAHOO.util.Event;
-
-        //The SimpleEditor config
-        var myConfig = {
-            height: '300px',
-            width: '600px',
-            dompath: true,
-            focusAtStart: true
-        };
-
-    //Now let's load the SimpleEditor..
-    var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
-    myEditor.render();
-        } 
-    }); 
- 
-// Load the files using the insert() method. 
-loader.insert();
+	var loader = new YAHOO.util.YUILoader({ 
+		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/", 
+		require: ["button","containercore","dom","element","event","menu","simpleeditor"], 
+		loadOptional: false, 
+		combine: false, 
+		filter: "MIN", 
+		allowRollup: true, 
+		onSuccess: function() { 
+			//Setup some private variables
+			var Dom = YAHOO.util.Dom, Event = YAHOO.util.Event;
+			
+			//The SimpleEditor config
+			var myConfig = {
+				height: '300px',
+				width: '600px',
+				dompath: true,
+				focusAtStart: true
+			};
+			
+			//Now let's load the SimpleEditor..
+			var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
+			myEditor.render();
+			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(myEditor.saveHTML()); return formHandler(this); });
+		} 
+	});
+	
+	// Load the files using the insert() method. 
+	loader.insert();
 }); //<form onsubmit="$('#editor').text(myEditor.saveHTML()); return formHandler(this);" class="yui-skin-sam">
 </script>
-EOF;*/
+EOF;
 			}
 			
 			$content = <<<EOF
@@ -290,12 +290,15 @@ $.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js
 EOF;
 			}
 			break;
+		case 'users':
+			$content = '<h1>Users</h1>This feature is not supported, yet.';
+			break;
 		default:
 			KBTB::req(false, 'Invalid input (page: "'.$url.'")');
 			break;
 	}
 	return json_encode(array('page', $urlOrg, $content,
-		'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#modules">Modules</a><a href=".#design">Design</a><a href=".#files">Files</a><a href=".#settings">Settings</a><a href="#about">About KB CMS</a>'
+		'<a href=".#main">Main page</a><a href=".#pages">Pages</a><a href=".#modules">Modules</a><a href=".#design">Design</a><a href=".#files">Files</a><a href=".#users">Users</a><a href=".#settings">Settings</a><a href="#about">About KB CMS</a>'
 	));
 }
 
