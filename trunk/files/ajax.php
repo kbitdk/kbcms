@@ -537,6 +537,12 @@ function main() {
 }
 
 function cfgSet($cfg) {
+	$file = 'cfgOverride.php';
+	if(is_file($file) && is_readable($file)) {
+		require($file);
+		$cfg = cfgOverrideSet($cfg);
+	}
+	
 	if(!is_dir('../settings')) if(!@mkdir('../settings')) return false;
 	
 	KBTB::req(file_put_contents('../settings/.htaccess',"Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]")>0,'Couldn\'t save settings file. Check directory permissions.');
@@ -576,6 +582,12 @@ function cfgGet() {
 </html>
 EOF
 		);
+	}
+	
+	$file = 'cfgOverride.php';
+	if(is_file($file) && is_readable($file)) {
+		require($file);
+		return cfgOverrideGet($retval);
 	}
 	return $retval;
 }
