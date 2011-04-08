@@ -194,7 +194,7 @@ EOF;
 			$content = '<h1>Edit file</h1><a href="#files">Back to files</a><br/><br/>';
 			
 			$filename = $qs;
-			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
+			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i') && !in_array($filename,array('.','..')) && is_file('../settings/files/'.$filename));
 			
 			KBTB::req($file = file_get_contents('../settings/files/'.$filename));
 			
@@ -223,6 +223,15 @@ $(document).keydown(function (e) {
 	case 27: // escape
 		return fullscreen(false);
 		break;
+	case 70: // f
+		/*
+		var selection = aceEditor.getSession().doc.getTextRange(aceEditor.getSelectionRange());
+		var searchval = prompt('Find:',selection);
+		if(searchval!='' && searchval!==null) {
+			aceEditor.find(searchval);
+		}
+		return false;*/
+		break;
 	case 83: // s
 		if(e.ctrlKey) {
 			$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
@@ -230,9 +239,11 @@ $(document).keydown(function (e) {
 			return formHandler($('#codeForm'));
 		}
 		break;
-	/*case 114: // F3
-		//return false;
-		break;*/
+	case 114: // F3
+		if(e.shiftKey) aceEditor.findPrevious();
+		else aceEditor.findNext();
+		return false;
+		break;
 	}
 });
 function fullscreen(enable) {
@@ -242,12 +253,12 @@ function fullscreen(enable) {
 	aceEditor.focus();
 	return false;
 }
-$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function() {
+$.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js', function() {
 	var ace = window.__ace_shadowed__;
 	var editor = ace.edit('aceEditor');
 	window.aceEditor = editor;
 	var theme = ['clouds_midnight','twilight','pastel_on_dark','idle_fingers','merbivore','merbivore_soft','vibrant_ink'][2];
-	$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/theme-'+theme+'.js', function() {
+	$.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/theme-'+theme+'.js', function() {
 		editor.setTheme('ace/theme/'+theme);
 		$('.ace-pastel-on-dark .ace_scroller').css('background','#1C1818');
 		var sess = editor.getSession();
@@ -268,7 +279,7 @@ $.getScript('http://ajaxorg.github.com/ace/build/textarea/src/ace.js', function(
 		}[ext];
 		
 		if(mode!==undefined) {
-			$.getScript('http://ajaxorg.github.com/ace/build/textarea/src/mode-'+mode+'.js', function() {
+			$.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/mode-'+mode+'.js', function() {
 				var modeNew = ace.require('ace/mode/'+mode).Mode;
 				sess.setMode(new modeNew());
 			});
@@ -341,7 +352,10 @@ function main() {
 	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
 	
-	if(!in_array($_POST['a'], array('logout','checklogin','login')) && !user::loggedIn()) return json_encode(array('redirect','.'));
+	if(!in_array($_POST['a'], array('logout','checklogin','login','page')) && !user::loggedIn()) {
+		echo(json_encode(array('errLogin')));
+		return;
+	}
 	switch($_POST['a']) {
 		case 'designChange':
 			$fieldErrs = array();
@@ -473,7 +487,8 @@ function main() {
 			
 			if(!KBTB::valid('strlen',$filename,0,100)) echo(json_encode(array('err','Invalid filename.')));
 			elseif(substr($filename,-5)=='.html') echo(json_encode(array('err','HTML files are not allowed through this interface. Use the pages section.')));
-			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i')) echo(json_encode(array('err','Invalid filename.')));
+			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i')) echo(json_encode(array('err','Invalid filename.')));
+			elseif(in_array($filename,array('.','..'))) echo(json_encode(array('err','Invalid filename.')));
 			elseif(file_exists('../settings/files/'.$filename) || file_exists('../'.$filename)) echo(json_encode(array('err','File already exists.')));
 			elseif(!is_dir('../settings') && !cfgSet($cfg)) die(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
@@ -497,7 +512,7 @@ function main() {
 			break;
 		case 'adminFileEditChange':
 			$filename = $_POST['filename'];
-			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9][a-z0-9_.]{0,98}$/i') && is_file('../settings/files/'.$filename));
+			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i') && !in_array($filename,array('.','..')) && is_file('../settings/files/'.$filename));
 			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
 			
 			KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false);
@@ -532,10 +547,23 @@ function cfgSet($cfg) {
 
 function cfgGet() {
 	$file = '../settings/cfg.json';
-	if(is_file($file) && is_readable($file)) {
-		return json_decode(file_get_contents($file),true);
-	}else {
-		$design = <<<EOF
+	if(is_file($file) && is_readable($file)) $retval = json_decode(file_get_contents($file),true);
+	else {
+		$retval = array( // Default config
+			'users' =>	array(
+				array(
+					'user' =>	'admin',
+					'pass' =>	'asd'
+				)
+			),
+			'pages' =>	array(
+				array(
+					'page' =>	'index',
+					'title' =>	'Main page',
+					'content' =>	'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>'
+				)
+			),
+			'design' =>	<<<'EOF'
 <!DOCTYPE html>
 <html>
 <head>
@@ -546,24 +574,10 @@ function cfgGet() {
 	{%"content","main"%}
 </body>
 </html>
-EOF;
-		return array( // Default config
-			'users' =>	array(
-				array(
-					'user' =>	'admin',
-					'pass' =>	crypt('changeme')
-				)
-			),
-			'pages' =>	array(
-				array(
-					'page' =>	'index',
-					'title' =>	'Main page',
-					'content' =>	'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>'
-				)
-			),
-			'design' =>	$design
+EOF
 		);
 	}
+	return $retval;
 }
 
 
