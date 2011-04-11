@@ -5,6 +5,21 @@ Licensed under GPLv2 or later.
 */
 
 // Functions
+
+function filterModules($val) {
+	return is_file('../settings/'.$val) && preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $val);
+}
+function filterFiles($val) {
+	return is_file('../settings/files/'.$val);
+}
+function listFiles($val) {
+	return '<tr><td><a href="#fileEdit?'.$val.'">'.$val.'</td><td><a href="#" class="arrow" onclick=\'if(confirm("Are you sure you want to delete this file?")) ajax({a:"fileDelete",file:"'.KBTB::attr_encode($val).'"}); return false;\'>X</a></td></tr>';
+}
+function filesRepublishWCheck($val) {
+	if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val));
+}
+
+
 function page($urlOrg,$cfg) {
 	if(!user::loggedIn()) return json_encode(array('redirect','.'));
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
@@ -157,7 +172,7 @@ EOF;
 		case 'modules':
 			$content = '<h1>Modules</h1>';
 			
-			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,function($val) { return is_file('../settings/'.$val) && preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $val); }))==0)
+			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,filterModules))==0)
 				$content .= 'There are currently no modules installed.';
 			else while($entry = $files) {
 				KBTB::req(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex));
@@ -174,12 +189,11 @@ EOF;
 			$content = '<h1>Module settings ('.KBTB::html_encode(constant('module\\'.$qs.'\\name')).')</h1>'.constant('module\\'.$qs.'\\settings');
 			break;
 		case 'files':
-			if(!is_dir('../settings/files') || !($files = scandir('../settings/files')) || count($files = array_filter($files,function($val) { return is_file('../settings/files/'.$val); }))==0)
+			if(!is_dir('../settings/files') || !($files = scandir('../settings/files')) || count($files = array_filter($files,filterFiles))==0)
 				$filelist = 'There are currently no files uploaded.';
 			else $filelist =
 				'<table class="pagetable">'.
-				implode('',array_map(function($val) { return '<tr><td><a href="#fileEdit?'.$val.'">'.$val.'</td>'.
-					'<td><a href="#" class="arrow" onclick=\'if(confirm("Are you sure you want to delete this file?")) ajax({a:"fileDelete",file:"'.KBTB::attr_encode($val).'"}); return false;\'>X</a></td></tr>'; },$files)).
+				implode('',array_map(listFiles,$files)).
 				'</table>';
 			
 			$content =
@@ -525,7 +539,7 @@ function main() {
 			else echo(json_encode(array('page','files')));
 			break;
 		case 'filesRepublish':
-			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, function($val) { if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val)); }));
+			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, filesRepublishWCheck));
 			
 			echo(json_encode(array('msg','The files have been re-published.')));
 			break;
@@ -562,7 +576,7 @@ function cfgGet() {
 			'users' =>	array(
 				array(
 					'user' =>	'admin',
-					'pass' =>	'asd'
+					'pass' =>	crypt('changeme')
 				)
 			),
 			'pages' =>	array(
@@ -572,7 +586,7 @@ function cfgGet() {
 					'content' =>	'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>'
 				)
 			),
-			'design' =>	<<<'EOF'
+			'design' =>	<<<EOF
 <!DOCTYPE html>
 <html>
 <head>
