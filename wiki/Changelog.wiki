@@ -1,6 +1,11 @@
 #summary Changes in each version.
 #labels Featured
 
+= Unreleased changes =
+Changes described here are in the repository and should be included in the next release
+ * Compatible with PHP 5.2 and possibly earlier PHP versions
+  * 0.2.0 used anonymous functions and the nowdoc syntax, which were introduced to PHP in version 5.3
+
 = 0.2 =
  * Rewrite to overcome some limitations in version 0.1.
  * Content and design is now editable directly in the admin interface, instead of using XML/XSL
