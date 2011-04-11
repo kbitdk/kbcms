@@ -127,7 +127,7 @@ $editor
 EOF;
 			break;
 		case 'main':
-			$content = '<h1>Main page</h1>You\'re logged in to KB CMS.<br/><br/><a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
+			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version 0.2.1.<br/><br/><a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
 			break;
 		case 'pages':
 			$pages = $cfg['pages'];
