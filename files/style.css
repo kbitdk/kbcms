@@ -42,7 +42,7 @@ a img {
 }
 #content {
 	background:					#b3c9ff;
-	position:					relative;
+	position:					absolute;
 	top:							120px;
 	left:							220px;
 	width:					750px;
