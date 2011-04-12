@@ -114,6 +114,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 			
 			//Now let's load the SimpleEditor..
 			var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
+			myEditor._defaultToolbar.buttonType = 'advanced';
 			myEditor.render();
 			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(myEditor.saveHTML()); return formHandler(this); });
 		} 
