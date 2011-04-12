@@ -87,7 +87,7 @@ $.getScript('../lib/ckeditor/ckeditor.js', function() {
 //]]></script>
 EOF;
 			}else{
-				$editor = '<textarea name="editor" id="editor" style="width:730px; height:300px;">'.$pageContent.'</textarea>';
+				$editor = '<textarea name="editor" id="editor" style="width:700px; height:300px;" rows="20" cols="75">'.$pageContent.'</textarea>';
 				$editor .= <<<EOF
 <script type="text/javascript">
 // Instantiate and configure YUI Loader:
@@ -113,11 +113,11 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 			};
 			//YAHOO.widget.Logger.enableBrowserConsole();
 			var state = 'off';
-			$("<style type='text/css'> .editor-hidden { visibility: hidden; top: -9999px; left: -9999px; position: absolute; } </style>").appendTo("head");
+			$("<style type='text/css'> .editor-hidden { visibility: hidden; top: -9999px; left: -9999px; position: absolute; } textarea { border: 0; margin: 0; padding: 0; } .yui-skin-sam .yui-toolbar-container .yui-toolbar-editcode span.yui-toolbar-icon { background-image: url( https://developer.yahoo.com/yui/examples/editor/assets/html_editor.gif ); background-position: 0 1px; left: 5px; } .yui-skin-sam .yui-toolbar-container .yui-button-editcode-selected span.yui-toolbar-icon { background-image: url( https://developer.yahoo.com/yui/examples/editor/assets/html_editor.gif ); background-position: 0 1px; left: 5px; } </style>").appendTo("head");
 			
 			//Now let's load the SimpleEditor..
 			var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
-			//myEditor._defaultToolbar.buttonType = 'advanced';
+			myEditor._defaultToolbar.buttonType = 'advanced';
 			myEditor.on('toolbarLoaded', function() {
 				var codeConfig = {
 					type: 'push', label: 'Edit HTML Code', value: 'editcode'
