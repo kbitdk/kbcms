@@ -93,14 +93,14 @@ EOF;
 // Instantiate and configure YUI Loader:
 var form = $('#editor').parents('form');
 $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuiloader-min.js', function() {
-	var loader = new YAHOO.util.YUILoader({ 
-		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/", 
-		require: ["button","containercore","dom","element","event","menu","simpleeditor"], 
-		loadOptional: false, 
-		combine: false, 
-		filter: "MIN", 
-		allowRollup: true, 
-		onSuccess: function() { 
+	var loader = new YAHOO.util.YUILoader({
+		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/",
+		require: ["button","containercore","dom","element","event","menu","simpleeditor"], //,"logger"
+		loadOptional: false,
+		combine: false,
+		filter: "MIN",
+		allowRollup: true,
+		onSuccess: function() {
 			//Setup some private variables
 			var Dom = YAHOO.util.Dom, Event = YAHOO.util.Event;
 			
@@ -111,10 +111,72 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 				dompath: true,
 				focusAtStart: true
 			};
+			//YAHOO.widget.Logger.enableBrowserConsole();
+			var state = 'off';
+			$("<style type='text/css'> .editor-hidden { visibility: hidden; top: -9999px; left: -9999px; position: absolute; } </style>").appendTo("head");
 			
 			//Now let's load the SimpleEditor..
 			var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
-			myEditor._defaultToolbar.buttonType = 'advanced';
+			//myEditor._defaultToolbar.buttonType = 'advanced';
+			myEditor.on('toolbarLoaded', function() {
+				var codeConfig = {
+					type: 'push', label: 'Edit HTML Code', value: 'editcode'
+				};
+				YAHOO.log('Create the (editcode) Button', 'info', 'example');
+				this.toolbar.addButtonToGroup(codeConfig, 'insertitem');
+				
+				this.toolbar.on('editcodeClick', function() {
+					var ta = this.get('element'),
+					iframe = this.get('iframe').get('element');
+					
+					if (state == 'on') {
+						state = 'off';
+						this.toolbar.set('disabled', false);
+						YAHOO.log('Show the Editor', 'info', 'example');
+						YAHOO.log('Inject the HTML from the textarea into the editor', 'info', 'example');
+						this.setEditorHTML(ta.value);
+						if (!this.browser.ie) {
+							this._setDesignMode('on');
+						}
+						
+						Dom.removeClass(iframe, 'editor-hidden'); //visibility: hidden; top: -9999px; left: -9999px; position: absolute;
+						Dom.addClass(ta, 'editor-hidden'); //textarea { border: 0; margin: 0; padding: 0; }
+						this.show();
+						this._focusWindow();
+					} else {
+						state = 'on';
+						YAHOO.log('Show the Code Editor', 'info', 'example');
+						this.cleanHTML();
+						YAHOO.log('Save the Editors HTML', 'info', 'example');
+						Dom.addClass(iframe, 'editor-hidden');
+						Dom.removeClass(ta, 'editor-hidden');
+						this.toolbar.set('disabled', true);
+						this.toolbar.getButtonByValue('editcode').set('disabled', false);
+						this.toolbar.selectButton('editcode');
+						this.dompath.innerHTML = 'Editing HTML Code';
+						this.hide();
+					}
+					return false;
+				}, this, true);
+				
+				this.on('cleanHTML', function(ev) {
+					YAHOO.log('cleanHTML callback fired..', 'info', 'example');
+					this.get('element').value = ev.html;
+				}, this, true);
+				
+				this.on('afterRender', function() {
+					var wrapper = this.get('editor_wrapper');
+					wrapper.appendChild(this.get('element'));
+					this.setStyle('width', '100%');
+					this.setStyle('height', '100%');
+					this.setStyle('visibility', '');
+					this.setStyle('top', '');
+					this.setStyle('left', '');
+					this.setStyle('position', '');
+					
+					this.addClass('editor-hidden');
+				}, this, true);
+			}, myEditor, true);
 			myEditor.render();
 			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(myEditor.saveHTML()); return formHandler(this); });
 		} 
@@ -232,7 +294,7 @@ EOF;
 </form>
 <script>
 $(document).keydown(function (e) {
-	switch(e.which) {
+	switch(e.which) { // Diagnostics: $(document).keydown(function (e) { console.log(e.which); });
 	case 13: // enter
 		if(e.altKey) return fullscreen();
 		break;
@@ -259,6 +321,9 @@ $(document).keydown(function (e) {
 		if(e.shiftKey) aceEditor.findPrevious();
 		else aceEditor.findNext();
 		return false;
+		break;
+	case 121: // F10
+		return fullscreen();
 		break;
 	}
 });
@@ -534,7 +599,7 @@ function main() {
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i') && !in_array($filename,array('.','..')) && is_file('../settings/files/'.$filename));
 			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
 			
-			if(!is_writable('../settings/files/'.$filename)) echo(json_encode(array('msg','Error trying to save the file. Please check permissions.')));
+			if(!is_writable('../settings/files/'.$filename)) echo(json_encode(array('msg','Error trying to save the file. Please check permissions.<br/><br/>Command to reset permissions:<br/>sudo chown -R `whoami`:www-data /var/www; sudo chmod -R g+w /var/www')));
 			else {
 				KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false, 'Error trying to save the file.');
 				KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
