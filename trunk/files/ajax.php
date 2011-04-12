@@ -142,7 +142,9 @@ $editor
 EOF;
 			break;
 		case 'main':
-			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version 0.2.1.<br/><br/><a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
+			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version 0.2.1.<br/><br/>'.
+				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/><br/>'.
+				'<a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
 			break;
 		case 'pages':
 			$pages = $cfg['pages'];
@@ -172,7 +174,7 @@ EOF;
 		case 'modules':
 			$content = '<h1>Modules</h1>';
 			
-			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,filterModules))==0)
+			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,'filterModules'))==0)
 				$content .= 'There are currently no modules installed.';
 			else while($entry = $files) {
 				KBTB::req(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex));
@@ -189,18 +191,17 @@ EOF;
 			$content = '<h1>Module settings ('.KBTB::html_encode(constant('module\\'.$qs.'\\name')).')</h1>'.constant('module\\'.$qs.'\\settings');
 			break;
 		case 'files':
-			if(!is_dir('../settings/files') || !($files = scandir('../settings/files')) || count($files = array_filter($files,filterFiles))==0)
+			if(!is_dir('../settings/files') || !($files = scandir('../settings/files')) || count($files = array_filter($files,'filterFiles'))==0)
 				$filelist = 'There are currently no files uploaded.';
 			else $filelist =
 				'<table class="pagetable">'.
-				implode('',array_map(listFiles,$files)).
+				implode('',array_map('listFiles',$files)).
 				'</table>';
 			
 			$content =
 				'<h1>Files</h1>'.
 				'<a href="#" onclick="return fileUpload();">Upload file</a><br/>'.
-				'<a href="#" onclick="return fileEditNew();">Edit new file</a><br/>'.
-				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Re-publish files</a><br/><br/>'.
+				'<a href="#" onclick="return fileEditNew();">Edit new file</a><br/><br/>'.
 				$filelist
 			;
 			break;
@@ -506,7 +507,7 @@ function main() {
 			elseif(substr($filename,-5)=='.html') echo(json_encode(array('err','HTML files are not allowed through this interface. Use the pages section.')));
 			elseif(!KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i')) echo(json_encode(array('err','Invalid filename.')));
 			elseif(in_array($filename,array('.','..'))) echo(json_encode(array('err','Invalid filename.')));
-			elseif(file_exists('../settings/files/'.$filename) || file_exists('../'.$filename)) echo(json_encode(array('err','File already exists.')));
+			elseif(file_exists('../settings/files/'.$filename)) echo(json_encode(array('err','File already exists.')));
 			elseif(!is_dir('../settings') && !cfgSet($cfg)) die(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else {
 				
@@ -532,16 +533,20 @@ function main() {
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i') && !in_array($filename,array('.','..')) && is_file('../settings/files/'.$filename));
 			KBTB::req(KBTB::valid('strlen', $_POST['aceEditor'], -1,80000) && is_file('../settings/files/'.$filename));
 			
-			KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false);
-			KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
-			
-			if($_POST['return']=='0') echo(json_encode(array('msg','File has been saved.')));
-			else echo(json_encode(array('page','files')));
+			if(!is_writable('../settings/files/'.$filename)) echo(json_encode(array('msg','Error trying to save the file. Please check permissions.')));
+			else {
+				KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false, 'Error trying to save the file.');
+				KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
+				
+				if($_POST['return']=='0') echo(json_encode(array('msg','File has been saved.')));
+				else echo(json_encode(array('page','files')));
+			}
 			break;
 		case 'filesRepublish':
-			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, filesRepublishWCheck));
+			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, 'filesRepublishWCheck'));
+			foreach($cfg['pages'] as $page) pageUpdate($page,$cfg);
 			
-			echo(json_encode(array('msg','The files have been re-published.')));
+			echo(json_encode(array('msg','The files have been republished.')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
