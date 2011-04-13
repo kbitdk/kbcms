@@ -206,11 +206,12 @@ EOF;
 			break;
 		case 'main':
 			$version = '0.2.1';
+			$cfg['versionNewest']['version'] = '0.2.2'; // For testing
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
 				'Last check for updates: '.($cfg['versionNewest']===null?'Never':date('Y-m-d H:i',$cfg['versionNewest']['checkLast'])).
 				'<br/>Newest version: '.($cfg['versionNewest']===null?'N/A':$cfg['versionNewest']['version']).
-				(version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return unsupported();">Upgrade</a>':'').
+				(version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return ajax({a:\'updateRun\'});">Upgrade</a>':'').
 				'<br/><br/><a href="#" onclick="return ajax({a:\'updateCheck\'});">Check for updates</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
@@ -630,6 +631,10 @@ function main() {
 			
 			if(!cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
 			else echo(page('main',$cfg));
+			break;
+		case 'updateRun':
+			
+			echo(json_encode(array('unsupported')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
