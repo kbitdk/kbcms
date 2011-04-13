@@ -206,6 +206,7 @@ EOF;
 			break;
 		case 'main':
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version 0.2.1.<br/><br/>'.
+				'Last check for updates: Never<br/>Newest version: N/A<br/><br/><a href="#" onclick="return ajax({a:\'updateCheck\'});">Check for updates</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
 			break;
@@ -274,7 +275,7 @@ EOF;
 			$filename = $qs;
 			KBTB::req(KBTB::valid('regex',$filename,'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i') && !in_array($filename,array('.','..')) && is_file('../settings/files/'.$filename));
 			
-			KBTB::req($file = file_get_contents('../settings/files/'.$filename));
+			KBTB::req(($file=file_get_contents('../settings/files/'.$filename))!==false);
 			
 			if(preg_match('/[\x00-\x08\x0E-\x1F\x7F]/',$file)) $content .= 'Editing binary files is not supported, yet.';
 			else {
@@ -613,6 +614,19 @@ function main() {
 			foreach($cfg['pages'] as $page) pageUpdate($page,$cfg);
 			
 			echo(json_encode(array('msg','The files have been republished.')));
+			break;
+		case 'updateCheck':
+			/*$r = new HttpRequest('https://kbit.dk/kbcms.json', HttpRequest::METH_GET);
+			try {
+				$r->send();
+				KBTB::debug($r->getResponseCode());
+				//if ($r->getResponseCode() == 200) {
+				//file_put_contents('local.rss', $r->getResponseBody());
+				//}
+			} catch (HttpException $e) {
+				KBTB::debug($e);
+			}*/
+			echo(json_encode(array('unsupported')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
