@@ -633,6 +633,14 @@ function main() {
 			else echo(page('main',$cfg));
 			break;
 		case 'updateRun':
+			//KBTB::req(($ver=file_get_contents($cfg['versionNewest']['download']))!==false);
+			//KBTB::debug(gzuncompress($ver));
+			//$fp = fopen('compress.zlib://'.$cfg['versionNewest']['download'], 'r');
+			//KBTB::debug(fgets($fp));
+			//http://stackoverflow.com/questions/2390604/how-to-pass-variables-as-stdin-into-command-line-from-php
+			//http://ca3.php.net/manual/en/function.gzdecode.php
+			//http://pear.php.net/package/Archive_Tar
+			//system('tar -zxvf file.tar.gz')
 			
 			echo(json_encode(array('unsupported')));
 			break;
