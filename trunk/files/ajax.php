@@ -209,7 +209,7 @@ EOF;
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
-				'Last check for updates: '.(!$updChecked?'Never':date('Y-m-d H:i',$cfg['versionNewest']['checkLast'])).
+				'Last check for updates: '.(!$updChecked?'Never':date('Y-m-d H:i T (\U\T\CO)',$cfg['versionNewest']['checkLast'])).
 				'<br/>Newest version: '.(!$updChecked?'N/A':$cfg['versionNewest']['version']).
 				($updChecked && version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return ajax({a:\'updateRun\'});">Upgrade</a>':'').
 				'<br/><br/><a href="#" onclick="return ajax({a:\'updateCheck\'});">Check for updates</a><br/><br/>'.
