@@ -94,7 +94,7 @@ EOF;
 var form = $('#editor').parents('form');
 $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuiloader-min.js', function() {
 	var loader = new YAHOO.util.YUILoader({
-		base: "https://ajax.googleapis.com/ajax/libs/yui/2.8/build/",
+		base: 'https://ajax.googleapis.com/ajax/libs/yui/2.8/build/',
 		require: ["button","containercore","dom","element","event","menu","simpleeditor"], //,"logger"
 		loadOptional: false,
 		combine: false,
@@ -135,12 +135,10 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 						YAHOO.log('Show the Editor', 'info', 'example');
 						YAHOO.log('Inject the HTML from the textarea into the editor', 'info', 'example');
 						this.setEditorHTML(ta.value);
-						if (!this.browser.ie) {
-							this._setDesignMode('on');
-						}
+						if (!this.browser.ie) this._setDesignMode('on');
 						
-						Dom.removeClass(iframe, 'editor-hidden'); //visibility: hidden; top: -9999px; left: -9999px; position: absolute;
-						Dom.addClass(ta, 'editor-hidden'); //textarea { border: 0; margin: 0; padding: 0; }
+						Dom.removeClass(iframe, 'editor-hidden');
+						Dom.addClass(ta, 'editor-hidden');
 						this.show();
 						this._focusWindow();
 					} else {
@@ -178,7 +176,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 				}, this, true);
 			}, myEditor, true);
 			myEditor.render();
-			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(myEditor.saveHTML()); return formHandler(this); });
+			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(state=='on'?myEditor.get('element').value:myEditor.saveHTML()); return formHandler(this); });
 		} 
 	});
 	
@@ -661,7 +659,9 @@ function cfgSet($cfg) {
 	
 	if(!is_dir('../settings')) if(!@mkdir('../settings')) return false;
 	
-	KBTB::req(file_put_contents('../settings/.htaccess',"Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]")>0,'Couldn\'t save settings file. Check directory permissions.');
+	if(!is_writable('../settings/.htaccess') || !is_writable('../settings/cfg.json')) die(json_encode(array('msg','Error trying to save settings. Please check permissions.<br/><br/>Command to reset permissions:<br/>sudo chown -R `whoami`:www-data /var/www; sudo chmod -R g+w /var/www')));
+	
+	KBTB::req(file_put_contents('../settings/.htaccess','Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]')>0,'Couldn\'t save settings file. Check directory permissions.');
 	KBTB::req(file_put_contents('../settings/cfg.json',json_encode($cfg))>0);
 	
 	return true;
