@@ -206,12 +206,12 @@ EOF;
 			break;
 		case 'main':
 			$version = '0.2.1';
-			$cfg['versionNewest']['version'] = '0.2.2'; // For testing
+			$updChecked = array_key_exists('versionNewest',$cfg);
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
-				'Last check for updates: '.($cfg['versionNewest']===null?'Never':date('Y-m-d H:i',$cfg['versionNewest']['checkLast'])).
-				'<br/>Newest version: '.($cfg['versionNewest']===null?'N/A':$cfg['versionNewest']['version']).
-				(version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return ajax({a:\'updateRun\'});">Upgrade</a>':'').
+				'Last check for updates: '.(!$updChecked?'Never':date('Y-m-d H:i',$cfg['versionNewest']['checkLast'])).
+				'<br/>Newest version: '.(!$updChecked?'N/A':$cfg['versionNewest']['version']).
+				($updChecked && version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return ajax({a:\'updateRun\'});">Upgrade</a>':'').
 				'<br/><br/><a href="#" onclick="return ajax({a:\'updateCheck\'});">Check for updates</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
@@ -633,16 +633,14 @@ function main() {
 			else echo(page('main',$cfg));
 			break;
 		case 'updateRun':
-			//KBTB::req(($ver=file_get_contents($cfg['versionNewest']['download']))!==false);
-			//KBTB::debug(gzuncompress($ver));
-			//$fp = fopen('compress.zlib://'.$cfg['versionNewest']['download'], 'r');
-			//KBTB::debug(fgets($fp));
-			//http://stackoverflow.com/questions/2390604/how-to-pass-variables-as-stdin-into-command-line-from-php
-			//http://ca3.php.net/manual/en/function.gzdecode.php
-			//http://pear.php.net/package/Archive_Tar
-			//system('tar -zxvf file.tar.gz')
+			KBTB::req(($update=file_get_contents($cfg['versionNewest']['download']))!==false);
+			KBTB::req((file_put_contents('update.tgz', $update))!==false);
 			
-			echo(json_encode(array('unsupported')));
+			exec('tar -xzf update.tgz', $output, $retval);
+			KBTB::req(unlink('update.tgz'));
+			KBTB::req($retval===0);
+			
+			echo(json_encode(array('reload')));
 			break;
 		default:
 			if(preg_match('/^module_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)$/',$_POST['a'],$matches)) {
@@ -657,7 +655,7 @@ function main() {
 function cfgSet($cfg) {
 	$file = 'cfgOverride.php';
 	if(is_file($file) && is_readable($file)) {
-		require($file);
+		require_once($file);
 		$cfg = cfgOverrideSet($cfg);
 	}
 	
@@ -704,7 +702,7 @@ EOF
 	
 	$file = 'cfgOverride.php';
 	if(is_file($file) && is_readable($file)) {
-		require($file);
+		require_once($file);
 		return cfgOverrideGet($retval);
 	}
 	return $retval;
