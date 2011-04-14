@@ -8,7 +8,7 @@ Changes described here are in the repository and should be included in the next 
 = 0.2.1 =
  * Compatible with PHP 5.2 and possibly earlier PHP versions
   * 0.2.0 used anonymous functions and the nowdoc syntax, which were introduced to PHP in version 5.3
- * Uses Yahoo's YUI 2 Rich Text Editor as a fallback if CKEditor is not found
+ * Uses Yahoo's YUI 2 Rich Text Editor as a fallback if CKEditor is not found (issue 1)
  * KB CMS can now update itself
 
 = 0.2 =
