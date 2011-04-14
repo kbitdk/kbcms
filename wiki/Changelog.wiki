@@ -3,7 +3,10 @@
 
 = Unreleased changes =
 Changes described here are in the repository and should be included in the next release
+ * Fixed an issue where the YUI code view didn't retain any changes when submitting
+<wiki:comment>
  * No new unreleased features, yet.
+</wiki:comment>
 
 = 0.2.1 =
  * Compatible with PHP 5.2 and possibly earlier PHP versions
