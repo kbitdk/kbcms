@@ -5,7 +5,7 @@
 
 This is a guide to install KB CMS on Ubuntu. Many of the steps may apply to other Ubuntu versions, other distributions or even other operating systems. This guide is specifically made for one certain setup for simplicity, but others may follow later. 
 
-= Ubuntu 10.10 =
+= Ubuntu =
 
 The initial setup can be done with the following commands in a terminal window:
 
