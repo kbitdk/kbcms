@@ -1,3 +1,1 @@
-Options -Indexes
-RewriteEngine on
-RewriteRule ^.*$ - [F]
+Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]
