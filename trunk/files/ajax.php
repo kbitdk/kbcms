@@ -119,9 +119,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 			var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
 			myEditor._defaultToolbar.buttonType = 'advanced';
 			myEditor.on('toolbarLoaded', function() {
-				var codeConfig = {
-					type: 'push', label: 'Edit HTML Code', value: 'editcode'
-				};
+				var codeConfig = { type: 'push', label: 'Edit HTML Code', value: 'editcode' };
 				YAHOO.log('Create the (editcode) Button', 'info', 'example');
 				this.toolbar.addButtonToGroup(codeConfig, 'insertitem');
 				
@@ -134,8 +132,10 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 						this.toolbar.set('disabled', false);
 						YAHOO.log('Show the Editor', 'info', 'example');
 						YAHOO.log('Inject the HTML from the textarea into the editor', 'info', 'example');
+						//console.log(ta.value);
 						this.setEditorHTML(ta.value);
 						if (!this.browser.ie) this._setDesignMode('on');
+						//console.log(this.saveHTML());
 						
 						Dom.removeClass(iframe, 'editor-hidden');
 						Dom.addClass(ta, 'editor-hidden');
@@ -144,7 +144,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 					} else {
 						state = 'on';
 						YAHOO.log('Show the Code Editor', 'info', 'example');
-						this.cleanHTML();
+						if(this.editorDirty) this.cleanHTML();
 						YAHOO.log('Save the Editors HTML', 'info', 'example');
 						Dom.addClass(iframe, 'editor-hidden');
 						Dom.removeClass(ta, 'editor-hidden');
@@ -176,6 +176,7 @@ $.getScript('https://ajax.googleapis.com/ajax/libs/yui/2.8/build/yuiloader/yuilo
 				}, this, true);
 			}, myEditor, true);
 			myEditor.render();
+			//window.myEditor = myEditor;
 			form.addClass('yui-skin-sam').removeAttr('onsubmit').submit(function() { $('#editor').text(state=='on'?myEditor.get('element').value:myEditor.saveHTML()); return formHandler(this); });
 		} 
 	});
@@ -203,7 +204,7 @@ $editor
 EOF;
 			break;
 		case 'main':
-			$version = '0.2.1';
+			$version = '0.2.2a';
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
@@ -561,15 +562,23 @@ function main() {
 			break;
 		case 'fileEditNew':
 			$fieldErrs = array();
+			$filename = $_POST['filename'];
 			
 			if(!KBTB::valid('strlen',$_POST['filename'],0,100)) $fieldErrs['filename'] = 'Invalid input.';
 			elseif(substr($_POST['filename'],-5)=='.html') $fieldErrs['filename'] = 'HTML files are not allowed through this interface. Use the pages section.';
-			elseif(!KBTB::valid('regex',$_POST['filename'],'/^[a-z0-9][a-z0-9.]*$/i')) $fieldErrs['filename'] = 'Invalid input.';
+			elseif(!KBTB::valid('regex',$_POST['filename'],'/^[a-z0-9_.][a-z0-9_.]{0,98}$/i')) $fieldErrs['filename'] = 'Invalid input.';
+			elseif(in_array($filename,array('.','..'))) $fieldErrs['filename'] = 'Invalid filename.';
+			elseif(file_exists('../settings/files/'.$filename)) $fieldErrs['filename'] = 'File already exists.';
 			
 			// Send validation err's back
 			if(count($fieldErrs)>0) die(json_encode(array('fieldErrs',$fieldErrs)));
 			
-			echo(json_encode(array('unsupported')));
+			if(!is_dir('../settings') && !cfgSet($cfg)) echo(json_encode(array('err','Error: Couldn\'t save settings. Check if application has necessary directory permissions.')));
+			if(!is_writable('../settings/files')) echo(json_encode(array('msg','Error trying to save the file. Please check permissions.<br/><br/>Command to reset permissions:<br/>sudo chown -R `whoami`:www-data /var/www; sudo chmod -R g+w /var/www')));
+			else {
+				KBTB::req(file_put_contents('../settings/files/'.$filename, '')!==false, 'Error trying to save the file.');
+				echo(page('fileEdit?'.$filename,$cfg));
+			}
 			break;
 		case 'fileUpload':
 			$filename = $_FILES['file']['name'];
@@ -689,7 +698,7 @@ function cfgGet() {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>KB CMS - Suit yourself</title>
+	<title>New site made with KB CMS</title>
 </head>
 <body>
 	<h1>{%"content","title"%}</h1>
