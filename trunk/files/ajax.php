@@ -204,8 +204,12 @@ $editor
 EOF;
 			break;
 		case 'main':
-			$version = '0.2.2a';
-			KBTB::debug('$Revision$');
+			$version = '0.2.2';
+			$rev = '$Revision$';
+			KBTB::req(preg_match('/^\$Revision$rev, $entryRegex));
+			$rev = $entryRegex[1];
+			$version .= 'a.'.$rev;
+			
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
