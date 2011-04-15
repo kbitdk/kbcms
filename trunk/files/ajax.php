@@ -204,11 +204,11 @@ $editor
 EOF;
 			break;
 		case 'main':
-			$version = '0.2.2';
+			$version = '0.2.3';
 			$rev = '$Revision$';
-			KBTB::req(preg_match('/^\$Revision$rev, $entryRegex));
+			KBTB::req(preg_match('/^\$Re'.'vision: ([1-9][0-9]{0,20}) \$$/', $rev, $entryRegex));
 			$rev = $entryRegex[1];
-			$version .= 'a.'.$rev;
+			$version .= '.dev.'.$rev;
 			
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
