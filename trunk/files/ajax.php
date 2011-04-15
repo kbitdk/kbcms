@@ -205,6 +205,7 @@ EOF;
 			break;
 		case 'main':
 			$version = '0.2.2a';
+			KBTB::debug('$Revision$');
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
 			$content = '<h1>Main page</h1>You\'re logged in to KB CMS version '.$version.'.<br/><br/>'.
@@ -527,7 +528,7 @@ function main() {
 			
 			$login = false;
 			$oldpass = $cfg['users'][0]['pass'];
-			foreach($cfg['users'] as $key=>$user) if($login===false && $user['user']==$_SESSION['user'] && crypt($_POST['passOld'],$user['pass'])==$user['pass']) $login = $key;
+			foreach($cfg['users'] as $key=>$user) if($login===false && $user['user']==user::username() && crypt($_POST['passOld'],$user['pass'])==$user['pass']) $login = $key;
 			if($login===false) $fieldErrs['passOld'] = 'Invalid input.';
 			
 			// Send validation err's back
@@ -539,7 +540,7 @@ function main() {
 			else echo(json_encode(array('callbackCustom','passChanged')));
 			break;
 		case 'logout':
-			unset($_SESSION['user']);
+			user::logout();
 			unset($_SESSION['KCFINDER']);
 			echo(json_encode(array('redirect','.')));
 			break;
@@ -553,7 +554,7 @@ function main() {
 			
 			if($login===false) echo(json_encode(array('fieldErrs',array('user'=>'Incorrect username and/or password.','pass'=>'Incorrect username and/or password.'))));
 			else {
-				$_SESSION['user'] = $user['user'];
+				user::login($user['user']);
 				echo(page('main',$cfg));
 			}
 			break;
@@ -721,8 +722,17 @@ EOF
 // Classes
 
 class user {
+	function login($user) {
+		$_SESSION['kbcms_'.dirname($_SERVER['SCRIPT_NAME']).'_user'] = $user;
+	}
+	function logout() {
+		unset($_SESSION['kbcms_'.dirname($_SERVER['SCRIPT_NAME']).'_user']);
+	}
 	function loggedIn() {
-		return isset($_SESSION['user']);
+		return isset($_SESSION['kbcms_'.dirname($_SERVER['SCRIPT_NAME']).'_user']);
+	}
+	function username() {
+		return $_SESSION['kbcms_'.dirname($_SERVER['SCRIPT_NAME']).'_user'];
 	}
 }
 
