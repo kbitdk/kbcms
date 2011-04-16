@@ -19,7 +19,6 @@ function filesRepublishWCheck($val) {
 	if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val));
 }
 
-
 function page($urlOrg,$cfg) {
 	if(!user::loggedIn()) return json_encode(array('redirect','.'));
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
