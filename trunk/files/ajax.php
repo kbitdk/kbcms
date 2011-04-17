@@ -20,7 +20,6 @@ function filesRepublishWCheck($val) {
 }
 
 function page($urlOrg,$cfg) {
-	if(!user::loggedIn()) return json_encode(array('redirect','.'));
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
 		$qs = substr($urlOrg,$qPos+1);
 		$url = substr($urlOrg,0,$qPos);
@@ -446,8 +445,8 @@ function main() {
 	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
 	
-	if(!in_array($_POST['a'], array('logout','checklogin','login','page')) && !user::loggedIn()) {
-		echo(json_encode(array('errLogin')));
+	if(!in_array($_POST['a'], array('logout','checklogin','login')) && !user::loggedIn()) {
+		echo(json_encode($_POST['a']=='page' ? array('redirect','.') : array('errLogin')));
 		return;
 	}
 	switch($_POST['a']) {
