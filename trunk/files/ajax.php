@@ -303,37 +303,39 @@ EOF;
 </form>
 <script>
 $(document).keydown(function (e) {
-	switch(e.which) { // Diagnostics: $(document).keydown(function (e) { console.log(e.which); });
-	case 13: // enter
-		if(e.altKey) return fullscreen();
-		break;
-	case 27: // escape
-		return fullscreen(false);
-		break;
-	case 70: // f
-		/*
-		var selection = aceEditor.getSession().doc.getTextRange(aceEditor.getSelectionRange());
-		var searchval = prompt('Find:',selection);
-		if(searchval!='' && searchval!==null) {
-			aceEditor.find(searchval);
+	if($('#aceEditorTextarea').length) {
+		switch(e.which) { // Diagnostics: $(document).keydown(function (e) { console.log(e.which); });
+		case 13: // enter
+			if(e.altKey) return fullscreen();
+			break;
+		case 27: // escape
+			return fullscreen(false);
+			break;
+		case 70: // f
+			/*
+			var selection = aceEditor.getSession().doc.getTextRange(aceEditor.getSelectionRange());
+			var searchval = prompt('Find:',selection);
+			if(searchval!='' && searchval!==null) {
+				aceEditor.find(searchval);
+			}
+			return false;*/
+			break;
+		case 83: // s
+			if(e.ctrlKey) {
+				$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
+				$('input[name=return]',this).val('0');
+				return formHandler($('#codeForm'));
+			}
+			break;
+		case 114: // F3
+			if(e.shiftKey) aceEditor.findPrevious();
+			else aceEditor.findNext();
+			return false;
+			break;
+		case 121: // F10
+			return fullscreen();
+			break;
 		}
-		return false;*/
-		break;
-	case 83: // s
-		if(e.ctrlKey) {
-			$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
-			$('input[name=return]',this).val('0');
-			return formHandler($('#codeForm'));
-		}
-		break;
-	case 114: // F3
-		if(e.shiftKey) aceEditor.findPrevious();
-		else aceEditor.findNext();
-		return false;
-		break;
-	case 121: // F10
-		return fullscreen();
-		break;
 	}
 });
 function fullscreen(enable) {
