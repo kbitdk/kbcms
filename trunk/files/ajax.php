@@ -206,7 +206,7 @@ EOF;
 			$rev = '$Revision$';
 			KBTB::req(preg_match('/^\$Re'.'vision: ([1-9][0-9]{0,20}) \$$/', $rev, $entryRegex));
 			$rev = $entryRegex[1];
-			$version .= '.dev.'.$rev;
+			//$version .= '.dev.'.$rev;
 			
 			$updChecked = array_key_exists('versionNewest',$cfg);
 			
@@ -302,42 +302,45 @@ EOF;
 <input type="submit" value="Submit"/>
 </form>
 <script>
-$(document).keydown(function (e) {
-	if($('#aceEditorTextarea').length) {
-		switch(e.which) { // Diagnostics: $(document).keydown(function (e) { console.log(e.which); });
-		case 13: // enter
-			if(e.altKey) return fullscreen();
-			break;
-		case 27: // escape
-			return fullscreen(false);
-			break;
-		case 70: // f
-			/*
-			var selection = aceEditor.getSession().doc.getTextRange(aceEditor.getSelectionRange());
-			var searchval = prompt('Find:',selection);
-			if(searchval!='' && searchval!==null) {
-				aceEditor.find(searchval);
+if(!window.aceKeysBound) {
+	$(document).keydown(function (e) {
+		if($('#aceEditorTextarea').length) {
+			switch(e.which) { // Diagnostics: $(document).keydown(function (e) { console.log(e.which); });
+			case 13: // enter
+				if(e.altKey) return fullscreen();
+				break;
+			case 27: // escape
+				return fullscreen(false);
+				break;
+			case 70: // f
+				/*
+				var selection = aceEditor.getSession().doc.getTextRange(aceEditor.getSelectionRange());
+				var searchval = prompt('Find:',selection);
+				if(searchval!='' && searchval!==null) {
+					aceEditor.find(searchval);
+				}
+				return false;*/
+				break;
+			case 83: // s
+				if(e.ctrlKey) {
+					$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
+					$('input[name=return]',this).val('0');
+					return formHandler($('#codeForm'));
+				}
+				break;
+			case 114: // F3
+				if(e.shiftKey) aceEditor.findPrevious();
+				else aceEditor.findNext();
+				return false;
+				break;
+			case 121: // F10
+				return fullscreen();
+				break;
 			}
-			return false;*/
-			break;
-		case 83: // s
-			if(e.ctrlKey) {
-				$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
-				$('input[name=return]',this).val('0');
-				return formHandler($('#codeForm'));
-			}
-			break;
-		case 114: // F3
-			if(e.shiftKey) aceEditor.findPrevious();
-			else aceEditor.findNext();
-			return false;
-			break;
-		case 121: // F10
-			return fullscreen();
-			break;
 		}
-	}
-});
+	});
+	window.aceKeysBound = true;
+}
 function fullscreen(enable) {
 	if(typeof(enable)=='undefined') enable = !$('#aceEditor').hasClass('fullscreen');
 	$('#aceEditor').toggleClass('fullscreen',enable);
