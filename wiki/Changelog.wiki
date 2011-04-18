@@ -1,16 +1,19 @@
 #summary Changes in each version.
 #labels Featured
 
-= 0.2.3 =
+= Unreleased features =
 Changes described here are in the repository and should be included in the next release
+ * No new unreleased features, yet.
+
+<wiki:comment>
+</wiki:comment>
+
+= 0.2.3 =
  * Fixed an issue where the YUI code view didn't retain any changes when submitting
  * Made the login session variable unique for the folder KB CMS is in, so you can have multiple CMS'es on one site with separate users
   * This means that an upgrade will require you to log in again after the upgrade
  * Fixed an issue where the about page wouldn't show properly while logged in
  * Fixed an issue where shortcuts for the ACE editor were in some cases applied when the editor wasn't there and in some cases multiple times
-<wiki:comment>
- * No new unreleased features, yet.
-</wiki:comment>
 
 = 0.2.1 =
  * Compatible with PHP 5.2 and possibly earlier PHP versions
