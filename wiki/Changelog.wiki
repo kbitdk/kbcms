@@ -7,6 +7,7 @@ Changes described here are in the repository and should be included in the next 
  * Made the login session variable unique for the folder KB CMS is in, so you can have multiple CMS'es on one site with separate users
   * This means that an upgrade will require you to log in again after the upgrade
  * Fixed an issue where the about page wouldn't show properly while logged in
+ * Fixed an issue where shortcuts for the ACE editor were sometimes applied when the editor wasn't there
 <wiki:comment>
  * No new unreleased features, yet.
 </wiki:comment>
