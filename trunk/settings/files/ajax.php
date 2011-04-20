@@ -637,10 +637,10 @@ function main() {
 			echo(json_encode(array('msg','The files have been republished.')));
 			break;
 		case 'updateCheck':
-			KBTB::req(($ver=file_get_contents('https://kbit.dk/kbcms.json'))!==false);
-			KBTB::req(($ver=json_decode($ver,true))!==null);
+			KBTB::req(($release=file_get_contents('https://kbcms.googlecode.com/svn/trunk/releases/releases.json'))!==false);
+			KBTB::req(($release=json_decode($release,true))!==null);
 			
-			KBTB::req($ver['version'][0]!==null);
+			$ver = $release['stable'];
 			$ver['checkLast'] = time();
 			$cfg['versionNewest'] = $ver;
 			
