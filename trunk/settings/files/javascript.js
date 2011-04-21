@@ -74,6 +74,15 @@ function ajaxCallback(msg, arg) {
 			if(new RegExp('^[a-zA-Z]+$').test(msg[1])) eval(msg[1]+'(msg);');
 			else alert('Error: Invalid internal call.');
 			break;
+		case 'callbackDirect':
+			msg.shift();
+			var funName = msg.shift();
+			if(new RegExp('^[a-zA-Z]+(\\.[a-zA-Z]+)*$').test(funName)) eval(funName+'.apply(this,msg);');
+			else alert('Error: Invalid internal call.');
+			break;
+		case 'consoleLog':
+			console.log(msg[1]);
+			break;
 		case 'content':
 		case 'contentTop':
 			$(typeof(arg['contentBox'])=='undefined'?'#content':arg['contentBox']).html(msg[1]);
