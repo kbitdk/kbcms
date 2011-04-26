@@ -18,6 +18,9 @@ function listFiles($val) {
 function filesRepublishWCheck($val) {
 	if(is_file('../settings/files/'.$val)) KBTB::req(copy('../settings/files/'.$val,'../'.$val));
 }
+function filesPackage($val) {
+	if(is_file('../settings/files/'.$val)) echo(targz($val, file_get_contents('../settings/files/'.$val)));
+}
 
 function page($urlOrg,$cfg) {
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
@@ -215,7 +218,8 @@ EOF;
 				'<br/>Newest version: '.(!$updChecked?'N/A':$cfg['versionNewest']['version']).
 				($updChecked && version_compare($cfg['versionNewest']['version'],$version)==1?' <a href="#" onclick="return ajax({a:\'updateRun\'});">Upgrade</a>':'').
 				'<br/><br/><a href="#" onclick="return ajax({a:\'updateCheck\'});">Check for updates</a><br/><br/>'.
-				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/><br/>'.
+				'<a href="#" onclick="return ajax({a:\'filesRepublish\'});">Republish site</a><br/>'.
+				'<a href="ajax.php?a=filesRepublishPackage">Package site in a tgz file</a><br/><br/>'.
 				'<a href="#" onclick="return ajax({a:\'logout\'})">Log out</a>';
 			break;
 		case 'pages':
@@ -397,7 +401,7 @@ EOF;
 	));
 }
 
-function pageUpdate($page,$cfg) {
+function pageReturn($page,$cfg) {
 	$handlees = array($page['content'],$cfg['design']);
 	
 	$file = '../settings/tplHandler.php';
@@ -443,18 +447,20 @@ function pageUpdate($page,$cfg) {
 		$handlees[$i] = implode($pageResult).$handlees[$i];
 	}
 	
-	KBTB::req(file_put_contents('../'.$page['page'].'.html',$handlees[1])>0);
+	return $handlees[1];
+}
+
+function pageUpdate($page,$cfg) {
+	KBTB::req(file_put_contents('../'.$page['page'].'.html',pageReturn($page,$cfg))>0);
 }
 
 function main() {
 	if(!isset($_SESSION)) session_start();
 	$cfg = cfgGet();
 	
-	if(!in_array($_POST['a'], array('logout','checklogin','login')) && !user::loggedIn()) {
-		echo(json_encode($_POST['a']=='page' ? array('redirect','.') : array('errLogin')));
-		return;
-	}
-	switch($_POST['a']) {
+	if(!isset($_POST['a'])) getHandler($_GET,$cfg);
+	elseif(!in_array($_POST['a'], array('logout','checklogin','login')) && !user::loggedIn()) echo(json_encode($_POST['a']=='page' ? array('redirect','.') : array('errLogin')));
+	else switch($_POST['a']) {
 		case 'designChange':
 			$fieldErrs = array();
 			if(!KBTB::valid('strlen',$_POST['design'],0,4000)) $fieldErrs['design'] = 'Invalid input.';
@@ -667,6 +673,20 @@ function main() {
 	die();
 }
 
+function getHandler($input,$cfg) {
+	switch($input['a']) {
+		case 'filesRepublishPackage':
+			header('Content-type: application/x-gzip');
+			header('Content-Disposition: attachment; filename="site.tgz"');
+			
+			if(is_dir('../settings/files') && ($files = scandir('../settings/files'))) KBTB::req(array_walk($files, 'filesPackage'));
+			foreach($cfg['pages'] as $page) echo(targz($page['page'].'.html', pageReturn($page,$cfg)));
+			break;
+		default:
+			KBTB::req(false,'Invalid GET input (a: "'.$input['a'].'").');
+	}
+}
+
 function cfgSet($cfg) {
 	$file = 'cfgOverride.php';
 	if(is_file($file) && is_readable($file)) {
@@ -723,6 +743,72 @@ EOF
 		return cfgOverrideGet($retval);
 	}
 	return $retval;
+}
+
+
+// Taken from http://www.clker.com/blog/2008/03/27/creating-a-tar-gz-on-the-fly-using-php/
+// which is a derivative of http://www.koders.com/php/fidA384A1E097E7BEA8DB56698D0FE248C7E1D68DB4.aspx?s=smtp+server
+// which is LGPL 2.1 or later and the derivate did not relicense it, so we can safely use it here under GPLv2 or later
+
+// Computes the unsigned Checksum of a file’s header
+// to try to ensure valid file
+// PRIVATE ACCESS FUNCTION
+function __computeUnsignedChecksum($bytestring)
+{
+  $unsigned_chksum = '';
+  for($i=0; $i<512; $i++)
+    $unsigned_chksum += ord($bytestring[$i]);
+  for($i=0; $i<8; $i++)
+    $unsigned_chksum -= ord($bytestring[148 + $i]);
+  $unsigned_chksum += ord(" ") * 8;
+ 
+  return $unsigned_chksum;
+}
+ 
+// Generates a TAR file from the processed data
+// PRIVATE ACCESS FUNCTION
+function tarSection($Name, $Data, $information=NULL)
+{
+  // Generate the TAR header for this file
+ 
+  $header = str_pad($Name,100,chr(0));
+  $header .= str_pad("777",7,"0",STR_PAD_LEFT) . chr(0);
+  $header .= str_pad(decoct($information["user_id"]),7,"0",STR_PAD_LEFT) . chr(0);
+  $header .= str_pad(decoct($information["group_id"]),7,"0",STR_PAD_LEFT) . chr(0);
+  $header .= str_pad(decoct(strlen($Data)),11,"0",STR_PAD_LEFT) . chr(0);
+  $header .= str_pad(decoct(time(0)),11,"0",STR_PAD_LEFT) . chr(0);
+  $header .= str_repeat(" ",8);
+  $header .= "0";
+  $header .= str_repeat(chr(0),100);
+  $header .= str_pad("ustar",6,chr(32));
+  $header .= chr(32) . chr(0);
+  $header .= str_pad($information["user_name"],32,chr(0));
+  $header .= str_pad($information["group_name"],32,chr(0));
+  $header .= str_repeat(chr(0),8);
+  $header .= str_repeat(chr(0),8);
+  $header .= str_repeat(chr(0),155);
+  $header .= str_repeat(chr(0),12);
+ 
+  // Compute header checksum
+  $checksum = str_pad(decoct(__computeUnsignedChecksum($header)),6,"0",STR_PAD_LEFT);
+  for($i=0; $i<6; $i++) {
+    $header[(148 + $i)] = substr($checksum,$i,1);
+  }
+  $header[154] = chr(0);
+  $header[155] = chr(32);
+ 
+  // Pad file contents to byte count divisible by 512
+  $file_contents = str_pad($Data,(ceil(strlen($Data) / 512) * 512),chr(0));
+ 
+  // Add new tar formatted data to tar file contents
+  $tar_file = $header . $file_contents;
+ 
+  return $tar_file;
+}
+ 
+function targz($Name, $Data)
+{
+  return gzencode(tarSection($Name,$Data),9);
 }
 
 
