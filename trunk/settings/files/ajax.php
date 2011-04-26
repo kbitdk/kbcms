@@ -696,7 +696,8 @@ function cfgSet($cfg) {
 	
 	if(!is_dir('../settings')) if(!@mkdir('../settings')) return false;
 	
-	if(!is_writable('../settings/.htaccess') || !is_writable('../settings/cfg.json')) die(json_encode(array('msg','Error trying to save settings. Please check permissions.<br/><br/>Command to reset permissions:<br/>sudo chown -R `whoami`:www-data /var/www; sudo chmod -R g+w /var/www')));
+	if(!is_writable('../settings') || (file_exists('../settings/.htaccess') && !is_writable('../settings/.htaccess')) || (file_exists('../settings/cfg.json') && !is_writable('../settings/cfg.json')))
+		die(json_encode(array('msg','Error trying to save settings. Please check permissions.<br/><br/>Command to reset permissions:<br/>sudo chown -R `whoami`:www-data /var/www; sudo chmod -R g+w /var/www')));
 	
 	KBTB::req(file_put_contents('../settings/.htaccess','Options -Indexes\nRewriteEngine on\nRewriteRule ^.*$ - [F]')>0,'Couldn\'t save settings file. Check directory permissions.');
 	KBTB::req(file_put_contents('../settings/cfg.json',json_encode($cfg))>0);
