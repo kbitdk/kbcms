@@ -3,11 +3,14 @@
 
 = Unreleased changes =
 Changes described here are in the repository and should be included in the next release
- * Added the ability to package site to a tgz file
- * Fixed issue with checking permissions when saving configuration
+ * No new unreleased features, yet.
 <wiki:comment>
  * No new unreleased features, yet.
 </wiki:comment>
+
+= 0.2.4 =
+ * Added the ability to package site to a tgz file
+ * Fixed issue with checking permissions when saving configuration
 
 = 0.2.3 =
  * Fixed an issue where the YUI code view didn't retain any changes when submitting
