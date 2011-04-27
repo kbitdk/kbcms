@@ -21,6 +21,13 @@ function filesRepublishWCheck($val) {
 function filesPackage($val) {
 	if(is_file('../settings/files/'.$val)) echo(targz($val, file_get_contents('../settings/files/'.$val)));
 }
+function moduleList() {
+	$modules = array();
+	
+	if(!is_dir('../settings') && ($files = scandir('../settings'))) foreach($files as $file) if(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $file, $retval) && is_file('../settings/'.$file)) $modules[] = $retval[1];
+	
+	return $modules;
+}
 
 function page($urlOrg,$cfg) {
 	if(($qPos=strpos($urlOrg,'?'))!==false) {
@@ -250,13 +257,12 @@ EOF;
 		case 'modules':
 			$content = '<h1>Modules</h1>';
 			
-			if(!is_dir('../settings') || !($files = scandir('../settings')) || count($files = array_filter($files,'filterModules'))==0)
-				$content .= 'There are currently no modules installed.';
-			else while($entry = $files) {
-				KBTB::req(preg_match('/^module_([a-zA-Z0-9]+)\.php$/', $entry, $entryRegex));
-				require_once('../settings/'.$entry);
-				$modname = $entryRegex[1];
-				$content .= '<a href=".#modules_settings?'.$modname.'">'.KBTB::html_encode(constant('module\\'.$modname.'\\name')).'<br/>';
+			$modules = moduleList();
+			
+			if(count($modules)==0) $content .= 'There are currently no modules installed.';
+			else foreach($modules as $module) {
+				require_once('../settings/module_'.$entry.'.php');
+				$content .= '<a href=".#modules_settings?'.$module.'">'.KBTB::html_encode(constant('module\\'.$module.'\\name')).'<br/>';
 			}
 			break;
 		case 'modules_settings':
