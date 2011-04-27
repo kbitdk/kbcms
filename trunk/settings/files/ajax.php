@@ -749,67 +749,49 @@ EOF
 
 // Taken from http://www.clker.com/blog/2008/03/27/creating-a-tar-gz-on-the-fly-using-php/
 // which is a derivative of http://www.koders.com/php/fidA384A1E097E7BEA8DB56698D0FE248C7E1D68DB4.aspx?s=smtp+server
-// which is LGPL 2.1 or later and the derivate did not relicense it, so we can safely use it here under GPLv2 or later
+// which is LGPL 2.1 or later and the derivate did not relicense it, so we can safely use it here as GPLv2 or later
 
-// Computes the unsigned Checksum of a file’s header
-// to try to ensure valid file
-// PRIVATE ACCESS FUNCTION
-function __computeUnsignedChecksum($bytestring)
-{
-  $unsigned_chksum = '';
-  for($i=0; $i<512; $i++)
-    $unsigned_chksum += ord($bytestring[$i]);
-  for($i=0; $i<8; $i++)
-    $unsigned_chksum -= ord($bytestring[148 + $i]);
-  $unsigned_chksum += ord(" ") * 8;
- 
-  return $unsigned_chksum;
-}
- 
-// Generates a TAR file from the processed data
-// PRIVATE ACCESS FUNCTION
-function tarSection($Name, $Data, $information=NULL)
-{
-  // Generate the TAR header for this file
- 
-  $header = str_pad($Name,100,chr(0));
-  $header .= str_pad("777",7,"0",STR_PAD_LEFT) . chr(0);
-  $header .= str_pad(decoct($information["user_id"]),7,"0",STR_PAD_LEFT) . chr(0);
-  $header .= str_pad(decoct($information["group_id"]),7,"0",STR_PAD_LEFT) . chr(0);
-  $header .= str_pad(decoct(strlen($Data)),11,"0",STR_PAD_LEFT) . chr(0);
-  $header .= str_pad(decoct(time(0)),11,"0",STR_PAD_LEFT) . chr(0);
-  $header .= str_repeat(" ",8);
-  $header .= "0";
-  $header .= str_repeat(chr(0),100);
-  $header .= str_pad("ustar",6,chr(32));
-  $header .= chr(32) . chr(0);
-  $header .= str_pad($information["user_name"],32,chr(0));
-  $header .= str_pad($information["group_name"],32,chr(0));
-  $header .= str_repeat(chr(0),8);
-  $header .= str_repeat(chr(0),8);
-  $header .= str_repeat(chr(0),155);
-  $header .= str_repeat(chr(0),12);
- 
-  // Compute header checksum
-  $checksum = str_pad(decoct(__computeUnsignedChecksum($header)),6,"0",STR_PAD_LEFT);
-  for($i=0; $i<6; $i++) {
-    $header[(148 + $i)] = substr($checksum,$i,1);
-  }
-  $header[154] = chr(0);
-  $header[155] = chr(32);
- 
-  // Pad file contents to byte count divisible by 512
-  $file_contents = str_pad($Data,(ceil(strlen($Data) / 512) * 512),chr(0));
- 
-  // Add new tar formatted data to tar file contents
-  $tar_file = $header . $file_contents;
- 
-  return $tar_file;
-}
- 
-function targz($Name, $Data)
-{
-  return gzencode(tarSection($Name,$Data),9);
+function targz($Name, $Data) {
+	// Generates a TAR file from the processed data
+	$information = NULL;
+	
+	// Generate the TAR header for this file
+	$header = str_pad($Name,100,chr(0)).
+		str_pad('777',7,'0',STR_PAD_LEFT) . chr(0).
+		str_pad(decoct($information['user_id']),7,'0',STR_PAD_LEFT) . chr(0).
+		str_pad(decoct($information['group_id']),7,'0',STR_PAD_LEFT) . chr(0).
+		str_pad(decoct(strlen($Data)),11,'0',STR_PAD_LEFT) . chr(0).
+		str_pad(decoct(time(0)),11,'0',STR_PAD_LEFT) . chr(0).
+		str_repeat(' ',8).'0'.
+		str_repeat(chr(0),100).
+		str_pad('ustar',6,chr(32)).
+		chr(32) . chr(0).
+		str_pad($information['user_name'],32,chr(0)).
+		str_pad($information['group_name'],32,chr(0)).
+		str_repeat(chr(0),8).
+		str_repeat(chr(0),8).
+		str_repeat(chr(0),155).
+		str_repeat(chr(0),12);
+	
+	// Computes the unsigned Checksum of a file’s header
+	$unsigned_chksum = '';
+	for($i=0; $i<512; $i++) $unsigned_chksum += ord($header[$i]);
+	for($i=0; $i<8; $i++) $unsigned_chksum -= ord($header[148 + $i]);
+	$unsigned_chksum += ord(' ') * 8;
+	
+	// Compute header checksum
+	$checksum = str_pad(decoct($unsigned_chksum),6,'0',STR_PAD_LEFT);
+	for($i=0; $i<6; $i++) $header[(148 + $i)] = substr($checksum,$i,1);
+	$header[154] = chr(0);
+	$header[155] = chr(32);
+	
+	// Pad file contents to byte count divisible by 512
+	$file_contents = str_pad($Data,(ceil(strlen($Data) / 512) * 512),chr(0));
+	
+	// Add new tar formatted data to tar file contents
+	$tar_file = $header . $file_contents;
+	
+	return gzencode($tar_file,9);
 }
 
 
