@@ -617,6 +617,7 @@ function main() {
 				copy($settingspath,'../'.$filename);
 				
 				echo(json_encode(array('reload')));
+				//echo(page('files',$cfg));
 			}
 			break;
 		case 'fileDelete':
@@ -626,7 +627,7 @@ function main() {
 			KBTB::req(unlink('../settings/files/'.$filename));
 			KBTB::req(unlink('../'.$filename));
 			
-			echo(json_encode(array('reload')));
+			echo(page('files',$cfg));
 			break;
 		case 'adminFileEditChange':
 			$filename = $_POST['filename'];
@@ -667,6 +668,7 @@ function main() {
 			KBTB::req(unlink('update.tgz'));
 			KBTB::req($retval===0);
 			
+			//echo(page('main',$cfg));
 			echo(json_encode(array('reload')));
 			break;
 		default:
