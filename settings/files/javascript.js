@@ -1,4 +1,4 @@
-/*
+﻿/*
 KB CMS
 Licensed under GPLv2 or later.
 */
@@ -268,10 +268,10 @@ function formHandler(form) {
 		$(document.body).append(iframe);
 		
 		$('#'+id).bind('load',function() {
-			var rc=new RegExp('^("(\\\\.|[^"\\\\\\n\\r])*?"|[,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t])+?$');
-			var msg = $(this).contents().text();
-			if(rc.test(msg)) msg = eval(msg);
-			ajaxCallback(msg,form);
+			var retval = $(this).contents().text();
+			var msg = null;
+			try { msg = $.parseJSON(retval); } catch(e) {}
+			ajaxCallback(msg===null?retval:msg,form);
 		});
 		
 		return true;
