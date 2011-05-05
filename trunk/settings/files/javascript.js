@@ -169,7 +169,7 @@ function KBPopupDialog(opts) {
 	$('.popupDialog').stop().remove();
 	var popup = '<div class="popupDialog" style="visibility:hidden; position:fixed; top:0px; left:0px; width:100%; height:100%; z-index:2000;">';
 	popup += '<div class="bg" style="position:absolute; width:100%; height:100%; background:#000; opacity:0.7; filter:alpha(opacity=70); z-index:2000;">&nbsp;</div>';
-	popup += '<div class="content" style="position:absolute; z-index:2010; background:#fff; overflow:auto; max-width:95%; max-height:95%;">';
+	popup += '<div class="content" style="position:absolute; z-index:2010; background:#fff; overflow:auto; max-width:95%; max-height:95%; white-space:nowrap;">';
 	popup += opts['msg'];
 	popup += '</div></div>';
 	var dialog = $(document.body).append(popup);
