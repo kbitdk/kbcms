@@ -343,7 +343,7 @@ if(!window.aceKeysBound) {
 				else aceEditor.findNext();
 				return false;
 				break;
-			case 121: // F10
+			case 120: // F9
 				return fullscreen();
 				break;
 			}
@@ -373,6 +373,9 @@ $.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js
 		editor.setShowPrintMargin(false);
 		$('#aceEditorLoading').hide();
 		$('#aceEditor').css({visibility:'visible'});
+		window.aceEditorDirty = false;
+		sess.on('change', function() { window.aceEditorDirty=true; });
+		//$(window).bind('beforeunload', function() { return 'Wait!'; });
 		
 		var ext = new RegExp('\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
 		if((ext instanceof Array) && ext.length>1) ext = ext[1];
