@@ -335,6 +335,7 @@ if(!window.aceKeysBound) {
 				if(e.ctrlKey) {
 					$('#aceEditorTextarea').val(window.aceEditor.getSession().getValue());
 					$('input[name=return]',this).val('0');
+					window.aceEditorDirty = 1; // Evaluates to true, but is different, so we can know if it's been changed between saving and receiving the confirmation of saving
 					return formHandler($('#codeForm'));
 				}
 				break;
@@ -358,6 +359,10 @@ function fullscreen(enable) {
 	aceEditor.focus();
 	return false;
 }
+function fileSaved() {
+	if(window.aceEditorDirty===1) window.aceEditorDirty = false;
+	KBAlert('File has been saved.');
+}
 $.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js', function() {
 	var ace = window.__ace_shadowed__;
 	var editor = ace.edit('aceEditor');
@@ -375,9 +380,9 @@ $.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js
 		$('#aceEditor').css({visibility:'visible'});
 		window.aceEditorDirty = false;
 		sess.on('change', function() { window.aceEditorDirty=true; });
-		//$(window).bind('beforeunload', function() { return 'Wait!'; });
+		$(window).bind('beforeunload', function() { if(window.aceEditorDirty) return 'Are you sure you want to leave the page?\\n\\nYou have unsaved changes in the editor.'; });
 		
-		var ext = new RegExp('\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
+		var ext = new RegExp('\\\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
 		if((ext instanceof Array) && ext.length>1) ext = ext[1];
 		var mode = {
 			css:	'css',
@@ -642,7 +647,7 @@ function main() {
 				KBTB::req(file_put_contents('../settings/files/'.$filename, $_POST['aceEditor'])!==false, 'Error trying to save the file.');
 				KBTB::req(copy('../settings/files/'.$filename,'../'.$filename));
 				
-				if($_POST['return']=='0') echo(json_encode(array('msg','File has been saved.')));
+				if($_POST['return']=='0') echo(json_encode(array('callbackCustom','fileSaved')));
 				else echo(json_encode(array('page','files')));
 			}
 			break;
