@@ -3,7 +3,7 @@
 
 = Unreleased changes =
 Changes described here are in the repository and should be included in the next release
- * No new unreleased features, yet.
+ * Changed keyboard shortcut for fullscreen in the ACE editor to be F9 instead of F10, to avoid conflict with Unity
 <wiki:comment>
  * No new unreleased features, yet.
 </wiki:comment>
