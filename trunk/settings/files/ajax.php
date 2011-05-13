@@ -381,6 +381,7 @@ $.getScript('https://github.com/ajaxorg/ace/raw/master/build/textarea/src/ace.js
 		window.aceEditorDirty = false;
 		sess.on('change', function() { window.aceEditorDirty=true; });
 		$(window).bind('beforeunload', function() { if(window.aceEditorDirty) return 'Are you sure you want to leave the page?\\n\\nYou have unsaved changes in the editor.'; });
+		KBTB.hashchange.beforeunload = function() { if(window.aceEditorDirty) return 'Are you sure you want to leave the page?\\n\\nYou have unsaved changes in the editor.'; };
 		
 		var ext = new RegExp('\\\\.([a-zA-Z0-9]+)$').exec($('input[name=filename]').val());
 		if((ext instanceof Array) && ext.length>1) ext = ext[1];

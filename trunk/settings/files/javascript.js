@@ -1,4 +1,4 @@
-﻿/*
+/*
 KB CMS
 Licensed under GPLv2 or later.
 */
@@ -7,10 +7,17 @@ Licensed under GPLv2 or later.
 $(function() {
 	if(typeof(ajaxFetcher)!='undefined' && ajaxFetcher) {
 		$(window).bind('hashchange',function(){
-			var hash = location.hash;
-			if(hash.indexOf('#')==0) hash = hash.substr(1);
-			ajax({a:'page',p:hash});
+			var msgWait = '';
+			if(KBTB.hashchange.beforeunload!==undefined && (msgWait=KBTB.hashchange.beforeunload()) && !confirm(msgWait)) window.location.hash = window.hashPrev;
+			else{
+				delete KBTB.hashchange.beforeunload;
+				var hash = location.hash;
+				if(hash.indexOf('#')==0) hash = hash.substr(1);
+				ajax({a:'page',p:hash});
+				window.hashPrev = hash;
+			}
 		});
+		window.hashPrev = location.hash;
 		if(location.hash!='') $(window).trigger('hashchange');
 	}
 	
@@ -21,7 +28,11 @@ $(function() {
 		var hashChecker = function(){ lastHash = location.hash; return setInterval(function() { if(lastHash !== location.hash) { $.event.trigger('hashchange'); lastHash = location.hash; } }, 50); }()
 	}
 });
-
+KBTB = {
+	hashchange: {
+		beforeunload: undefined
+	}
+};
 
 
 // Functions
