@@ -102,6 +102,9 @@ function ajaxCallback(msg, arg) {
 		case 'selector':
 			$(msg[1]).html(msg[2]);
 			break;
+		case 'selectorOuter':
+			$(msg[1]).before(msg[2]).remove();
+			break;
 		case 'unsupported':
 			unsupported();
 			break;
