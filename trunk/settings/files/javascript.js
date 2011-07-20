@@ -131,31 +131,29 @@ function ajaxCallback(msg, arg) {
 			if(typeof(arg)=='undefined' || typeof(arg)=='function') arg=document.body;
 			if(typeof(Recaptcha)!='undefined') Recaptcha.reload();
 			var clearCaptchaFun = function() {
-				$(this).css('background','');
+				$(this).css('background','').removeClass('fieldErr');
 			};
 			var clearFun = function() {
-				$(this).css('background','');
+				$(this).css('background','').removeClass('fieldErr');
 				$('+ span.validationResponse',this).hide();
 			};
 			var errorTop = $(arg).parents('.popupDialog').length ? false : $(document).height();
 			for(var key in msg[1]) {
 				if(key == 'captcha') {
 					var field = $('#recaptcha_response_field',arg);
-					if(field.length) {
-						field.css('background','#f66');
-						field.focus(clearCaptchaFun);
-					} else alert('Error finding captcha field.');
+					if(field.length) field.addClass('fieldErr').css('background','#f66').focus(clearCaptchaFun);
+					else alert('Error finding captcha field.');
 				}else{
 					var el = $('[name="'+key+'"]:not([type=hidden])',arg);
 					if(!el.length) alert('Error finding field with key: '+key);
 					else {
-						el.css('background','#f66');
+						el.addClass('fieldErr').css('background','#f66');
 						var ckedit = $('[name="'+key+'"] + .cke_skin_kama .cke_editor iframe',arg);
 						if(ckedit.length) {
-							ckedit.contents().find('body').css('background','#f66');
+							ckedit.contents().find('body').addClass('fieldErr').css('background','#f66');
 							el = ckedit;
 						}
-						$('[name="'+key+'"][type=radio],[name="'+key+'"][type=checkbox]',arg).parent().css('background','#f66').focus(clearFun).change(clearFun);
+						$('[name="'+key+'"][type=radio],[name="'+key+'"][type=checkbox]',arg).parent().addClass('fieldErr').css('background','#f66').focus(clearFun).change(clearFun);
 						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
 						$('[name="'+key+'"] + span.validationResponse',arg).show();
 						el.focus(clearFun).change(clearFun);
@@ -261,8 +259,8 @@ function formHandler(form) {
 	
 	$('input[type=submit]:not([disabled])',form).addClass('KBLoading').attr('disabled','disabled');
 	loadingStart();
-	$('input,select,textarea',form).css('background','');
-	$('input[type=radio]',form).parent().css('background','');
+	$('input,select,textarea',form).css('background','').removeClass('fieldErr');
+	$('input[type=radio]',form).parent().css('background','').removeClass('fieldErr');
 	$('input + span.validationResponse, select + span.validationResponse',form).hide();
 	
 	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) {
