@@ -265,7 +265,7 @@ function formHandler(form) {
 	
 	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) {
 		var inst = CKEDITOR.instances[instance];
-		inst.updateElement();
+		if($('#'+inst.id).length) inst.updateElement();
 	}
 	if($(form).attr('enctype')=='multipart/form-data') { // Use iframe style submit for file uploads
 		var id = 'KBFormIO' + (new Date().getTime());
