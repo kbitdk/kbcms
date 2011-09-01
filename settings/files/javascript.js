@@ -263,7 +263,7 @@ function formHandler(form) {
 	$('input[type=radio]',form).parent().css('background','').removeClass('fieldErr');
 	$('input + span.validationResponse, select + span.validationResponse',form).hide();
 	
-	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) CKEDITOR.instances[instance].updateElement();
+	if(typeof(CKEDITOR)!='undefined') for(var instance in CKEDITOR.instances) if(CKEDITOR.instances[instance].updateElement) CKEDITOR.instances[instance].updateElement();
 	if($(form).attr('enctype')=='multipart/form-data') { // Use iframe style submit for file uploads
 		var id = 'KBFormIO' + (new Date().getTime());
 		var iframe = '<iframe id="'+id+'" name="'+id+'" style="position:absolute;top:-1000px;left:-1000px; height:10px;width:10px;" src="about:blank" type="text/plain"/>';
