@@ -136,6 +136,7 @@ function ajaxCallback(msg, arg) {
 			var clearFun = function() {
 				$(this).css('background','').removeClass('fieldErr');
 				$('+ span.validationResponse',this).hide();
+				KBPopupDialogReposition();
 			};
 			var errorTop = $(arg).parents('.popupDialog').length ? false : $(document).height();
 			for(var key in msg[1]) {
