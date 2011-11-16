@@ -156,6 +156,7 @@ function ajaxCallback(msg, arg) {
 						$('[name="'+key+'"][type=radio],[name="'+key+'"][type=checkbox]',arg).parent().addClass('fieldErr').css('background','#f66').focus(clearFun).change(clearFun);
 						$('[name="'+key+'"] + span.validationResponse',arg).html(msg[1][key]);
 						$('[name="'+key+'"] + span.validationResponse',arg).show();
+						KBPopupDialogReposition();
 						el.focus(clearFun).change(clearFun);
 						if(errorTop!==false && (currTop=el.offset().top) < errorTop) errorTop = currTop;
 					}
@@ -172,8 +173,8 @@ function ajaxCallback(msg, arg) {
 
 function KBPopupDialogReposition() {
 	$('.popupDialog .content').css({
-		top:			$(window).height()/2-$('.popupDialog .content').height()/2,
-		left:			$(window).width()/2-$('.popupDialog .content').width()/2
+		top:	$(window).height()/2-$('.popupDialog .content').height()/2,
+		left:	$(window).width()/2-$('.popupDialog .content').width()/2
 	});
 }
 
@@ -208,14 +209,14 @@ function KBPopupDialogClose() {
 }
 function KBAlert(opts) {
 	if(typeof(opts)=='string') opts = {'msg': opts};
-	if(typeof(opts['buttons'])=='object' && opts['buttons'] instanceof Array) {
+	if(typeof(opts.buttons)=='object' && opts.buttons instanceof Array) {
 		var buttons = '';
 		var tmpButtons = {};
-		for(var i in opts['buttons']) {
-			buttons += '<a href="#" class="'+opts['buttons'][i][1]+'" style="display:inline-block; margin: 0 36px 20px 0;">'+opts['buttons'][i][0]+'</a>';
-			tmpButtons[opts['buttons'][i][1]] = opts['buttons'][i][2];
+		for(var i in opts.buttons) {
+			buttons += '<a href="#" class="'+opts.buttons[i][1]+'" style="display:inline-block; margin: 0 36px 20px 0;">'+opts.buttons[i][0]+'</a>';
+			tmpButtons[opts.buttons[i][1]] = opts.buttons[i][2];
 		}
-		opts['buttons'] = tmpButtons;
+		opts.buttons = tmpButtons;
 	} else {
 		var text = {
 			da:	{
