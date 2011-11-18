@@ -279,7 +279,7 @@ function formHandler(form) {
 		$(document.body).append(iframe);
 		
 		$('#'+id).bind('load',function() {
-			var retval = $(this).contents().text();
+			var retval = $(this).contents().contents().text();
 			var msg = null;
 			try { msg = $.parseJSON(retval); } catch(e) {}
 			ajaxCallback(msg===null?retval:msg,form);
