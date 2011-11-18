@@ -282,7 +282,7 @@ function formHandler(form) {
 			var retval = $(this).contents().text();
 			if(retval=='') switch($(this).contents().find('h2').text()) {
 			case '':
-				retval = html_encode($(this).contents());
+				retval = html_encode($(this).contents().contents());
 			case 'HTTP Error 404.13 - Not Found':
 				retval = 'HTTP error: 404.13: Content length too large';
 			default:
