@@ -280,6 +280,7 @@ function formHandler(form) {
 		
 		$('#'+id).bind('load',function() {
 			var retval = $(this).contents().text();
+			if(retval=='' && $(this).contents().find('h2').text()!='') retval = 'HTTP error: '+($(this).contents().find('h2').text()=='HTTP Error 404.13 - Not Found' ? '404.13: Content length too large' : $(this).contents().find('h2').text();
 			var msg = null;
 			try { msg = $.parseJSON(retval); } catch(e) {}
 			ajaxCallback(msg===null?retval:msg,form);
@@ -292,7 +293,7 @@ function formHandler(form) {
 }
 
 function html_encode(input) {
-	return input===null ? '' : input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); //'
+	return input===null ? '' : input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function loadingStart() {
