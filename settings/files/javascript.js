@@ -280,15 +280,6 @@ function formHandler(form) {
 		
 		$('#'+id).bind('load',function() {
 			var retval = $(this).contents().text();
-			if(retval=='') switch($(this).contents().find('h2').text()) {
-			case '':
-				retval = html_encode($(this).contents().contents());
-			case 'HTTP Error 404.13 - Not Found':
-				retval = 'HTTP error: 404.13: Content length too large';
-			default:
-				retval = $(this).contents().find('h2').text();
-				break;
-			}
 			var msg = null;
 			try { msg = $.parseJSON(retval); } catch(e) {}
 			ajaxCallback(msg===null?retval:msg,form);
