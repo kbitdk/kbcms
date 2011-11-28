@@ -206,7 +206,9 @@ function KBPopupDialog(opts) {
 	return false;
 }
 function KBPopupDialogClose() {
-	$('.popupDialog').fadeOut();
+	$('.popupDialog').fadeOut(function() {
+		$(this).remove();
+	});
 }
 function KBAlert(opts) {
 	if(typeof(opts)=='string') opts = {'msg': opts};
