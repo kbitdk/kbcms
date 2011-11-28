@@ -115,7 +115,7 @@ function ajaxCallback(msg, arg) {
 			});
 			$(msg[1]).html(opts.join(''));
 			if(msg[3]) $(msg[1]).val(msg[3]).trigger('change');
-			$('.popupDialog').fadeOut();
+			KBPopupDialogClose();
 			break;
 		case 'form':
 			var $form = $('<form>').attr({method:'post',action:(msg[1]['action']?msg[1]['action']:(typeof(ajaxServer)!='undefined'?ajaxServer:'/'))});
@@ -194,7 +194,7 @@ function KBPopupDialog(opts) {
 	var oldFocus = $(':focus');
 	$(document).keydown(function (e) {
 		if(e.which == 27) {
-			$('.popupDialog').fadeOut();
+			KBPopupDialogClose();
 			if(typeof(oldFocus)!='undefined') oldFocus.focus();
 			return false;
 		}
@@ -222,20 +222,20 @@ function KBAlert(opts) {
 		opts.buttons = tmpButtons;
 	} else {
 		var text = {
-			da:	{
+			da: {
 				close:	'Luk'
 			},
-			en:	{
+			en: {
 				close:	'Close'
 			},
-			fr:	{
+			fr: {
 				close:	'Fermer'
 			}
 		};
 		var lang = (typeof(opts['lang'])!='undefined' && typeof(text[opts['lang']])!='undefined' ? opts['lang'] : 'en');
 		text = typeof(opts['text'])!='undefined' ? opts['text'] : text[lang]; 
 		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">'+text['close']+'</a>';
-		opts['buttons'] = { 'close': function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
+		opts.buttons = { 'close': function() { KBPopupDialogClose(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
 	}
 	var popup = "<div style='background:#fff; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
 	popup += "<div style='text-align:right;'>";
@@ -253,8 +253,8 @@ function KBConfirm(msg,ok,cancel) {
 	popup += "</div>";
 	var oldFocus = $(':focus');
 	return KBPopupDialog({ "msg": popup, "buttons": {
-		"ok": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(ok) ok(); return false; },
-		"cancel": function() { $('.popupDialog').fadeOut(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(cancel) cancel(); return false; }
+		"ok": function() { KBPopupDialogClose(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(ok) ok(); return false; },
+		"cancel": function() { KBPopupDialogClose(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(cancel) cancel(); return false; }
 	} });
 }
 
@@ -323,7 +323,7 @@ function loadingStop() {
 	if($('.popupDialog #loadingDots').length) {
 		clearTimeout(window.loadingUpdater);
 		$('.popupDialog').stop();
-		$('.popupDialog').fadeOut();
+		KBPopupDialogClose();
 	}
 }
 
