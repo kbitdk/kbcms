@@ -5,6 +5,7 @@ Licensed under GPLv2 or later.
 
 // Init
 $(function() {
+	// Initialize ajaxFetcher, which implements ajax pages
 	if(typeof(ajaxFetcher)!='undefined' && ajaxFetcher) {
 		$(window).bind('hashchange',function(){
 			var msgWait = '';
@@ -36,6 +37,8 @@ KBTB = {
 
 
 // Functions
+
+// Does an async XHR request to the URL defined in ajaxServer and displays any errors or runs ajaxCallback() on success
 function ajax(vars, arg) {
 	$.ajax({
 		type: 'POST', url: (typeof(ajaxServer)!='undefined'?ajaxServer:'/'), dataType: 'json', data: vars,
@@ -50,7 +53,8 @@ function ajax(vars, arg) {
 	});
 	return false;
 }
-function ajaxCallback(msg, arg) {
+// Callback for ajax request, where msg is the return value from the server and arg is an argument from the script that called the ajax handler
+function ajaxCallback(msg, arg) { // TODO: arg is probably not necessary
 	loadingStop();
 	if(!$.isArray(msg)) KBAlert(msg ? ('Parser error: <pre>'+html_encode(msg).replace(/\n/g, '<br/>')+'</pre>') : 'Unknown error');
 	else switch(msg[0]) {
@@ -74,7 +78,7 @@ function ajaxCallback(msg, arg) {
 		case 'msg':
 		case 'err':
 			var opts = {msg:msg[1]};
-			if(typeof(msg[2])=='string') opts['lang'] = msg[2];
+			if(typeof(msg[2])=='string') opts.lang = msg[2];
 			KBAlert(opts);
 			break;
 		case 'callback':
@@ -96,7 +100,7 @@ function ajaxCallback(msg, arg) {
 			break;
 		case 'content':
 		case 'contentTop':
-			$(typeof(arg['contentBox'])=='undefined'?'#content':arg['contentBox']).html(msg[1]);
+			$(typeof(arg.contentBox)=='undefined'?'#content':arg.contentBox).html(msg[1]);
 			if(msg[0]=='contentTop') $('html,body').scrollTop(0);
 			break;
 		case 'selector':
@@ -111,16 +115,16 @@ function ajaxCallback(msg, arg) {
 		case 'selectFill':
 			var opts = [];
 			$.map(msg[2],function(result){
-				opts.push($('<div>').append($('<option/>').val(result['key']).text(result['value'])).html());
+				opts.push($('<div>').append($('<option/>').val(result.key).text(result.value)).html());
 			});
 			$(msg[1]).html(opts.join(''));
 			if(msg[3]) $(msg[1]).val(msg[3]).trigger('change');
 			KBPopupDialogClose();
 			break;
 		case 'form':
-			var $form = $('<form>').attr({method:'post',action:(msg[1]['action']?msg[1]['action']:(typeof(ajaxServer)!='undefined'?ajaxServer:'/'))});
+			var $form = $('<form>').attr({method:'post',action:(msg[1].action?msg[1].action:(typeof(ajaxServer)!='undefined'?ajaxServer:'/'))});
 			
-			$.each(msg[1]['fields'], function(name, value) {
+			$.each(msg[1].fields, function(name, value) {
 				$('<input>').attr({type:'hidden',name:name,value:value}).appendTo($form);
 			});
 			
@@ -172,25 +176,19 @@ function ajaxCallback(msg, arg) {
 	$('input[type=submit][class~=KBLoading][disabled]').removeClass('KBLoading').removeAttr('disabled');
 }
 
-function KBPopupDialogReposition() {
-	$('.popupDialog .content').css({
-		top:	$(window).height()/2-$('.popupDialog .content').height()/2,
-		left:	$(window).width()/2-$('.popupDialog .content').width()/2
-	});
-}
-
+// Display an overlay dialog
 function KBPopupDialog(opts) {
 	$('.popupDialog').stop().remove();
 	var popup = '<div class="popupDialog" style="visibility:hidden; position:fixed; top:0px; left:0px; width:100%; height:100%; z-index:2000;">';
 	popup += '<div class="bg" style="position:absolute; width:100%; height:100%; background:#000; opacity:0.7; filter:alpha(opacity=70); z-index:2000;" onclick="KBPopupDialogClose();">&nbsp;</div>';
 	popup += '<div class="content" style="position:absolute; z-index:2010; background:#fff; overflow:auto; max-width:95%; max-height:95%;">';
-	popup += opts['msg'];
+	popup += opts.msg;
 	popup += '</div></div>';
 	var dialog = $(document.body).append(popup);
 	KBPopupDialogReposition();
 	$('.popupDialog',dialog).hide().css('visibility','visible');
-	for(var button in opts['buttons']) $('.popupDialog .content .'+button,dialog).click(opts['buttons'][button]);
-	for(var i in opts['events']) $('.popupDialog .content '+opts['events'][i][0],dialog).bind(opts['events'][i][1],opts['events'][i][2]);
+	for(var button in opts.buttons) $('.popupDialog .content .'+button,dialog).click(opts.buttons[button]);
+	for(var i in opts.events) $('.popupDialog .content '+opts.events[i][0],dialog).bind(opts.events[i][1],opts.events[i][2]);
 	var oldFocus = $(':focus');
 	$(document).keydown(function (e) {
 		if(e.which == 27) {
@@ -200,16 +198,25 @@ function KBPopupDialog(opts) {
 		}
 	});
 	$('.popupDialog',dialog).fadeIn();
-	if(typeof(opts['focus'])!='undefined') $(opts['focus']).focus();
+	if(typeof(opts.focus)!='undefined') $(opts.focus).focus();
 	else $('.popupDialog .content a:last',dialog).focus();
 	$('.popupDialog .content').scrollTop(0);
 	return false;
 }
+// Reposition the dialog if things have shifted
+function KBPopupDialogReposition() {
+	$('.popupDialog .content').css({
+		top:	$(window).height()/2-$('.popupDialog .content').height()/2,
+		left:	$(window).width()/2-$('.popupDialog .content').width()/2
+	});
+}
+// Close the dialog
 function KBPopupDialogClose() {
 	$('.popupDialog').fadeOut(function() {
 		$(this).remove();
 	});
 }
+// A simple dialog
 function KBAlert(opts) {
 	if(typeof(opts)=='string') opts = {'msg': opts};
 	if(typeof(opts.buttons)=='object' && opts.buttons instanceof Array) {
@@ -232,19 +239,20 @@ function KBAlert(opts) {
 				close:	'Fermer'
 			}
 		};
-		var lang = (typeof(opts['lang'])!='undefined' && typeof(text[opts['lang']])!='undefined' ? opts['lang'] : 'en');
-		text = typeof(opts['text'])!='undefined' ? opts['text'] : text[lang]; 
-		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">'+text['close']+'</a>';
+		var lang = (typeof(opts.lang)!='undefined' && typeof(text[opts.lang])!='undefined' ? opts.lang : 'en');
+		text = typeof(opts.text)!='undefined' ? opts.text : text[lang]; 
+		var buttons = '<a href="#" class="close" style="display:inline-block; margin: 0 36px 20px 36px;">'+text.close+'</a>';
 		opts.buttons = { 'close': function() { KBPopupDialogClose(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); return false; } };
 	}
-	var popup = "<div style='background:#fff; font-size:14px; padding:30px 23px 23px 23px;'>"+opts['msg']+"</div>";
+	var popup = "<div style='background:#fff; font-size:14px; padding:30px 23px 23px 23px;'>"+opts.msg+"</div>";
 	popup += "<div style='text-align:right;'>";
 	popup += buttons;
 	popup += "</div>";
 	var oldFocus = $(':focus');
-	return KBPopupDialog({ 'msg': popup, 'buttons': opts['buttons'], 'focus': opts['focus'], events: opts['events'] });
+	return KBPopupDialog({ 'msg': popup, 'buttons': opts.buttons, 'focus': opts.focus, events: opts.events });
 }
-function KBConfirm(msg,ok,cancel) {
+// Pre-defined dialog with OK/Cancel buttons
+function KBConfirm(msg, ok, cancel) {
 	var popup = '<div style="padding:10px; font-weight:bold;">Message</div>';
 	popup += "<div style='background:#fff; color:#888; font-size:14px; padding:23px;'>"+msg+"</div>";
 	popup += "<div style='text-align:right;'>";
@@ -257,7 +265,8 @@ function KBConfirm(msg,ok,cancel) {
 		"cancel": function() { KBPopupDialogClose(); if(typeof(oldFocus)!='undefined') oldFocus.focus(); if(cancel) cancel(); return false; }
 	} });
 }
-
+// Submits a form as a an ajax request or through an iframe if it has a file upload
+// Example usage: <form onsubmit="return formHandler();">
 function formHandler(form) {
 	if(typeof(form)=='undefined') return KBAlert('Internal error (formHandler): Invalid input.');
 	
@@ -292,11 +301,7 @@ function formHandler(form) {
 		return ajax($(form).serialize(), form);
 	}
 }
-
-function html_encode(input) {
-	return input===null ? '' : input.replace(/&/g, '&amp;').replace(/'/g, '&#039;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
+// Show loading animation
 function loadingStart() {
 	if(!$('.popupDialog:visible').length) {
 		$('.popupDialog').remove();
@@ -311,6 +316,7 @@ function loadingStart() {
 		window.loadingUpdater = setTimeout('loadingUpdate()',400);
 	}
 }
+// Update loading animation
 function loadingUpdate() {
 	$('.popupDialog:has(#loadingDots)').fadeIn();
 	var dots = $('.popupDialog #loadingDots:visible');
@@ -319,6 +325,7 @@ function loadingUpdate() {
 		window.loadingUpdater = setTimeout('loadingUpdate()',600);
 	}
 }
+// Stop loading animation
 function loadingStop() {
 	if($('.popupDialog #loadingDots').length) {
 		clearTimeout(window.loadingUpdater);
@@ -326,28 +333,35 @@ function loadingStop() {
 		KBPopupDialogClose();
 	}
 }
-
+// Log out
 function logout() {
 	return ajax({a:'logout'});
 }
- 
+// Function to quickly block a user from doing something unsupported before it's fully implemented
+// Example usage: <a href="kitchensink.php" onclick="return unsupported();">
 function unsupported() {
-	KBAlert("Error: This feature isn't supported, yet.");
-	return false;
+	return KBAlert("Error: This feature isn't supported, yet.");
 }
+// TODO: this function should probably be deprecated or use KBPopupDialog()
 function msgConfirm(question) {
 	return confirm(question);
 }
-
+// Escape input for use in HTML
 function html_escape(input) {
 	if(!input) return '';
 	inStr = input+''; 
 	if(input!=inStr) return '';
-	return inStr.replace(/&/g,'&amp;').replace(/'/g,'&#039;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); //'
+	return inStr.replace(/&/g,'&amp;').replace(/'/g,'&#039;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+// Alias
+function html_encode(input) {
+	return html_escape(input);
+}
+// Escape input for use in an HTML attribute
 function attr_escape(content) {
 	return html_escape(content);
 }
+// Implement's PHP's in_array, which searches array for the needle variable and returns true on a match or false otherwise
 function in_array(needle,haystack) {
 	if(!haystack instanceof Array) throw "Error: Haystack isn't an array.";
 	for(var i in haystack) if(haystack[i]==needle) return true;
