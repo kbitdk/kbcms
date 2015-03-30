@@ -1,13 +1,16 @@
 # Unreleased changes #
 Changes described here are in the repository and should be included in the next release
   * Changed keyboard shortcut for fullscreen in the ACE editor to be F9 instead of F10, to avoid conflict with Unity
-<a href='Hidden comment: 
+
+<!--
 * No new unreleased features, yet.
-'></a>
+-->
 
 # 0.2.4 #
   * Added the ability to package site to a tgz file
   * Fixed issue with checking permissions when saving configuration
+
+<!--asd-->
 
 # 0.2.3 #
   * Fixed an issue where the YUI code view didn't retain any changes when submitting
