@@ -75,12 +75,12 @@ func main() {
 		srcdir = path.Clean(srcdir)
 
 		// Read cfg
-		file, err := ioutil.ReadFile(srcdir+"/settings.json")
+		cfgFile, err := ioutil.ReadFile(srcdir+"/settings.json")
 		if os.IsNotExist(err) {
 			log.Fatalln("Invalid source dir (no settings.json file).")
 		} else { errHandler(err) }
 		var cfg Cfg
-		errHandler(json.Unmarshal(file, &cfg))
+		errHandler(json.Unmarshal(cfgFile, &cfg))
 
 		// Read template and create a temp dir for building the project
 		t, err := template.ParseFiles(srcdir+"/templates/design.html") // TODO: Support multiple templates
@@ -103,11 +103,18 @@ func main() {
 			errHandler(t.Execute(output, map[string]template.HTML{"Content":template.HTML(pageContent)}))
 		}
 
-		// Publish project and remove temp folder
-		files, err := filepath.Glob(tmpdir+"/*")
+		// Copy files from srcdir+"/files/*"
+		extraFiles, err := filepath.Glob(srcdir+"/files/*")
 		errHandler(err)
-		for _, file := range files {
-			errHandler(os.Rename(file, path.Clean(cfg.OutputDir)+"/"+path.Base(file)))
+		for _, extraFile := range extraFiles {
+			errHandler(copyFile(extraFile, tmpdir+"/"+path.Base(extraFile)))
+		}
+
+		// Publish project and remove temp folder
+		tmpFiles, err := filepath.Glob(tmpdir+"/*")
+		errHandler(err)
+		for _, tmpFile := range tmpFiles {
+			errHandler(os.Rename(tmpFile, path.Clean(cfg.OutputDir)+"/"+path.Base(tmpFile)))
 		}
 
 		errHandler(os.RemoveAll(tmpdir))

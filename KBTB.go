@@ -9,6 +9,7 @@ could potentially be separated to its own package for other programs to use.
 import (
 	"fmt"
 	"os"
+	"io"
 )
 
 // Throw exception on error
@@ -22,5 +23,18 @@ func dump(v interface{}) {
 	t = v
 	if fmt.Sprintf("%T",v) == "*os.File" { v = v.(*os.File).Name() }
 	fmt.Printf("%T: %#v\n", t, v)
+}
+
+func copyFile(srcName, dstName string) (err error) {
+	src, err := os.Open(srcName)
+	errHandler(err)
+	defer src.Close()
+
+	dst, err := os.Create(dstName)
+	errHandler(err)
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	return err
 }
 
