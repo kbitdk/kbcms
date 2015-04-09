@@ -95,7 +95,12 @@ func main() {
 			output, err := os.Create(tmpdir+"/"+path.Base(page))
 			errHandler(err)
 
-			errHandler(t.Execute(output, map[string]template.HTML{"Content":template.HTML("Test content...")}))
+			// Read the content
+			pageContent, err := ioutil.ReadFile(page)
+			errHandler(err)
+
+			// Apply the content to the template
+			errHandler(t.Execute(output, map[string]template.HTML{"Content":template.HTML(pageContent)}))
 		}
 
 		// Publish project and remove temp folder
