@@ -1,5 +1,10 @@
 # Introduction #
 
+Warning! This is a guide for an older version of KB CMS. This guide will not work with this version.
+
+TODO: Update this guide.
+
+
 This is a guide to install KB CMS on Ubuntu. Many of the steps may apply to other Ubuntu versions, other distributions or even other operating systems. This guide is specifically made for one certain setup for simplicity, but others may follow later.
 
 # Ubuntu #
