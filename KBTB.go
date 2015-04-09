@@ -3,7 +3,7 @@ package main
 
 /* KBTB.go
 The TB in KBTB is short for toolbox and it's a file that gathers functions that
-could potentially be separated to its own package for other programs to use
+could potentially be separated to its own package for other programs to use.
 */
 
 import (
