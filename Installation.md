@@ -1,26 +1,30 @@
-# Introduction #
 
-Warning! This is a guide for an older version of KB CMS. This guide will not work with this version.
+# User setup
 
-TODO: Update this guide.
+This guide is for setting up a working KB CMS setup with just the binaries needed to use it.
 
+TODO: Create this guide.
 
-This is a guide to install KB CMS on Ubuntu. Many of the steps may apply to other Ubuntu versions, other distributions or even other operating systems. This guide is specifically made for one certain setup for simplicity, but others may follow later.
+# Development setup
 
-# Ubuntu #
+This guide is for setting up a working KB CMS setup with the source code and anything necessary to contribute to or modify KB CMS.
+It's made for Ubuntu/Debian, but it should work on other systems. Perhaps with some tweaking.
 
-The initial setup can be done with the following commands in a terminal window:
+If you already use Go, you can just "go get github.com/kbitdk/kbcms". If you don't, run these commands:
 
 ```
 # Install required packages
-sudo apt-get -y install php5
-# Download KB CMS and set it up
-sudo chown -R `whoami` /var/www
-mkdir /var/www/admin
-wget "https://kbcms.googlecode.com/files/kbcms-0.2.4.tar.gz" -O - | tar -xzf - -C /var/www/admin
-sudo chown -R `whoami`:www-data /var/www
-sudo chmod -R g+w /var/www
-sudo /etc/init.d/apache2 restart
+sudo apt-get -y install golang git
+# Set up a Go environment
+mkdir $HOME/go
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+echo "# Env vars for Go" >> ~/.bashrc
+echo "export GOPATH=\$HOME/go" >> ~/.bashrc
+echo "export PATH=\$PATH:\$GOPATH/bin" >> ~/.bashrc
+# Get the project
+go get github.com/kbitdk/kbcms
 ```
 
-KB CMS should now be set up on http://localhost/admin to create the resulting site on http://localhost. The default username is "admin" and the default password is "changeme".
+See [the user guide](https://github.com/kbitdk/kbcms/blob/master/UserGuide.md) for how to use it once installed.
+

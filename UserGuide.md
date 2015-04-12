@@ -1,6 +1,5 @@
-# Help appreciated #
+# Your first site with KB CMS #
 
-KB CMS should preferably be intuitive enough to be used without instructions.
-In case you have a suggestion to get closer to that goal or believe something
-should be explained in the user guide, feel free to add an issue to the
-[issue tracker](https://github.com/kbitdk/kbcms/issues).
+TODO: Create this guide and include an example site.
+
+If you encounter any problems, feel free to add an issue to the [issue tracker](https://github.com/kbitdk/kbcms/issues).
