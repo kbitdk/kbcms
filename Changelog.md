@@ -1,8 +1,9 @@
 # Unreleased changes #
 <!--
-Changes described here are in the repository and should be included in the next release
 -->
-  * Rewritten in Go (unfinished)
+Changes described here are in the repository and should be included in the next release
+  * Rewritten in Go
+  * Minifies HTML, CSS and JS using [tdewolff's minify Go package](https://github.com/tdewolff/minify/)
 
 # 0.2.5 #
   * Changed keyboard shortcut for fullscreen in the ACE editor to be F9 instead of F10, to avoid conflict with Unity
