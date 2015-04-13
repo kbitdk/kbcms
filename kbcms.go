@@ -9,6 +9,11 @@ import (
 	"html/template"
 	"log"
 	"path/filepath"
+	"io"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/html"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/js"
 )
 
 // The settings.json file format
@@ -88,6 +93,12 @@ func main() {
 		tmpdir, err := ioutil.TempDir("", "kbcms_") // TODO: Look into deleting this folder in case of unhandled errors
 		errHandler(err)
 
+		// Ready up the minifier
+		m := minify.New()
+		m.AddFunc("text/html", html.Minify)
+		m.AddFunc("text/css", css.Minify)
+		m.AddFunc("text/javascript", js.Minify)
+
 		// Iterate pages
 		pages, err := filepath.Glob(srcdir+"/content/*.html") // TODO: Support sub-folders
 		for _, page := range pages {
@@ -95,19 +106,30 @@ func main() {
 			pageContent, err := ioutil.ReadFile(page)
 			errHandler(err)
 
-			// Writer for the file
-			output, err := os.Create(tmpdir+"/"+path.Base(page))
-			errHandler(err)
-			defer output.Close()
+			// Intermediate pipe between templating and minifier
+			pagePipeR, pagePipeW := io.Pipe()
+			defer pagePipeR.Close()
+			defer pagePipeW.Close()
+
+			// Set up handler for output of templating engine
+			go func() {
+				// Writer for the file
+				output, err := os.Create(tmpdir+"/"+path.Base(page))
+				errHandler(err)
+				defer output.Close()
+
+				// Minify
+				errHandler(m.Minify("text/html", output, pagePipeR))
+			}()
 
 			// Apply the content to the template
-			errHandler(t.Execute(output, map[string]template.HTML{"Content":template.HTML(pageContent)}))
+			errHandler(t.Execute(pagePipeW, map[string]template.HTML{"Content":template.HTML(pageContent)}))
 		}
 
 		// Copy files from srcdir+"/files/*"
 		extraFiles, err := filepath.Glob(srcdir+"/files/*")
 		errHandler(err)
-		for _, extraFile := range extraFiles {
+		for _, extraFile := range extraFiles { // TODO: Check for things like .css files, so we can minify them
 			errHandler(copyFile(extraFile, tmpdir+"/"+path.Base(extraFile)))
 		}
 
