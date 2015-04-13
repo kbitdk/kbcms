@@ -91,13 +91,14 @@ func main() {
 		// Iterate pages
 		pages, err := filepath.Glob(srcdir+"/content/*.html") // TODO: Support sub-folders
 		for _, page := range pages {
-			// Writer for the file
-			output, err := os.Create(tmpdir+"/"+path.Base(page))
-			errHandler(err)
-
 			// Read the content
 			pageContent, err := ioutil.ReadFile(page)
 			errHandler(err)
+
+			// Writer for the file
+			output, err := os.Create(tmpdir+"/"+path.Base(page))
+			errHandler(err)
+			defer output.Close()
 
 			// Apply the content to the template
 			errHandler(t.Execute(output, map[string]template.HTML{"Content":template.HTML(pageContent)}))
