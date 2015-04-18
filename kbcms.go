@@ -1,19 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/html"
+	"github.com/tdewolff/minify/js"
+	"html/template"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"path"
-	"encoding/json"
-	"io/ioutil"
-	"html/template"
-	"log"
 	"path/filepath"
-	"io"
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/html"
-	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/js"
 )
 
 // The settings.json file format

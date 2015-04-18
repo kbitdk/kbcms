@@ -8,8 +8,8 @@ could potentially be separated to its own package for other programs to use.
 
 import (
 	"fmt"
-	"os"
 	"io"
+	"os"
 )
 
 // Throw exception on error
