@@ -10,6 +10,7 @@ import (
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
+	"github.com/tdewolff/minify/xml"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -17,6 +18,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 )
 
 // The settings.json file format
@@ -101,6 +103,7 @@ func main() {
 		m.AddFunc("text/html", html.Minify)
 		m.AddFunc("text/css", css.Minify)
 		m.AddFunc("text/javascript", js.Minify)
+		m.AddFuncRegexp(regexp.MustCompile("^.+[/+]xml$"), xml.Minify)
 
 		// Iterate pages
 		pages, err := filepath.Glob(srcdir+"/content/*.html") // TODO: Support sub-folders
