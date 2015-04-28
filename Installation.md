@@ -5,6 +5,8 @@ This guide is for setting up a working KB CMS setup with just the binaries neede
 
 TODO: Create this guide.
 
+See [the user guide](https://github.com/kbitdk/kbcms/blob/master/UserGuide.md) for how to use it once installed.
+
 # Development setup
 
 This guide is for setting up a working KB CMS setup with the source code and anything necessary to contribute to or modify KB CMS.
