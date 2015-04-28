@@ -1,3 +1,6 @@
+/*
+KB CMS is a Go-based CMS aimed at easy setup and maintenance without sacrificing functionality.
+*/
 package main
 
 import (
