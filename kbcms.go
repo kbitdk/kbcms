@@ -110,7 +110,6 @@ func main() {
 			// Intermediate pipe between templating and minifier
 			pagePipeR, pagePipeW := io.Pipe()
 			defer pagePipeR.Close()
-			defer pagePipeW.Close()
 
 			// Set up handler for output of templating engine
 			go func() {
@@ -124,15 +123,14 @@ func main() {
 
 				// Minify
 				err = m.Minify("text/html", output, pagePipeR)
-				if err != nil {
-					errChan <- err
-					return
-				}
+				errChan <- err
 			}()
 
 			// Apply the content to the template
 			errHandler(t.Execute(pagePipeW, map[string]template.HTML{"Content":template.HTML(pageContent)}))
+			pagePipeW.Close()
 
+			// Handle errors from the goroutine
 			err = <- errChan
 			errHandler(err)
 		}
