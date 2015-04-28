@@ -101,6 +101,7 @@ func main() {
 
 		// Iterate pages
 		pages, err := filepath.Glob(srcdir+"/content/*.html") // TODO: Support sub-folders
+		var errChan chan error = make(chan error)
 		for _, page := range pages {
 			// Read the content
 			pageContent, err := ioutil.ReadFile(page)
@@ -115,15 +116,25 @@ func main() {
 			go func() {
 				// Writer for the file
 				output, err := os.Create(tmpdir+"/"+path.Base(page))
-				errHandler(err)
+				if err != nil {
+					errChan <- err
+					return
+				}
 				defer output.Close()
 
 				// Minify
-				errHandler(m.Minify("text/html", output, pagePipeR))
+				err = m.Minify("text/html", output, pagePipeR)
+				if err != nil {
+					errChan <- err
+					return
+				}
 			}()
 
 			// Apply the content to the template
 			errHandler(t.Execute(pagePipeW, map[string]template.HTML{"Content":template.HTML(pageContent)}))
+
+			err = <- errChan
+			errHandler(err)
 		}
 
 		// Copy files from srcdir+"/files/*"
