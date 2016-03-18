@@ -19,6 +19,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"time"
 )
 
 // The settings.json file format
@@ -95,6 +96,9 @@ func main() {
 		// Read template and create a temp dir for building the project
 		t, err := template.ParseFiles(srcdir+"/templates/design.html") // TODO: Support multiple templates
 		errHandler(err)
+		info, err := os.Stat(srcdir+"/templates/design.html")
+		errHandler(err)
+		tModTime := info.ModTime()
 		tmpdir, err := ioutil.TempDir("", "kbcms_") // TODO: Look into deleting this folder in case of unhandled errors
 		errHandler(err)
 
@@ -108,10 +112,12 @@ func main() {
 		// Iterate pages
 		pages, err := filepath.Glob(srcdir+"/content/*.html") // TODO: Support sub-folders
 		var errChan chan error = make(chan error)
+		var pModTime time.Time
 		for _, page := range pages {
 			// Read the content
 			pageContent, err := ioutil.ReadFile(page)
 			errHandler(err)
+			tmpFileName := tmpdir+"/"+path.Base(page)
 
 			// Intermediate pipe between templating and minifier
 			pagePipeR, pagePipeW := io.Pipe()
@@ -120,7 +126,7 @@ func main() {
 			// Set up handler for output of templating engine
 			go func() {
 				// Writer for the file
-				output, err := os.Create(tmpdir+"/"+path.Base(page))
+				output, err := os.Create(tmpFileName)
 				if err != nil {
 					errChan <- err
 					return
@@ -138,6 +144,17 @@ func main() {
 
 			// Handle errors from the goroutine
 			err = <- errChan
+			errHandler(err)
+
+			// Set mtime
+			info, err = os.Stat(page)
+			errHandler(err)
+			if(info.ModTime().After(tModTime)) {
+				pModTime = info.ModTime()
+			} else {
+				pModTime = tModTime
+			}
+			err = os.Chtimes(tmpFileName, pModTime, pModTime)
 			errHandler(err)
 		}
 
