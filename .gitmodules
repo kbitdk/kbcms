@@ -1,0 +1,12 @@
+[submodule "vendor/github.com/tdewolff/minify"]
+	path = vendor/github.com/tdewolff/minify
+	url = git@github.com:tdewolff/minify.git
+[submodule "vendor/github.com/tdewolff/buffer"]
+	path = vendor/github.com/tdewolff/buffer
+	url = git@github.com:tdewolff/buffer.git
+[submodule "vendor/github.com/tdewolff/parse"]
+	path = vendor/github.com/tdewolff/parse
+	url = git@github.com:tdewolff/parse.git
+[submodule "vendor/github.com/tdewolff/strconv"]
+	path = vendor/github.com/tdewolff/strconv
+	url = git@github.com:tdewolff/strconv.git
