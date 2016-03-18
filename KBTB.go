@@ -25,7 +25,7 @@ func dump(v interface{}) {
 	fmt.Printf("%T: %#v\n", t, v)
 }
 
-func copyFile(srcName, dstName string) (err error) {
+func copyFileWTime(srcName, dstName string) (err error) {
 	src, err := os.Open(srcName)
 	errHandler(err)
 	defer src.Close()
@@ -35,6 +35,12 @@ func copyFile(srcName, dstName string) (err error) {
 	defer dst.Close()
 
 	_, err = io.Copy(dst, src)
+	errHandler(err)
+
+	info, err := src.Stat()
+	errHandler(err)
+
+	err = os.Chtimes(dstName, info.ModTime(), info.ModTime())
 	return err
 }
 

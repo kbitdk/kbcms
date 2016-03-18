@@ -145,7 +145,7 @@ func main() {
 		extraFiles, err := filepath.Glob(srcdir+"/files/*")
 		errHandler(err)
 		for _, extraFile := range extraFiles { // TODO: Check for things like .css files, so we can minify them
-			errHandler(copyFile(extraFile, tmpdir+"/"+path.Base(extraFile)))
+			errHandler(copyFileWTime(extraFile, tmpdir+"/"+path.Base(extraFile)))
 		}
 
 		// Publish project and remove temp folder
