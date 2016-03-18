@@ -3,8 +3,6 @@
 
 This guide is for setting up a working KB CMS setup with just the binaries needed to use it.
 
-TODO: Create this guide.
-
 See [the user guide](https://github.com/kbitdk/kbcms/blob/master/UserGuide.md) for how to use it once installed.
 
 # Development setup
@@ -27,6 +25,14 @@ echo "export PATH=\$PATH:\$GOPATH/bin" >> ~/.bashrc
 # Get the project
 go get github.com/kbitdk/kbcms
 ```
+
+# Compiling
+
+```
+go install github.com/kbitdk/kbcms
+```
+
+# Usage
 
 See [the user guide](https://github.com/kbitdk/kbcms/blob/master/UserGuide.md) for how to use it once installed.
 
